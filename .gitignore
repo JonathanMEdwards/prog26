@@ -1,0 +1,21 @@
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.log
+*.run.xml
+*.dvi
+*.fdb_latexmk
+*.fls
+*.out.ps
+*.synctex
+*.synctex.gz
+.vscode/settings.json
+# Tomas' build scripts
+build.*
+*SAVE-ERROR
+*-blx.bib
+paper.pdf
+revisions.pdf
+*.tex.bak
+.DS_Store

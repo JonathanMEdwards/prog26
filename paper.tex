@@ -1,0 +1,97 @@
+% -*- coding: utf-8; -*-
+% vim: set fileencoding=utf-8 :
+\documentclass[english,submission]{programming}
+%% First parameter: the language is 'english'.
+%% Second parameter: use 'submission' for initial submission, remove it for camera-ready (see 5.1)
+
+\usepackage[backend=biber]{biblatex}
+\addbibresource{paper.bib}
+
+% define natbib citet
+\newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
+
+
+%%%%%%%%%%%%%%%%%%
+%% These data MUST be filled for your submission. (see 5.3)
+\paperdetails{
+  %% perspective options are: art, sciencetheoretical, scienceempirical, engineering.
+  %% Choose exactly the one that best describes this work. (see 2.1)
+  perspective=art,
+  %% State one or more areas, separated by a comma. (see 2.2)
+  %% Please see list of areas in http://programming-journal.org/cfp/
+  %% The list is open-ended, so use other areas if yours is/are not listed.
+  area={Database programming, Visual and live programming, Programming environments},
+  %% You may choose the license for your paper (see 3.)
+  %% License options include: cc-by (default), cc-by-nc
+  % license=cc-by,
+}
+%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%
+%% These data are provided by the editors. May be left out on submission.
+%\paperdetails{
+%  submitted=2016-08-10,
+%  published=2016-10-11,
+%  year=2016,
+%  volume=1,
+%  issue=1,
+%  articlenumber=1,
+%}
+%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+\title{Data as Code: the Calculus of Operations}
+%\title{Data as Code: Edit Calculus}
+
+\author[a]{Jonathan Edwards}[0000-0003-1958-7967]
+\authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
+for his \href{https://subtext-lang.org}{Subtext} programming language experiments and his blog at \href{https://alarmingdevelopment.org}{\texttt{alarmingdevelopment.org}}.
+He has been a researcher at MIT CSAIL and CDG/HARC. He tweets \href{https://x.com/jonathoda}{\texttt{@jonathoda}} and can be reached at
+\email{jonathanmedwards@gmail.com}.}
+\affiliation[a]{Independent, Boston, MA, USA}
+
+\author[b]{Tomas Petricek}[0000-0002-7242-2208]
+\authorinfo{is an assistant professor at Charles University. He
+is interested in finding easier and more accessible ways of thinking
+about programming. To do so, he combines technical work on
+programming systems and tools with research into history and
+philosophy of science. His work can be found at \href{https://tomasp.net}{\texttt{tomasp.net}} and
+he can be reached at \email{tomas@tomasp.net}.}
+\affiliation[b]{Charles University, Prague, Czechia}
+
+
+\keywords{key, word} % please provide 1--5 keywords
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Please go to https://dl.acm.org/ccs/ccs.cfm and generate your Classification
+% System [view CCS TeX Code] stanz and copy _all of it_ to this place.
+%% From HERE
+
+% To HERE
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+% Please always include the abstract.
+% The abstract MUST be written according to the directives stated in
+% http://programming-journal.org/submission/
+% Failure to adhere to the abstract directives may result in the paper
+% being returned to the authors.
+\begin{abstract}
+
+
+\end{abstract}
+
+\section{Introduction}
+
+
+\printbibliography
+
+\end{document}
+
+% Local Variables:
+% TeX-engine: luatex
+% End:
