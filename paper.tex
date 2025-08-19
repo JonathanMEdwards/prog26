@@ -9,7 +9,15 @@
 
 % define natbib citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
+\newcommand{\mathbox}[1]{\colorbox{black!10}{$#1$}}
+\usepackage{tcolorbox}
+\tcbset{colback=black!10, colframe=white}
 
+\DeclareMathOperator{\pipe}{|}
+\DeclareMathOperator{\at}{\textsf{@}}
+
+\usepackage{mathtools}
+\usepackage{csquotes}
 
 %%%%%%%%%%%%%%%%%%
 %% These data MUST be filled for your submission. (see 5.3)
@@ -42,8 +50,7 @@
 
 \begin{document}
 
-\title{Data as Code: the Calculus of Operations}
-%\title{Data as Code: Edit Calculus}
+\title{Edit Calculus: Data as Code}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
 \authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
@@ -75,17 +82,76 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \maketitle
 
-% Please always include the abstract.
-% The abstract MUST be written according to the directives stated in
-% http://programming-journal.org/submission/
-% Failure to adhere to the abstract directives may result in the paper
-% being returned to the authors.
 \begin{abstract}
 
+% Each submission must be accompanied by a plain-language abstract of up to 500 words that presents the key points in the paper in a manner understandable by experienced practitioners and researchers in nearby disciplines. The abstract should avoid mathematical symbols whenever possible, and it must address the following:
+% Context: What is the broad context of the work? What is the importance of the general research area?
+% Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?
+% Approach: What was done that unveiled new knowledge?
+% Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?
+% Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
+% Importance: Why does this work matter?
 
 \end{abstract}
 
+
+
+
+
 \section{Introduction}
+
+% Code as Data couldn't solve problems of "devops".
+% Try from other end: turn a database into a dev environment.
+
+% methodology
+% headlines/insights
+% contributions
+
+
+\section{Simple Structures}
+
+We assume sets \mathbox{s} of strings, \mathbox{n} of numbers including \mathbox{\textsf{NaN}}, and identifiers \mathbox{I}.
+\tcbox{
+\[ \begin{array}{rl|rl|rl|l}
+  \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
+  \hline
+  \textsf{T} \Coloneqq & & \textsf{v} \Coloneqq & & \textsf{T}^\varnothing = & &\\
+  &  \textsf{String} & & s & & \textsf{\textquotedbl\ \!\textquotedbl} & \textrm{string}\\
+  & \textsf{Number} & &  n & & \textsf{NaN} & \textrm{number}\\
+  & \textsf{List T} & & [ \# I : \textsf{v} \  \dots ] & & [] & \textrm{list}\\
+  & \{ I \  s : \textsf{T} \  \dots \} & & \{ I : \textsf{v} \  \dots \} & &
+  \{ I : \textsf{T}^\varnothing \  \dots \}& \textrm{record}\\
+
+  & \bot && \bigtimes & & \bigtimes & \textrm{tombstone}\\
+\end{array}\]
+}
+
+\tcbox{
+\[ \begin{array}{rl|l}
+  \textsf{p} \Coloneqq & / \textsf{i} \  \dots / & \textrm{path} \\
+  \textsf{i} \Coloneqq &  & \textrm{ID} \\
+  & I & \textrm{record field ID}\\
+  & \# I & \textrm{list element ID}\\
+  & \textsf{*} & \textrm{list element type}\\
+\end{array}\]
+}
+
+
+
+These definitions naturally induce:
+\[ \begin{array}{cl}
+  \mathbox{\textsf{v} \dblcolon \textsf{T}} & \textrm{iff value \mathbox{\textsf{v}} matches type \mathbox{\textsf{T}}}.\\
+
+  \mathbox{\textsf{T}\lfloor\textsf{p}\rfloor?} & \textrm{iff path \mathbox{\textsf{p}} exists in type \mathbox{\textsf{T}}} \textrm{, in which case}\\
+  & \mathbox{\textsf{T}\lfloor\textsf{p}\rfloor} \textrm{ is the type at that path and }\\
+  & \mathbox{\textsf{T}\lceil\textsf{p} \coloneqq \textsf{T}_\textsf{2}\rceil} \textrm{ is \textsf{T} with } \mathbox{\textsf{T}_\textsf{2}} \textrm{ substituted at that path.}\\
+
+  \mathbox{\textsf{v}\lfloor\textsf{p}\rfloor?} &\textrm{iff path \mathbox{\textsf{p}} exists in value \mathbox{\textsf{v}}} \textrm{, in which case }\\
+  & \mathbox{\textsf{v}\lfloor\textsf{p}\rfloor} \textrm{ is the value at that path and}\\
+  & \mathbox{\textsf{v}\lceil\textsf{p} \coloneqq \textsf{v}_\textsf{2}\rceil} \textrm{ is \textsf{v} with } \mathbox{\textsf{v}_\textsf{2}} \textrm{ substituted at that path.}\\
+\end{array}\]
+
+A \textit{state} is a triple \mathbox{\textsf{v} : \textsf{T} \at \textsf{p}} where \mathbox{\textsf{v} \dblcolon \textsf{T}} and either \mathbox{\textsf{T}\lfloor\textsf{p}\rfloor?} or \mathbox{\textsf{v}\lfloor\textsf{p}\rfloor?}. The path \mathbox{\textsf{p}} is called the \textit{selection} of the state.
 
 
 \printbibliography
