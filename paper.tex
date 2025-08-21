@@ -7,17 +7,25 @@
 \usepackage[backend=biber]{biblatex}
 \addbibresource{paper.bib}
 
+\usepackage{amsthm}
+\newtheorem*{remark}{Remark}
+
+\usepackage{mathtools}
+\usepackage{csquotes}
+\usepackage{stmaryrd}
+
 % define natbib citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
 \newcommand{\mathbox}[1]{\colorbox{black!10}{$#1$}}
 \usepackage{tcolorbox}
-\tcbset{colback=black!10, colframe=white}
+\tcbset{colback=black!10, colframe=white, right=-20pt}
 
 \DeclareMathOperator{\pipe}{|}
 \DeclareMathOperator{\at}{\textsf{@}}
+\DeclareMathOperator{\exec}{\fatsemi\ }
+\newcommand{\isa}{\text{::}}
 
-\usepackage{mathtools}
-\usepackage{csquotes}
+\newcommand{\quotedstring}[1]{\textsf{\textquotedbl{#1}\textquotedbl}}
 
 %%%%%%%%%%%%%%%%%%
 %% These data MUST be filled for your submission. (see 5.3)
@@ -50,7 +58,7 @@
 
 \begin{document}
 
-\title{Edit Calculus: Data as Code}
+\title{Action Calculus: Data as Code}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
 \authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
@@ -103,6 +111,13 @@ he can be reached at \email{tomas@tomasp.net}.}
 % Code as Data couldn't solve problems of "devops".
 % Try from other end: turn a database into a dev environment.
 
+% problems being solved: devops and dev tools should not exist, or rather be automated invisibly.
+
+% integrated DB and UI
+
+% define action calculus
+% benefits
+
 % methodology
 % headlines/insights
 % contributions
@@ -110,41 +125,72 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \section{Simple Historical Structures}
 
-We assume sets \mathbox{s} of strings, \mathbox{n} of numbers including \mathbox{\textsf{NaN}}, and two disjoint sets of identifiers(IDs) \mathbox{F} for record fields and \mathbox{E} for list elements. There are two special list element IDs: \mathbox{*} and \mathbox{\mathbb{1}}.
+We will first introduce action calculus on a simple and familiar data model: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. There are two special list element IDs: \mathbox{*} and \mathbox{\mathbb{1}}. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}. IDs and tombstones are invisible to both the user and the program -- they record historical information utilized by the action calculus. We discuss this design decision in ***.
+
+The model is homogeneously typed similarly to statically typed functional programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (except tombstones). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list nd the fields of a record must have different IDs.
+%Record fields are named with a string which need not be unique.
+The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \textit{initial value}. We define the syntax of this model:
 
 \tcbox{
 \[ \begin{array}{rl|rl|rl|l}
   \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
   \hline
-  \textsf{T} \Coloneqq & & \textsf{v} \Coloneqq & & \textsf{T}^\varnothing = & &\\
-  &  \textsf{String} & & s & & \textsf{\textquotedbl\ \!\textquotedbl} & \textrm{string}\\
-  & \textsf{Number} & &  n & & \textsf{NaN} & \textrm{number}\\
-  & \textsf{List T} & & [ E : \textsf{v} \  \dots ] & & [] & \textrm{list}\\
-  & \{ F \  s : \textsf{T} \  \dots \} & & \{ F : \textsf{v} \  \dots \} & &
-  \{ F : \textsf{T}^\varnothing \  \dots \}& \textrm{record}\\
+  T \Coloneqq & & v \Coloneqq & & T^\varnothing = & &\\
+  &  \textsf{String} & & S & & \textsf{\textquotedbl\ \!\textquotedbl} & \textrm{string}\\
+  & \textsf{Number} & &  N & & \textsf{NaN} & \textrm{number}\\
+  & \textsf{List } T & & [ E : v \  \dots ] & & [] & \textrm{list}\\
+  %& \{ F \  S : T \  \dots \} & & \{ F : v \  \dots \} & & \{ F : T^\varnothing \  \dots \}& \textrm{record}\\
+  & \{ F : T \  \dots \} & & \{ F : v \  \dots \} & & \{ F : T^\varnothing \  \dots \}& \textrm{record}\\
 
   & \bot && \bigtimes & & \bigtimes & \textrm{tombstone}\\
 \end{array}\]
 }
 
-A \textit{path} is a possibly empty sequence of IDs denoting a path drilling into nested records and lists. Paths can access both values and types. We will represent paths with slashes as in Unix file paths.
-These preliminaries naturally define:
-\[ \begin{array}{cl}
-  \mathbox{\textsf{v} \dblcolon \textsf{T}} & \textrm{iff value \mathbox{\textsf{v}} matches type \mathbox{\textsf{T}}}.\\
+A \textit{path} is a possibly empty sequence of IDs denoting a path drilling into nested records and lists. Paths can access both values and types. We construct paths with slashes as in Unix file paths. The special element ID~\mathbox{*} is used to access the element type of a list type.
+A \textit{state} pairs a value with its type. We abuse the notation \mathbox{v \isa T} to both denote a state and assert that the value matches the type.
 
-  \mathbox{\textsf{T}\lfloor\textsf{p}\rfloor?} & \textrm{iff path \mathbox{\textsf{p}} exists in type \mathbox{\textsf{T}}} \textrm{, in which case}\\
-  & \mathbox{\textsf{T}\lfloor\textsf{p}\rfloor} \textrm{ is the type at that path and }\\
-  & \mathbox{\textsf{T}\lceil\textsf{p} \coloneqq \textsf{T}_\textsf{2}\rceil} \textrm{ is \textsf{T} with } \mathbox{\textsf{T}_\textsf{2}} \textrm{ substituted at that path.}\\
-  & \textsf{List element IDs are lifted to their type:} \mathbox{\forall e \in E. (\textsf{List T})\lfloor e \rfloor = \textsf{T}}.
-  % \mathbox{*} \textsf{is used as a generic element ID.}
-  \\
+An \textit{action} is an operation on states, converting a \textit{pre-state} into a \textit{post-state}.
+All actions take a \textit{target} path as a parameter indicating that the action is to be performed at that path within the state.
+For example the \textsf{write} action takes a value as another parameter and writes that value into the target path. Actions are not defined for all pre-states. The \textsf{write} action requires that the target path exists in the value and that its type matches the value parameter. We define actions as terms of a grammer,
+using infix syntax, placing the target path first, then the action name, followed by any other parameters, like this:
+\mathbox{\mathit{write} \Coloneqq p \textsf{ write } v}
 
-  \mathbox{\textsf{v}\lfloor\textsf{p}\rfloor?} &\textrm{iff path \mathbox{\textsf{p}} exists in value \mathbox{\textsf{v}}} \textrm{, in which case }\\
-  & \mathbox{\textsf{v}\lfloor\textsf{p}\rfloor} \textrm{ is the value at that path and}\\
-  & \mathbox{\textsf{v}\lceil\textsf{p} \coloneqq \textsf{v}_\textsf{2}\rceil} \textrm{ is \textsf{v} with } \mathbox{\textsf{v}_\textsf{2}} \textrm{ substituted at that path.}\\
-\end{array}\]
+We execute actions with the \mathbox{\fatsemi} infix operator taking a pre-state on the left, an action on the right, and yielding a post-state which may be chained into subsequent executions. Here is a concrete example defining a record type \mathbox{\mathit{Name}} given field IDs \mathbox{\mathit{first}} and \mathbox{\mathit{last}}:
+%\begin{tcolorbox}[nobeforeafter]
+\begin{align*}
+%\mathit{Name} &= \{\mathit{first}\  \quotedstring{first}: \textsf{String},\  \mathit{last}\  \quotedstring{last}: \textsf{String}\}\\
+\mathit{Name} &= \{\mathit{first}  : \textsf{String},\  \mathit{last} : \textsf{String}\}\\
+s_1 &= \{\mathit{first}: \quotedstring{John},\  \mathit{last}: \quotedstring{Smith}\} \isa \mathit{Name}\\
+s_2 &= s_1 \exec \mathit{last} \textsf{ write } \quotedstring{Smythe}\\
+&= \{\mathit{first}: \quotedstring{John},\  \mathit{last}: \quotedstring{Smythe}\} \isa \mathit{Name}\\
+\end{align*}
+%\end{tcolorbox}
+The \textsf{write} action is a \textit{value action}, meaning it does not modify the type of the state. On the other hand \textit{type actions} may modify both the type and value. We capitalize the name of type actions. Our system has a \textit{user mode} in which only value actions are permitted.
 
-A \textit{state} of the system is a typed value and a \textit{selection path} within the value or type. Formally, it is a triple \mathbox{\textsf{v} : \textsf{T} \at \textsf{p}} where \mathbox{\textsf{v} \dblcolon \textsf{T}} and either \mathbox{\textsf{T}\lfloor\textsf{p}\rfloor?} or \mathbox{\textsf{v}\lfloor\textsf{p}\rfloor?}.
+\begin{remark}\normalfont
+In this presentation we have adopted the conventional approach of defining values and types as distinct objects. However our implementation only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped action calculus\cite{denicek}, but that is not the topic of this paper.
+\end{remark}
+
+
+
+% These definitions follow naturally:
+% \[ \begin{array}{cl}
+%   \mathbox{\textsf{v} \textsf{ isa } \textsf{T}} & \textrm{iff value \mathbox{\textsf{v}} matches type \mathbox{\textsf{T}}}.\\
+
+%   \mathbox{\textsf{T}\lfloor\textsf{p}\rfloor?} & \textrm{iff path \mathbox{\textsf{p}} exists in type \mathbox{\textsf{T}}} \textrm{, in which case}\\
+%   & \mathbox{\textsf{T}\lfloor\textsf{p}\rfloor} \textrm{ is the type at that path and }\\
+%   & \mathbox{\textsf{T}\lceil\textsf{p} \coloneqq \textsf{T}_\textsf{2}\rceil} \textrm{ is \textsf{T} with } \mathbox{\textsf{T}_\textsf{2}} \textrm{ substituted at that path.}\\
+%   & \textsf{The special element ID \mathbox{*} is defined to access the type of a list, as will any element ID:}\\
+%   & \mathbox{\forall e \in E \ldotp (\textsf{List T})\lfloor e \rfloor = \textsf{T}}.
+%   \\
+
+%   \mathbox{\textsf{v}\lfloor\textsf{p}\rfloor?} &\textrm{iff path \mathbox{\textsf{p}} exists in value \mathbox{\textsf{v}}} \textrm{, in which case }\\
+%   & \mathbox{\textsf{v}\lfloor\textsf{p}\rfloor} \textrm{ is the value at that path and}\\
+%   & \mathbox{\textsf{v}\lceil\textsf{p} \coloneqq \textsf{v}_\textsf{2}\rceil} \textrm{ is \textsf{v} with } \mathbox{\textsf{v}_\textsf{2}} \textrm{ substituted at that path.}\\
+% \end{array}\]
+
+
+
 
 
 \printbibliography
