@@ -59,7 +59,7 @@
 
 \begin{document}
 
-\title{Working Title}
+\title{The Many-worlds Interpretation of Programming}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
 \authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
@@ -97,13 +97,11 @@ he can be reached at \email{tomas@tomasp.net}.}
 % Context: What is the broad context of the work? What is the importance of the general research area?
 % Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?
 % Approach: What was done that unveiled new knowledge?
+series of prototypes? theorizing by prototyping
 % Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
 % Importance: Why does this work matter?
 
-Possible Titles:\\
-Action Calculus: Programming in the Multiverse\\
-The Many-worlds Interpretation of Programming\\
 
 \end{abstract}
 
@@ -113,6 +111,80 @@ The Many-worlds Interpretation of Programming\\
 
 \section{Introduction}
 
+We observe that \textit{change managment} is a central problem throughout the theory and practice of programming, albeit appearing in many guises. The goal of this paper is to convert that observation into a research vision of new general purpose techniques for change management that can yield benefits across diverse aspects of programming and software development. To motivate and substantiate this vision we offer a first step: a technique of change managment called \textit{action calculus} that we apply to demonstrate several novel capabilities.
+
+Problems of change management appear in many guises:
+\begin{itemize}
+
+  \item Programming ultimately happens by changing code. There are well-established tools for managing changes to source code but also much discontent with them, indicating a pent-up demand for something better (\S\ref{VC}).
+  % Because extant version control systems work at the level of text, they lose much of the intention of programmers, so for example a system-wide rename refactoring appears as many differences and conflicts rather than one.
+
+  \item Managing state change is a deep concern in the design of programming languages. A central principle of functional programming is to reject mutable state in favor of abstractions like monads and lenses. For their part, imperative languages utilize complex state management libraries. (\S\ref{PLstate})
+
+  \item Much code is required to translate data changes between a UI, PL data structures, and a DB. It seems like much less code ought to be needed, but extensive research on this \textit{impedance mismatch problem} has not produced a decisive solution (\S\ref{impedance}).
+
+  \item Collaborative editing and data synchronization engines are concerned with automatically transporting and reconciling changes, applying the techniques of Operational Transformation (OT \S\ref{OT}) and Convergent Replicated DataTypes (CRDTs \S\ref{CRDT}).
+
+  \item Database schema change necessitates data migration and query rewriting. Live programming faces a similar problem when state becomes stale. There has been much research on \textit{schema evolution} but in practice it is still largely manual and ad hoc (\S \ref{schema}).
+
+  \item Tests sometimes simulate input changes, mock output changes, and check for expected changes. Tests sometimes snapshot a system state for convenient comparison, but then can't detect when it is stale.
+
+  \item Changes in dev must be deployed to prod.
+  % Why must that be more involved than switching branches?
+  Sometimes code changes are wrapped inside feature flags that turn them into runtime changes.
+  % Why can't that be an automated refactoring?
+
+  \item Changes in upstream dependencies must be installed, often via elaborate and fragile package management systems.
+  % Why must that be more complicated than accepting a pull request?
+
+\end{itemize}
+
+% commented out criticisms above becuase they may just invite objections
+\medskip
+The list could go on. But it is all too easy to notice patterns and draw analogies. Is there some shared essence that can be distilled into a theory and leveraged in a tool to practical benefit? We conjecture yes, though with the caveat that it may be necessary to break compatibility with the established tech stack, at least at first. We believe it would still be a valuable result to show that a unified approach to change management can significantly simplify multiple aspects of programming, even if at first only in a Petri dish.
+
+Towards that end we propose a new technique of change management called \textit{action calculus}. Action calculus differs from familiar techniques in that:
+\begin{enumerate}
+
+  \item It starts by defining the data model of a class of artifacts along with a system of actions upon that model. These actions capture high-level design changes such as transformations and refactorings, not just primitive edit operations in the model (or even worse, edits to a textual syntax).
+
+  \item The history of actions on an artifact is recorded in a \textit{timeline}. The timeline is recorded in the API and also from a GUI that manifests actions as direct manipulations.
+  Because actions know more about the user's intent than primitive edits, an action timeline contains more information than the final state or even the entire history of states.
+
+  \item Timelines can be compared to compute the differences between artifacts, expressed as a hypothetical timeline in which a maximally common ancestor was first created and then the two artifacts forked off with minimally diverging timelines. Note that this common ancestor may not have ever actually existed.
+  Differential timelines are more accurate than lower-level techniques because they take into account structural transformations and refactorings.
+
+  \item The key feature of the action calculus is the ability to \textit{transport} individual actions across forking timelines while preserving the actions's intent (which is given a precise meaning).
+  %Familiar change management operations like \textit{merging} are implemented with transportation.
+  %Differencing is also done through transportation.
+  We say that transportation explores the \textit{multiverse} of alternate timelines of an artifact\footnote{It is well known that a transporter can access and create alternate timelines\cite{mirrormirror}}.
+
+  %\item Transportation is itself built upon the core mechanism of the calculus: \textit{time travel}, shifting an action forward or backward in time to generate an alternate timeline with the same final state.
+
+\end{enumerate}
+
+Our research conjecture is that the action calculus can be applied beneficially to the varied problems of change management in programming that were listed above (and others not listed). Since the action calculus explores the multiverse of alternate histories we call our conjecture the Many-worlds Interpretation of Programming.
+
+\textcolor{red}{Maybe too cute. Alternate title --
+Action Calculus: Programming in the Multiverse\\
+}
+
+We cannot settle this conjecture yet. It is offered as a research vision motivating our work and we hope inspiring others. The concrete contributions of this paper are:
+
+\begin{enumerate}
+
+  \item We semi-formally define the action calculus on a simple data model. The capabilities of the calculus are explained by example. Transforming between a scalar and a list is used as a point of comparison with other techniques.
+
+  \item We extend the simple data model to include relationships, and add actions to handle common schema refactorings in relational databases. The motivating example is normalizing a table by splitting and deduping.
+
+  \item We present a GUI design for visualizing nesting and relationships. It also visualizes differences even in the presence of structural transformations. We discuss the design tradeoffs explored in the iterative evolution of this GUI. A \textit{playable demo} is submitted as an acccompanying artifact, which lets you experience the GUI and be guided through the database normalization scenario.
+
+  \item We present the first steps towards extending the action calculus into a query language. Although only a preliminary prototype it demonstrates the key idea that a function can be seen as a hypothetical timeline of imperative actions that extracts the result from the final state. We show one benefit of this approach: Programming by Demonstration (PbD). Another benefit is that \textit{query rewriting} falls out for free from transporting schema changes. We communicate these very preliminary results because the community may find them intriguing and controversial.
+
+\end{enumerate}
+
+
+
 
 
 
@@ -120,7 +192,7 @@ The Many-worlds Interpretation of Programming\\
 
 \section{Simple Historical Structures}
 
-We will first introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. There are two special list element IDs: \mathbox{*} and \mathbox{\mathbb{1}}. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}. IDs and tombstones are invisible to both the user and the program -- they record historical information utilized by the action calculus. We discuss this design decision in ***.
+We introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. There are two special list element IDs: \mathbox{*} and \mathbox{\mathbb{1}}. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}. IDs and tombstones are invisible to both the user and the program -- they record historical information utilized by the action calculus. We discuss this design decision in ***.
 
 The model is homogeneously typed similarly to statically typed functional programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (except tombstones). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list nd the fields of a record must have different IDs.
 %Record fields are named with a string which need not be unique.
@@ -211,6 +283,59 @@ The \textsf{Convert} action can only convert between atomic types like strings a
 
 
 
+
+
+
+
+
+\section{Related work}
+
+copy from related work of challenge problem paper
+
+actually related work:
+Alex's worlds. Roly. Ask them for comment?
+Challenge problem paper.
+I\&S: cambria, peritext, universal version control
+Braid time machine https://braid.org/meeting-111
+
+\subsection{Version control}\label{VC}
+
+git, darcs, pijul
+
+git is the most established tool for change management but is also the source of much discontent. Pull refs from schema change paper. santiago's stuff. intentional?
+
+\subsection{The impedance mismatch problem} \label{impedance}
+
+orthogonal persistence, ORMs, Linq, single tier (Tier, hop), naked objects, DBOS, durable computation
+
+\subsection{PL state management}\label{PLstate}
+
+FP: Monads, Lenses
+
+Imperative: immutable, React state menagement
+
+\subsection{OT}\label{OT}
+
+\subsection{CRDT}\label{CRDT}
+
+\subsection{Schema Evolution}\label{schema}
+just ref challenge problems paper?
+
+
+
+
+
+
+
+
+\section{Discussion}
+pros and cons
+
+caveats, weaknesses, open problems
+
+\section{Commencement}
+summary
+call to action
 
 \printbibliography
 
