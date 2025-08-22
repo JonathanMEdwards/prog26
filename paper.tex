@@ -16,16 +16,17 @@
 
 % define natbib citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
+
 \newcommand{\mathbox}[1]{\colorbox{black!10}{$#1$}}
 \usepackage{tcolorbox}
 \tcbset{colback=black!10, colframe=white, right=-20pt}
 
-\DeclareMathOperator{\pipe}{|}
-\DeclareMathOperator{\at}{\textsf{@}}
 \DeclareMathOperator{\exec}{\fatsemi\ }
-\newcommand{\isa}{\text{::}}
-
+\newcommand{\isa}{\dblcolon}
 \newcommand{\quotedstring}[1]{\textsf{\textquotedbl{#1}\textquotedbl}}
+\newcommand{\emptystring}{\textsf{\textquotedbl\ \!\textquotedbl}}
+%\DeclareMathOperator{\pipe}{|}
+%\DeclareMathOperator{\at}{\textsf{@}}
 
 %%%%%%%%%%%%%%%%%%
 %% These data MUST be filled for your submission. (see 5.3)
@@ -36,7 +37,7 @@
   %% State one or more areas, separated by a comma. (see 2.2)
   %% Please see list of areas in http://programming-journal.org/cfp/
   %% The list is open-ended, so use other areas if yours is/are not listed.
-  area={Database programming, Visual and live programming, Programming environments},
+  area={Database programming, Visual and live programming, Programming environments, Version control},
   %% You may choose the license for your paper (see 3.)
   %% License options include: cc-by (default), cc-by-nc
   % license=cc-by,
@@ -58,7 +59,7 @@
 
 \begin{document}
 
-\title{Action Calculus: Data as Code}
+\title{Working Title}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
 \authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
@@ -100,6 +101,10 @@ he can be reached at \email{tomas@tomasp.net}.}
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
 % Importance: Why does this work matter?
 
+Possible Titles:\\
+Action Calculus: Programming in the Multiverse\\
+The Many-worlds Interpretation of Programming\\
+
 \end{abstract}
 
 
@@ -108,24 +113,14 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \section{Introduction}
 
-% Code as Data couldn't solve problems of "devops".
-% Try from other end: turn a database into a dev environment.
 
-% problems being solved: devops and dev tools should not exist, or rather be automated invisibly.
 
-% integrated DB and UI
 
-% define action calculus
-% benefits
-
-% methodology
-% headlines/insights
-% contributions
 
 
 \section{Simple Historical Structures}
 
-We will first introduce action calculus on a simple and familiar data model: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. There are two special list element IDs: \mathbox{*} and \mathbox{\mathbb{1}}. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}. IDs and tombstones are invisible to both the user and the program -- they record historical information utilized by the action calculus. We discuss this design decision in ***.
+We will first introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. There are two special list element IDs: \mathbox{*} and \mathbox{\mathbb{1}}. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}. IDs and tombstones are invisible to both the user and the program -- they record historical information utilized by the action calculus. We discuss this design decision in ***.
 
 The model is homogeneously typed similarly to statically typed functional programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (except tombstones). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list nd the fields of a record must have different IDs.
 %Record fields are named with a string which need not be unique.
@@ -136,7 +131,7 @@ The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \
   \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
   \hline
   T \Coloneqq & & v \Coloneqq & & T^\varnothing = & &\\
-  &  \textsf{String} & & S & & \textsf{\textquotedbl\ \!\textquotedbl} & \textrm{string}\\
+  &  \textsf{String} & & S & & \emptystring & \textrm{string}\\
   & \textsf{Number} & &  N & & \textsf{NaN} & \textrm{number}\\
   & \textsf{List } T & & [ E : v \  \dots ] & & [] & \textrm{list}\\
   %& \{ F \  S : T \  \dots \} & & \{ F : v \  \dots \} & & \{ F : T^\varnothing \  \dots \}& \textrm{record}\\
@@ -156,6 +151,7 @@ using infix syntax, placing the target path first, then the action name, followe
 \mathbox{\mathit{write} \Coloneqq p \textsf{ write } v}
 
 We execute actions with the \mathbox{\fatsemi} infix operator taking a pre-state on the left, an action on the right, and yielding a post-state which may be chained into subsequent executions. Here is a concrete example defining a record type \mathbox{\mathit{Name}} given field IDs \mathbox{\mathit{first}} and \mathbox{\mathit{last}}:
+
 %\begin{tcolorbox}[nobeforeafter]
 \begin{align*}
 %\mathit{Name} &= \{\mathit{first}\  \quotedstring{first}: \textsf{String},\  \mathit{last}\  \quotedstring{last}: \textsf{String}\}\\
@@ -165,11 +161,34 @@ s_2 &= s_1 \exec \mathit{last} \textsf{ write } \quotedstring{Smythe}\\
 &= \{\mathit{first}: \quotedstring{John},\  \mathit{last}: \quotedstring{Smythe}\} \isa \mathit{Name}\\
 \end{align*}
 %\end{tcolorbox}
-The \textsf{write} action is a \textit{value action}, meaning it does not modify the type of the state. On the other hand \textit{type actions} may modify both the type and value. We capitalize the name of type actions. Our system has a \textit{user mode} in which only value actions are permitted.
+
+The \textsf{write} action is a \textit{value action}, meaning it does not modify the type of the state. On the other hand \textit{type actions} may modify both the type and value. By convention we capitalize the name of type actions. Our system has a \textit{user mode} in which only value actions are permitted.
 
 \begin{remark}\normalfont
 In this presentation we have adopted the conventional approach of defining values and types as distinct objects. However our implementation only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped action calculus\cite{denicek}, but that is not the topic of this paper.
 \end{remark}
+
+The \textsf{Define} action is the type-level equivalent of \textsf{write}: \mathbox{p \textsf{ Define } T}. The path $p$ must exist in the state's type, in which case it is changed into the new type $T$. Any path in the state's value that \textit{corresponds} to the path $p$ is changed into the initial value of the new type $T^\varnothing$. A value path $q$ correspond to a type path $p$ iff replacing every list element ID in $q$ with $*$ makes it equal to $p$. In other words, the initial value is written into all list elements corresponding to a list type. For example:
+
+% mention untyped approach of * as a selector. We use homogenous typing of lists to drive iteration declaratively.
+
+\begin{align*}
+s_1 &= [ e_1: 1,\  e_2: 2] \isa \textsf{List Number}\\
+s_2 &= s_1 \exec * \textsf{ Define } \textsf{String}\\
+    &= [ e_1: \emptystring,\  e_2: \emptystring] \isa \textsf{List String}\\
+\end{align*}
+
+The \textsf{Define} action is typically used to define new types. To change the type of populated data as in the above example the \textsf{Convert} action is more useful. For example:
+
+\begin{align*}
+s_1 &= [ e_1: 1,\  e_2: 2] \isa \textsf{List Number}\\
+s_2 &= s_1 \exec * \textsf{ Convert } \textsf{String}\\
+    &= [ e_1: \quotedstring{1},\  e_2: \quotedstring{2}] \isa \textsf{List String}\\
+\end{align*}
+
+What happens if we convert a string into a number but the string doesn't parse as a number? There are many design choices like this when defining a system of actions, with different tradeoffs. One might choose to yield \textsf{NaN}. Our implementation instead wraps the string in an error value that can be repaired later in the UI.
+
+The \textsf{Convert} action can only convert between atomic types like strings and numbers. Structural transformations are handled with different actions, which is where things get interesting.
 
 
 
