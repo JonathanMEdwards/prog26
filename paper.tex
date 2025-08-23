@@ -8,7 +8,9 @@
 \addbibresource{paper.bib}
 
 \usepackage{amsthm}
+\theoremstyle{definition}
 \newtheorem*{remark}{Remark}
+\newtheorem*{summary}{Summary}
 
 \usepackage{mathtools}
 \usepackage{csquotes}
@@ -93,17 +95,37 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \begin{abstract}
 
+Action calculus is a technique of change management that generalizes conventional version control and collaborative editing systems to handle refactorings, transformations, schema evolution, and database differencing. A fragment of a new kind of query language is included. Altogether we solve $4/8$ of the challenge problems of schema evolution identified in a prior paper.
+The theory is presented semi-formally and a prototype implementation is discussed. A playable demo is submitted as an artifact.
+
+The superpower of the action calculus is transporting actions across alternate timelines while preserving their intention. The \textit{Many-worlds Interpretation of Programming}
+is a research vision to extend the action calculus into a unified PL/DB/UI, solve the impedance mismatch problem, and integrate facilities for testing, package management, and deployment.
+Realizing that vision would in effect be a revival of the beloved Lisp/SmallTalk live programming experience in a single unifying language, reimagined for the modern world.
+
+\noindent\rule{\textwidth}{1pt}
+
 % Each submission must be accompanied by a plain-language abstract of up to 500 words that presents the key points in the paper in a manner understandable by experienced practitioners and researchers in nearby disciplines. The abstract should avoid mathematical symbols whenever possible, and it must address the following:
 % Context: What is the broad context of the work? What is the importance of the general research area?
-% Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?
-% Approach: What was done that unveiled new knowledge?
-series of prototypes? theorizing by prototyping
-% Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?
-% Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
-% Importance: Why does this work matter?
+Context: The programming tech stack has inflated to mind-boggling proportions. We must seek ways to simplify programming, if only in certain domains.
 
+% Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?
+Inquiry: Problems of change management recur in many guises throughout programming. Is this a point of attack where a general technique can leverage widespread benefits? We generalize upon prior work in version control and collaborative editing systems.
+
+% Approach: What was done that unveiled new knowledge?
+Approach: In prior work we identified eight challenge problems of schema evolution in programming systems. We developed the action calculus initially to solve two of these. The key move was to shift the focus from states to high-level actions.
+
+% Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?
+Knowledge: We discovered a new technique of change management that works on timelines of high-level actions, not primitive state edits. It offers a much-simplified conceptual model for version control. We iteratively designed a new GUI for visualizing nesting and relationships and differencing them.
+
+% Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
+Grounding: We solve $4/8$ of the challenge problems of schema evolution identified in prior work.
+The action calculus has iterated through two prior workshop papers. Demos were used for feedback on the GUI, leading to two complete redesigns.
+
+% Importance: Why does this work matter?
+Importance: Version control and schema evolution are sources of much complaint that deserve improved solutions. More generally we need to research cures for the Complexity Cancer afflicting programming.
 
 \end{abstract}
+
 
 
 
@@ -143,7 +165,7 @@ Problems of change management appear in many guises:
 \medskip
 The list could go on. But it is all too easy to notice patterns and draw analogies. Is there some shared essence that can be distilled into a theory and leveraged in a tool to practical benefit? We conjecture yes, though with the caveat that it may be necessary to break compatibility with the established tech stack, at least at first. We believe it would still be a valuable result to show that a unified approach to change management can significantly simplify multiple aspects of programming, even if at first only in a Petri dish.
 
-Towards that end we propose a new technique of change management called \textit{action calculus}. Action calculus differs from familiar techniques in that:
+Towards that end we propose a new technique of change management called the \textit{action calculus}. Action calculus differs from familiar techniques in that:
 \begin{enumerate}
 
   \item It starts by defining the data model of a class of artifacts along with a system of actions upon that model. These actions capture high-level design changes such as transformations and refactorings, not just primitive edit operations in the model (or even worse, edits to a textual syntax).
@@ -169,13 +191,14 @@ Our research conjecture is that the action calculus can be applied beneficially 
 Action Calculus: Programming in the Multiverse\\
 }
 
-We cannot settle this conjecture yet. It is offered as a research vision motivating our work and we hope inspiring others. The concrete contributions of this paper are:
+Proving that conjecture would in effect be a revival of the classic Lisp/SmallTalk live programming experience in a single unifying language, reimagined for the modern world. But for now this is a far-off research vision that we offer
+as the motivation of our work and we hope as an inspiration for others. The concrete contributions of this paper are:
 
 \begin{enumerate}
 
-  \item We semi-formally define the action calculus on a simple data model. The capabilities of the calculus are explained by example. Transforming between a scalar and a list is used as a point of comparison with other techniques.
+  \item We semi-formally define the action calculus on a simple data model. The capabilities of the calculus are explained by example. We simplify the baroque conceptual models of version control into an open world of artifacts with append-only histories where branching is just copying. Transforming between a scalar and a list is used as a point of comparison with other techniques.
 
-  \item We extend the simple data model to include relationships, and add actions to handle common schema refactorings in relational databases. The motivating example is normalizing a table by splitting and deduping.
+  \item We extend the simple data model to include relationships, along with actions to handle common schema refactorings in relational databases. The motivating example is normalizing a table by splitting and deduping.
 
   \item We present a GUI design for visualizing nesting and relationships. It also visualizes differences even in the presence of structural transformations. We discuss the design tradeoffs explored in the iterative evolution of this GUI. A \textit{playable demo} is submitted as an acccompanying artifact, which lets you experience the GUI and be guided through the database normalization scenario.
 
@@ -183,6 +206,7 @@ We cannot settle this conjecture yet. It is offered as a research vision motivat
 
 \end{enumerate}
 
+Altogether we solve $4/8$ of the challenge problems of schema evolution from a prior paper\cite{challenge-problems}.
 
 
 
@@ -214,6 +238,7 @@ The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \
 }
 
 A \textit{path} is a possibly empty sequence of IDs denoting a path drilling into nested records and lists. Paths can access both values and types. We construct paths with slashes as in Unix file paths. The special element ID~\mathbox{*} is used to access the element type of a list type.
+
 A \textit{state} pairs a value with its type. We abuse the notation \mathbox{v \isa T} to both denote a state and assert that the value matches the type.
 
 An \textit{action} is an operation on states, converting a \textit{pre-state} into a \textit{post-state}.
@@ -236,7 +261,7 @@ s_2 &= s_1 \exec \mathit{last} \textsf{ write } \quotedstring{Smythe}\\
 
 The \textsf{write} action is a \textit{value action}, meaning it does not modify the type of the state. On the other hand \textit{type actions} may modify both the type and value. By convention we capitalize the name of type actions. Our system has a \textit{user mode} in which only value actions are permitted.
 
-\begin{remark}\normalfont
+\begin{remark}
 In this presentation we have adopted the conventional approach of defining values and types as distinct objects. However our implementation only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped action calculus\cite{denicek}, but that is not the topic of this paper.
 \end{remark}
 
@@ -296,7 +321,7 @@ actually related work:
 Alex's worlds. Roly. Ask them for comment?
 Challenge problem paper.
 I\&S: cambria, peritext, universal version control
-Braid time machine https://braid.org/meeting-111
+Braid time machine https://braid.org/time-machines
 
 \subsection{Version control}\label{VC}
 
