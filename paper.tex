@@ -163,14 +163,15 @@ Problems of change management appear in many guises:
 
 % commented out criticisms above becuase they may just invite objections
 \medskip
-The list could go on. But it is all too easy to notice patterns and draw analogies. Is there some shared essence that can be distilled into a theory and leveraged in a tool to practical benefit? We conjecture yes, though with the caveat that it may be necessary to break compatibility with the established tech stack, at least at first. We believe it would still be a valuable result to show that a unified approach to change management can significantly simplify multiple aspects of programming, even if at first only in a Petri dish.
+The list could go on. But it is all too easy to notice patterns and draw analogies. Is there some shared essence that can be distilled into a theory and leveraged in a tool to practical benefit? We conjecture yes, though with the caveat that it may be necessary to break compatibility with the established tech stack, at least at first. We believe it would still be a valuable result to show that a unified approach to change management can  simplify multiple aspects of programming, even if at first only in a Petri dish.
+Likewise we argue that performance concerns be deferred.
 
-Towards that end we propose a new technique of change management called the \textit{action calculus}. Action calculus differs from familiar techniques in that:
+With that said we propose a new technique of change management called the \textit{action calculus}. Action calculus differs from familiar techniques in that:
 \begin{enumerate}
 
   \item It starts by defining the data model of a class of artifacts along with a system of actions upon that model. These actions capture high-level design changes such as transformations and refactorings, not just primitive edit operations in the model (or even worse, edits to a textual syntax).
 
-  \item The history of actions on an artifact is recorded in a \textit{timeline}. The timeline is recorded in the API and also from a GUI that manifests actions as direct manipulations.
+  \item The history of actions on an artifact is recorded in a \textit{timeline} by monitoring the API and a GUI that manifests actions as direct manipulations.
   Because actions know more about the user's intent than primitive edits, an action timeline contains more information than the final state or even the entire history of states.
 
   \item Timelines can be compared to compute the differences between artifacts, expressed as a hypothetical timeline in which a maximally common ancestor was first created and then the two artifacts forked off with minimally diverging timelines. Note that this common ancestor may not have ever actually existed.
@@ -187,11 +188,14 @@ Towards that end we propose a new technique of change management called the \tex
 
 Our research conjecture is that the action calculus can be applied beneficially to the varied problems of change management in programming that were listed above (and others not listed). Since the action calculus explores the multiverse of alternate histories we call our conjecture the Many-worlds Interpretation of Programming.
 
-\textcolor{red}{Maybe too cute. Alternate title --
+\noindent\textcolor{red}{Maybe too cute. Alternate titles:\\
 Action Calculus: Programming in the Multiverse\\
+Action Calculus: Managing the Multiverse\\
+Programming in the Multiverse\\
+Managing the Multiverse\\
 }
 
-Proving that conjecture would in effect be a revival of the classic Lisp/SmallTalk live programming experience in a single unifying language, reimagined for the modern world. But for now this is a far-off research vision that we offer
+Realizing that conjecture would in effect be a revival of the classic Lisp/SmallTalk live programming experience in a single unifying language, reimagined for the modern world. But for now this is a far-off research vision that we offer
 as the motivation of our work and we hope as an inspiration for others. The concrete contributions of this paper are:
 
 \begin{enumerate}
@@ -200,13 +204,16 @@ as the motivation of our work and we hope as an inspiration for others. The conc
 
   \item We extend the simple data model to include relationships, along with actions to handle common schema refactorings in relational databases. The motivating example is normalizing a table by splitting and deduping.
 
-  \item We present a GUI design for visualizing nesting and relationships. It also visualizes differences even in the presence of structural transformations. We discuss the design tradeoffs explored in the iterative evolution of this GUI. A \textit{playable demo} is submitted as an acccompanying artifact, which lets you experience the GUI and be guided through the database normalization scenario.
+  \item We present a GUI design for visualizing nesting and relationships. It also visualizes differences even in the presence of structural transformations. We discuss the design tradeoffs explored in the iterative evolution of this GUI.
+
+  \item We submit a \textit{playable demo} as an acccompanying artifact. This demo lets you directly experience the GUI and be guided through the database normalization scenario. We hope that playable demos offer a new way to evaluate HCI research.
 
   \item We present the first steps towards extending the action calculus into a query language. Although only a preliminary prototype it demonstrates the key idea that a function can be seen as a hypothetical timeline of imperative actions that extracts the result from the final state. We show one benefit of this approach: Programming by Demonstration (PbD). Another benefit is that \textit{query rewriting} falls out for free from transporting schema changes. We communicate these very preliminary results because the community may find them intriguing and controversial.
 
+  \item Altogether we solve $4/8$ of the challenge problems of schema evolution in a prior paper\cite{challenge-problems}.
+
 \end{enumerate}
 
-Altogether we solve $4/8$ of the challenge problems of schema evolution from a prior paper\cite{challenge-problems}.
 
 
 
@@ -240,12 +247,15 @@ The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \
 A \textit{path} is a possibly empty sequence of IDs denoting a path drilling into nested records and lists. Paths can access both values and types. We construct paths with slashes as in Unix file paths. The special element ID~\mathbox{*} is used to access the element type of a list type.
 
 A \textit{state} pairs a value with its type. We abuse the notation \mathbox{v \isa T} to both denote a state and assert that the value matches the type.
-
 An \textit{action} is an operation on states, converting a \textit{pre-state} into a \textit{post-state}.
 All actions take a \textit{target} path as a parameter indicating that the action is to be performed at that path within the state.
 For example the \textsf{write} action takes a value as another parameter and writes that value into the target path. Actions are not defined for all pre-states. The \textsf{write} action requires that the target path exists in the value and that its type matches the value parameter. We define actions as terms of a grammer,
 using infix syntax, placing the target path first, then the action name, followed by any other parameters, like this:
-\mathbox{\mathit{write} \Coloneqq p \textsf{ write } v}
+\mathbox{\mathit{writeAction} \Coloneqq p \textsf{ write } v}
+
+
+Table of actions
+
 
 We execute actions with the \mathbox{\fatsemi} infix operator taking a pre-state on the left, an action on the right, and yielding a post-state which may be chained into subsequent executions. Here is a concrete example defining a record type \mathbox{\mathit{Name}} given field IDs \mathbox{\mathit{first}} and \mathbox{\mathit{last}}:
 
@@ -306,16 +316,28 @@ The \textsf{Convert} action can only convert between atomic types like strings a
 % \end{array}\]
 
 
+\section{Transportation}
+Transport by example: pluralize, insert
 
+\subsection{Projection and retraction}
 
+\subsection{Branchless diffing}
+Conceptual model
+Algorithm
 
+\section{Relationships and normalization}
 
+\section{Visualizing the multiverse}
+\subsection{Exploring structure}
+\subsection{Relating variants}
+\subsection{A playable demo}
 
+\section{Queries as hypotheticals}
+\subsection{PbD}
+\subsection{Query rewriting via projection}
 
 
 \section{Related work}
-
-copy from related work of challenge problem paper
 
 actually related work:
 Alex's worlds. Roly. Ask them for comment?
@@ -348,19 +370,13 @@ just ref challenge problems paper?
 
 
 
-
-
-
-
-
 \section{Discussion}
 pros and cons
 
 caveats, weaknesses, open problems
 
 \section{Commencement}
-summary
-call to action
+summary and call to action
 
 \printbibliography
 
