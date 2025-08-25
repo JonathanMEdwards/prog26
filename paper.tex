@@ -251,10 +251,48 @@ An \textit{action} is an operation on states, converting a \textit{pre-state} in
 All actions take a \textit{target} path as a parameter indicating that the action is to be performed at that path within the state.
 For example the \textsf{write} action takes a value as another parameter and writes that value into the target path. Actions are not defined for all pre-states. The \textsf{write} action requires that the target path exists in the value and that its type matches the value parameter. We define actions as terms of a grammer,
 using infix syntax, placing the target path first, then the action name, followed by any other parameters, like this:
-\mathbox{\mathit{writeAction} \Coloneqq p \textsf{ write } v}
+\mathbox{p \textsf{ write } v}. Here are the actions on simple structures:
 
 
-Table of actions
+\tcbox{
+\[
+\hspace{-22pt}
+\begin{array}{l|l}
+  \textrm{Value actions} & \\
+  \hline
+  p \textsf{ write } v & \textrm{Write atomic value $v$ at $p$}\\
+
+  p \textsf{ insert } E \textsf{ before } E' & \textrm{Insert element ID $E$ into list at $p$ in front of element $E'$}\\
+  p \textsf{ insert } E & \textrm{Append element ID $E$ to end of list at $p$}\\
+
+  p \textsf{ delete } E & \textrm{Delete element ID $E$ in list at $p$}\\
+
+  p \textsf{ moveFrom } p' & \textrm{List element at $p$ is overwritten from $p'$ in same list}\\
+  & \textrm{or cousin in nested lists, and $p'$ is deleted}\\
+  \hline
+
+  \textrm{Type actions} & \textrm{(Iterated over all values paths matching type path $p$)}
+  \rule[0pt]{0pt}{16pt}\\
+  \hline
+  p \textsf{ Define } T & \textrm{Define $p$ to have type $T$, initializing values}\\
+  p \textsf{ Convert } T & \textrm{Convert $p$ to atomic type $T$}\\
+
+  p \textsf{ Insert } F \textsf{ before } F' & \textrm{Insert field ID $F$ into record at $p$ in front of field $F'$}\\
+  p \textsf{ Insert } F & \textrm{Append field ID $F$ to end of record at $p$}\\
+
+  p \textsf{ Delete } F & \textrm{Delete field ID $F$ in record at $p$}\\
+
+  p \textsf{ MoveFrom } p' & \textrm{Record field at $p$ is overwritten from $p'$ in same record}\\
+  & \textrm{or containing/contained record, and $p'$ is deleted}\\
+
+  p \textsf{ ListOf } & \textrm{Convert value at $p$ into a singleton list with element ID $\mathbb{1}$}\\
+  p \textsf{ FirstOf } & \textrm{Convert list at $p$ into its first element, else the initial value}\\
+
+
+
+\end{array}\]
+}
+
 
 
 We execute actions with the \mathbox{\fatsemi} infix operator taking a pre-state on the left, an action on the right, and yielding a post-state which may be chained into subsequent executions. Here is a concrete example defining a record type \mathbox{\mathit{Name}} given field IDs \mathbox{\mathit{first}} and \mathbox{\mathit{last}}:
@@ -329,10 +367,14 @@ Algorithm
 
 \section{Visualizing the multiverse}
 \subsection{Exploring structure}
-\subsection{Relating variants}
+\subsection{Finding commonality}
+hard problem is seeing what \textit{hasn't} changed, just moved
+\subsection{Design tradeoffs}
+Ultorg.
+iterations on UI
 \subsection{A playable demo}
 
-\section{Queries as hypotheticals}
+\section{Queries as hypothetical timelines}
 \subsection{PbD}
 \subsection{Query rewriting via projection}
 
