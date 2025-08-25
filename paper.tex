@@ -267,11 +267,11 @@ using infix syntax, placing the target path first, then the action name, followe
 
   p \textsf{ delete } E & \textrm{Delete element ID $E$ in list at $p$}\\
 
-  p \textsf{ moveFrom } p' & \textrm{List element at $p$ is overwritten from $p'$ in same list}\\
+  p \textsf{ moveFrom } p' & \textrm{List element at $p$ is overwritten from $p'$ in the same list}\\
   & \textrm{or cousin in nested lists, and $p'$ is deleted}\\
   \hline
 
-  \textrm{Type actions} & \textrm{Iterated over all values paths matching type path $p$}
+  \textrm{Type actions} & \textrm{Iterated over all value paths matching type path $p$}
   \rule[0pt]{0pt}{16pt}\\
   \hline
   p \textsf{ Define } T & \textrm{Define $p$ to have type $T$, initializing values}\\
@@ -282,11 +282,11 @@ using infix syntax, placing the target path first, then the action name, followe
 
   p \textsf{ Delete } F & \textrm{Delete field ID $F$ in record at $p$}\\
 
-  p \textsf{ MoveFrom } p' & \textrm{Record field at $p$ is overwritten from $p'$ in same record}\\
-  & \textrm{or containing/contained record, and $p'$ is deleted}\\
+  p \textsf{ MoveFrom } p' & \textrm{Record field at $p$ is overwritten from $p'$ in the same record}\\
+  & \textrm{or containing\slash contained record, and $p'$ is deleted}\\
 
 
-  p \textsf{ ListOf } E & \textrm{Convert value at $p$ into a list with one element ID $E$}\\
+  p \textsf{ ListOf } E & \textrm{Convert value at $p$ into a list with one element $E$}\\
   p \textsf{ IntoFirst } & \textrm{Convert list at $p$ into its first element, else the initial value} \\
 
   p \textsf{ RecordOf } F & \textrm{Convert value at $p$ into a record with one field $F$} \\
