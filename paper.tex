@@ -223,7 +223,7 @@ as the motivation of our work and we hope as an inspiration for others. The conc
 
 \section{Simple Historical Structures}
 
-We introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. There are two special list element IDs: \mathbox{*} and \mathbox{\mathbb{1}}. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}. IDs and tombstones are invisible to both the user and the program -- they record historical information utilized by the action calculus. We discuss this design decision in ***.
+We introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. There is a special list element ID \mathbox{*}. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}. IDs and tombstones are invisible to both the user and the program -- they record historical information utilized by the action calculus. We discuss this design decision in ***.
 
 The model is homogeneously typed similarly to statically typed functional programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (except tombstones). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list nd the fields of a record must have different IDs.
 %Record fields are named with a string which need not be unique.
@@ -271,7 +271,7 @@ using infix syntax, placing the target path first, then the action name, followe
   & \textrm{or cousin in nested lists, and $p'$ is deleted}\\
   \hline
 
-  \textrm{Type actions} & \textrm{(Iterated over all values paths matching type path $p$)}
+  \textrm{Type actions} & \textrm{Iterated over all values paths matching type path $p$}
   \rule[0pt]{0pt}{16pt}\\
   \hline
   p \textsf{ Define } T & \textrm{Define $p$ to have type $T$, initializing values}\\
@@ -285,10 +285,12 @@ using infix syntax, placing the target path first, then the action name, followe
   p \textsf{ MoveFrom } p' & \textrm{Record field at $p$ is overwritten from $p'$ in same record}\\
   & \textrm{or containing/contained record, and $p'$ is deleted}\\
 
-  p \textsf{ ListOf } & \textrm{Convert value at $p$ into a singleton list with element ID $\mathbb{1}$}\\
-  p \textsf{ FirstOf } & \textrm{Convert list at $p$ into its first element, else the initial value}\\
 
+  p \textsf{ ListOf } E & \textrm{Convert value at $p$ into a list with one element ID $E$}\\
+  p \textsf{ IntoFirst } & \textrm{Convert list at $p$ into its first element, else the initial value} \\
 
+  p \textsf{ RecordOf } F & \textrm{Convert value at $p$ into a record with one field $F$} \\
+  p \textsf{ IntoField } F & \textrm{Convert record at $p$ into value of its field $F$} \\
 
 \end{array}\]
 }
@@ -334,6 +336,11 @@ s_2 &= s_1 \exec * \textsf{ Convert } \textsf{String}\\
 What happens if we convert a string into a number but the string doesn't parse as a number? There are many design choices like this when defining a system of actions, with different tradeoffs. One might choose to yield \textsf{NaN}. Our implementation instead wraps the string in an error value that can be repaired later in the UI.
 
 The \textsf{Convert} action can only convert between atomic types like strings and numbers. Structural transformations are handled with different actions, which is where things get interesting.
+
+insert/delete on elements and fields
+
+Multiplcity change (Challenge \#7) with ListOf
+
 
 
 
