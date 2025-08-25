@@ -95,12 +95,12 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \begin{abstract}
 
-Action calculus is a technique of change management that generalizes conventional version control and collaborative editing systems to handle refactorings, transformations, schema evolution, and database differencing. A fragment of a new kind of query language is included. Altogether we solve $4/8$ of the challenge problems of schema evolution identified in a prior paper.
+Action calculus is a technique of change management that generalizes conventional version control and collaborative editing systems to handle refactorings, transformations, schema evolution, and database differencing. We take the first steps of extending it into a new kind of query language. Altogether we solve four of the eight challenge problems of schema evolution identified in a prior paper.
 The theory is presented semi-formally and a prototype implementation is discussed. A playable demo is submitted as an artifact.
 
 The superpower of the action calculus is transporting actions across alternate timelines while preserving their intention. The \textit{Many-worlds Interpretation of Programming}
-is a research vision to extend the action calculus into a unified PL/DB/UI, solve the impedance mismatch problem, and integrate facilities for testing, package management, and deployment.
-Realizing that vision would in effect be a revival of the beloved Lisp/SmallTalk live programming experience in a single unifying language, reimagined for the modern world.
+is a research vision to extend this power into a unified PL/DB/UI, solve the impedance mismatch problem, and integrate facilities for testing, package management, and deployment.
+Realizing that vision would in effect be a revival of the beloved Lisp/SmallTalk unified programming experience, reimagined for the modern world.
 
 \noindent\rule{\textwidth}{1pt}
 
@@ -118,7 +118,7 @@ Approach: In prior work we identified eight challenge problems of schema evoluti
 Knowledge: We discovered a new technique of change management that works on timelines of high-level actions, not primitive state edits. It offers a much-simplified conceptual model for version control. We iteratively designed a new GUI for visualizing nesting and relationships and differencing them.
 
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
-Grounding: We solve $4/8$ of the challenge problems of schema evolution identified in prior work.
+Grounding: We solve four of the eight challenge problems of schema evolution identified in prior work.
 The action calculus has iterated through two prior workshop papers. Demos were used for feedback on the GUI, leading to two complete redesigns.
 
 % Importance: Why does this work matter?
@@ -180,13 +180,13 @@ With that said we propose a new technique of change management called the \texti
   \item The key feature of the action calculus is the ability to \textit{transport} individual actions across forking timelines while preserving the actions's intent (which is given a precise meaning).
   %Familiar change management operations like \textit{merging} are implemented with transportation.
   %Differencing is also done through transportation.
-  We say that transportation explores the \textit{multiverse} of alternate timelines of an artifact\footnote{It is well known that a transporter can access and create alternate timelines\cite{mirrormirror}}.
+  We say that transportation navigates the \textit{multiverse} of alternate timelines of an artifact\footnote{It is well known that a transporter can access and create alternate timelines\cite{mirrormirror}}.
 
   %\item Transportation is itself built upon the core mechanism of the calculus: \textit{time travel}, shifting an action forward or backward in time to generate an alternate timeline with the same final state.
 
 \end{enumerate}
 
-Our research conjecture is that the action calculus can be applied beneficially to the varied problems of change management in programming that were listed above (and others not listed). Since the action calculus explores the multiverse of alternate histories we call our conjecture the Many-worlds Interpretation of Programming.
+Our research conjecture is that the action calculus can be applied beneficially to the varied problems of change management in programming that were listed above, and more. Since the action calculus navigates the multiverse of alternate histories we call our conjecture the Many-worlds Interpretation of Programming.
 
 \noindent\textcolor{red}{Maybe too cute. Alternate titles:\\
 Action Calculus: Programming in the Multiverse\\
@@ -195,7 +195,7 @@ Programming in the Multiverse\\
 Managing the Multiverse\\
 }
 
-Realizing that conjecture would in effect be a revival of the classic Lisp/SmallTalk live programming experience in a single unifying language, reimagined for the modern world. But for now this is a far-off research vision that we offer
+Realizing that conjecture would in effect be a revival of the beloved Lisp/SmallTalk unified programming experience, reimagined for the modern world. But for now this is a far-off research vision that we offer
 as the motivation of our work and we hope as an inspiration for others. The concrete contributions of this paper are:
 
 \begin{enumerate}
@@ -208,9 +208,9 @@ as the motivation of our work and we hope as an inspiration for others. The conc
 
   \item We submit a \textit{playable demo} as an acccompanying artifact. This demo lets you directly experience the GUI and be guided through the database normalization scenario. We hope that playable demos offer a new way to evaluate HCI research.
 
-  \item We present the first steps towards extending the action calculus into a query language. Although only a preliminary prototype it demonstrates the key idea that a function can be seen as a hypothetical timeline of imperative actions that extracts the result from the final state. We show one benefit of this approach: Programming by Demonstration (PbD). Another benefit is that \textit{query rewriting} falls out for free from transporting schema changes. We communicate these very preliminary results because the community may find them intriguing and controversial.
+  \item We take the first steps of extending the action calculus into a query language. Although only a preliminary prototype it demonstrates the key idea that a function can be seen as a hypothetical timeline of imperative actions that extracts the result from the final state. We show one benefit of this approach: Programming by Demonstration (PbD). Another benefit is that \textit{query rewriting} falls out for free from transporting schema changes. We communicate these very preliminary results because the community may find them intriguing and controversial.
 
-  \item Altogether we solve $4/8$ of the challenge problems of schema evolution in a prior paper\cite{challenge-problems}.
+  \item Altogether we solve four of the eight challenge problems of schema evolution in a prior paper\cite{challenge-problems}.
 
 \end{enumerate}
 
