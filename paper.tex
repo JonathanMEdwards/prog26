@@ -61,7 +61,8 @@
 
 \begin{document}
 
-\title{The Many-worlds Interpretation of Programming}
+%\title{The Many-worlds Interpretation of Programming}
+\title{Working Title}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
 \authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
@@ -188,13 +189,6 @@ With that said we propose a new technique of change management called the \texti
 
 Our research conjecture is that the action calculus can be applied beneficially to the varied problems of change management in programming that were listed above, and more. Since the action calculus navigates the multiverse of alternate histories we call our conjecture the Many-worlds Interpretation of Programming.
 
-\noindent\textcolor{red}{Maybe too cute. Alternate titles:\\
-Action Calculus: Programming in the Multiverse\\
-Action Calculus: Managing the Multiverse\\
-Programming in the Multiverse\\
-Managing the Multiverse\\
-}
-
 Realizing that conjecture would in effect be a revival of the beloved Lisp/SmallTalk unified programming experience, reimagined for the modern world. But for now this is a far-off research vision that we offer
 as the motivation of our work and we hope as an inspiration for others. The concrete contributions of this paper are:
 
@@ -223,14 +217,15 @@ as the motivation of our work and we hope as an inspiration for others. The conc
 
 \section{Simple Historical Structures}
 
-We introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. There is a special list element ID \mathbox{*}. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}. IDs and tombstones are invisible to both the user and the program -- they record historical information utilized by the action calculus. We discuss this design decision in ***.
+We introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}. IDs and tombstones are invisible to both the user and the program -- they record historical information utilized by the action calculus. We discuss this design decision in ***.
 
 The model is homogeneously typed similarly to statically typed functional programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (except tombstones). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list nd the fields of a record must have different IDs.
 %Record fields are named with a string which need not be unique.
 The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \textit{initial value}. We define the syntax of this model:
 
+% simple syntax table
 \tcbox{
-\[ \begin{array}{rl|rl|rl|l}
+\[ \begin{array}{r@{\ }l|r@{\ }l|r@{\ }l|l}
   \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
   \hline
   T \Coloneqq & & v \Coloneqq & & T^\varnothing = & &\\
@@ -238,7 +233,7 @@ The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \
   & \textsf{Number} & &  N & & \textsf{NaN} & \textrm{number}\\
   & \textsf{List } T & & [ E : v \  \dots ] & & [] & \textrm{list}\\
   %& \{ F \  S : T \  \dots \} & & \{ F : v \  \dots \} & & \{ F : T^\varnothing \  \dots \}& \textrm{record}\\
-  & \{ F : T \  \dots \} & & \{ F : v \  \dots \} & & \{ F : T^\varnothing \  \dots \}& \textrm{record}\\
+  & \{ F \  S : T \  \dots \} & & \{ F : v \  \dots \} & & \{ F : T^\varnothing \  \dots \}& \textrm{record}\\
 
   & \bot && \bigtimes & & \bigtimes & \textrm{tombstone}\\
 \end{array}\]
@@ -276,6 +271,8 @@ using infix syntax, placing the target path first, then the action name, followe
   \hline
   p \textsf{ Define } T & \textrm{Define $p$ to have type $T$, initializing values}\\
   p \textsf{ Convert } T & \textrm{Convert $p$ to atomic type $T$}\\
+
+  p \textsf{ Rename } S & \textrm{Rename record field $p$ to string $S$}\\
 
   p \textsf{ Insert } F \textsf{ before } F' & \textrm{Insert field ID $F$ into record at $p$ in front of field $F'$}\\
   p \textsf{ Insert } F & \textrm{Append field ID $F$ to end of record at $p$}\\
@@ -342,6 +339,8 @@ insert/delete on elements and fields
 Multiplcity change (Challenge \#7) with ListOf
 
 
+There is a special list element ID \mathbox{*}.
+
 
 
 % These definitions follow naturally:
@@ -366,8 +365,12 @@ Transport by example: pluralize, insert
 
 \subsection{Projection and retraction}
 
+\subsection{Galois connection}
+
 \subsection{Branchless diffing}
 Conceptual model
+Branching by copying
+Open world of copies with no boundaries, not a DAG in a repo
 Algorithm
 
 \section{Relationships and normalization}
