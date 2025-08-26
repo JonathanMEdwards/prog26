@@ -23,7 +23,7 @@
 \usepackage{tcolorbox}
 \tcbset{colback=black!10, colframe=white, right=-20pt}
 
-\DeclareMathOperator{\exec}{\fatsemi\ }
+\DeclareMathOperator{\exec}{\ \fatsemi\ \ }
 \newcommand{\isa}{\dblcolon}
 \newcommand{\quotedstring}[1]{\textsf{\textquotedbl{#1}\textquotedbl}}
 \newcommand{\emptystring}{\textsf{\textquotedbl\ \!\textquotedbl}}
@@ -217,7 +217,11 @@ as the motivation of our work and we hope as an inspiration for others. The conc
 
 \section{Simple Historical Structures}
 
-We introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}. IDs and tombstones are invisible to both the user and the program -- they record historical information utilized by the action calculus. We discuss this design decision in ***.
+We introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}.
+
+\begin{remark}
+IDs and tombstones are invisible to both the user and the program. They only affect action transportation (and performance). We believe they are not necessary and have prototyped implementations without them (in fact Baseline currently doesn't use tombstones), but that adds a lot of complexity. We adopt them here in the interest of simplicity.
+\end{remark}
 
 The model is homogeneously typed similarly to statically typed functional programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (except tombstones). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list nd the fields of a record must have different IDs.
 %Record fields are named with a string which need not be unique.
@@ -239,16 +243,16 @@ The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \
 \end{array}\]
 }
 
-A \textit{path} is a possibly empty sequence of IDs denoting a path drilling into nested records and lists. Paths can access both values and types. We construct paths with slashes as in Unix file paths. The special element ID~\mathbox{*} is used to access the element type of a list type.
+A \textit{path} is a possibly empty sequence of IDs denoting a path drilling into nested records and lists. Paths can access both values and types. We separate the IDs in a path with dots, and a single dot is the empty (top) path. A special element ID~\mathbox{*} is used to access the element type of a list type.
 
 A \textit{state} pairs a value with its type. We abuse the notation \mathbox{v \isa T} to both denote a state and assert that the value matches the type.
-An \textit{action} is an operation on states, converting a \textit{pre-state} into a \textit{post-state}.
+An \textit{action} is an operation on states, converting a \textit{pre-state} into a \textit{post-state}. Actions are not defined on all pre-states, imposing various preconditions.
 All actions take a \textit{target} path as a parameter indicating that the action is to be performed at that path within the state.
-For example the \textsf{write} action takes a value as another parameter and writes that value into the target path. Actions are not defined for all pre-states. The \textsf{write} action requires that the target path exists in the value and that its type matches the value parameter. We define actions as terms of a grammer,
-using infix syntax, placing the target path first, then the action name, followed by any other parameters, like this:
-\mathbox{p \textsf{ write } v}. Here are the actions on simple structures:
+% For example the \textsf{write} action takes a value as another parameter and writes that value into the target path. Actions are not defined for all pre-states. The \textsf{write} action requires that the target path exists in the value and that its type matches the value parameter.
+We define actions as terms of a grammer,
+using infix syntax, placing the target path first, then the action name, followed by any other parameters. Here are the actions on simple structures:
 
-
+% simple actions table
 \tcbox{
 \[
 \hspace{-22pt}
@@ -258,7 +262,7 @@ using infix syntax, placing the target path first, then the action name, followe
   p \textsf{ write } v & \textrm{Write atomic value $v$ at $p$}\\
 
   p \textsf{ insert } E \textsf{ before } E' & \textrm{Insert element ID $E$ into list at $p$ in front of element $E'$}\\
-  p \textsf{ insert } E & \textrm{Append element ID $E$ to end of list at $p$}\\
+  p \textsf{ append } E & \textrm{Append element ID $E$ to end of list at $p$}\\
 
   p \textsf{ delete } E & \textrm{Delete element ID $E$ in list at $p$}\\
 
@@ -266,8 +270,7 @@ using infix syntax, placing the target path first, then the action name, followe
   & \textrm{or cousin in nested lists, and $p'$ is deleted}\\
   \hline
 
-  \textrm{Type actions} & \textrm{Iterated over all value paths matching type path $p$}
-  \rule[0pt]{0pt}{16pt}\\
+  \textrm{Type actions} & \rule[0pt]{0pt}{16pt}\\
   \hline
   p \textsf{ Define } T & \textrm{Define $p$ to have type $T$, initializing values}\\
   p \textsf{ Convert } T & \textrm{Convert $p$ to atomic type $T$}\\
@@ -275,7 +278,7 @@ using infix syntax, placing the target path first, then the action name, followe
   p \textsf{ Rename } S & \textrm{Rename record field $p$ to string $S$}\\
 
   p \textsf{ Insert } F \textsf{ before } F' & \textrm{Insert field ID $F$ into record at $p$ in front of field $F'$}\\
-  p \textsf{ Insert } F & \textrm{Append field ID $F$ to end of record at $p$}\\
+  p \textsf{ Append } F & \textrm{Append field ID $F$ to end of record at $p$}\\
 
   p \textsf{ Delete } F & \textrm{Delete field ID $F$ in record at $p$}\\
 
@@ -294,52 +297,31 @@ using infix syntax, placing the target path first, then the action name, followe
 
 
 
-We execute actions with the \mathbox{\fatsemi} infix operator taking a pre-state on the left, an action on the right, and yielding a post-state which may be chained into subsequent executions. Here is a concrete example defining a record type \mathbox{\mathit{Name}} given field IDs \mathbox{\mathit{first}} and \mathbox{\mathit{last}}:
-
-%\begin{tcolorbox}[nobeforeafter]
+We execute actions with the \mathbox{\fatsemi} infix operator taking a pre-state on the left, an action on the right, and yielding a post-state which may be chained into subsequent executions. Here is an example that starts with an empty list of numbers and adds an element $e$ with value $1$:
 \begin{align*}
-%\mathit{Name} &= \{\mathit{first}\  \quotedstring{first}: \textsf{String},\  \mathit{last}\  \quotedstring{last}: \textsf{String}\}\\
-\mathit{Name} &= \{\mathit{first}  : \textsf{String},\  \mathit{last} : \textsf{String}\}\\
-s_1 &= \{\mathit{first}: \quotedstring{John},\  \mathit{last}: \quotedstring{Smith}\} \isa \mathit{Name}\\
-s_2 &= s_1 \exec \mathit{last} \textsf{ write } \quotedstring{Smythe}\\
-&= \{\mathit{first}: \quotedstring{John},\  \mathit{last}: \quotedstring{Smythe}\} \isa \mathit{Name}\\
+s_1 &= [] \isa \textsf{List Number}\\
+s_2 &= s_1 \exec \ldotp \textsf{ append } e \exec e \textsf{ write } 1\\
+&= [e: 1] \isa \textsf{List Number}\\
 \end{align*}
-%\end{tcolorbox}
+The \textsf{append} action targets the empty path \mathbox{\ldotp} referring to the whole list. Then the \textsf{write} action targets the new element with the path \mathbox{e} which is an abbreviation for \mathbox{.e}. In all our example we will take IDs like $e$ as given but in practice the Baseline API generates them.
 
-The \textsf{write} action is a \textit{value action}, meaning it does not modify the type of the state. On the other hand \textit{type actions} may modify both the type and value. By convention we capitalize the name of type actions. Our system has a \textit{user mode} in which only value actions are permitted.
+A \textit{table} is a list of records, the fields of which are the \textit{columns} while the elements of the list are the \textit{rows}. Here is an example of changing the type of a table:
+\begin{align*}
+s_1 &= [\{x : 1,\  y : 2\}] \isa \textsf{List} \{x : \textsf{Number},\  y : \textsf{Number}\}\\
+s_2 &= s_1 \exec * \textsf{ Append } z \exec *\ldotp z \textsf{ Define Number}\\
+ &= [\{x : 1,\  y : 2,\ z: \textsf{NaN}\}] \isa \textsf{List} \{x : \textsf{Number},\  y : \textsf{Number},\ z: \textsf{Number}\}\\
+\end{align*}
+The \textsf{Append} action targets the path \mathbox{*} which is the record type of the list's elements and adds a new field \mathbox{z} to it, in effect adding a column to the table. The \textsf{Define} action targets the path \mathbox{*\ldotp z} which is the type of the new field (initially the unit type $\{\}$) and changes it to \textsf{Number}. The new field is also inserted into all elements of the list with the initial value \textsf{NaN}.
+
+The \textsf{append} and \textsf{write} actions are \textit{value actions}, meaning they do not modify the type of the state. On the other hand \textsf{Append} and \textsf{Define} are \textit{type actions} that may modify both the type and value. Type actions do what databases call \textit{schema migration}: the value is changed to match the type, iterating over list elements where needed. By convention we capitalize the name of type actions. Baseline has a \textit{user mode} in which only value actions are permitted.
 
 \begin{remark}
-In this presentation we have adopted the conventional approach of defining values and types as distinct objects. However our implementation only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped action calculus\cite{denicek}, but that is not the topic of this paper.
+In this presentation we adopt the standard approach of defining values and types as distinct objects. However Baseline only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped action calculus\cite{denicek}, but that is not the topic of this paper.
 \end{remark}
 
-The \textsf{Define} action is the type-level equivalent of \textsf{write}: \mathbox{p \textsf{ Define } T}. The path $p$ must exist in the state's type, in which case it is changed into the new type $T$. Any path in the state's value that \textit{corresponds} to the path $p$ is changed into the initial value of the new type $T^\varnothing$. A value path $q$ correspond to a type path $p$ iff replacing every list element ID in $q$ with $*$ makes it equal to $p$. In other words, the initial value is written into all list elements corresponding to a list type. For example:
-
-% mention untyped approach of * as a selector. We use homogenous typing of lists to drive iteration declaratively.
-
-\begin{align*}
-s_1 &= [ e_1: 1,\  e_2: 2] \isa \textsf{List Number}\\
-s_2 &= s_1 \exec * \textsf{ Define } \textsf{String}\\
-    &= [ e_1: \emptystring,\  e_2: \emptystring] \isa \textsf{List String}\\
-\end{align*}
-
-The \textsf{Define} action is typically used to define new types. To change the type of populated data as in the above example the \textsf{Convert} action is more useful. For example:
-
-\begin{align*}
-s_1 &= [ e_1: 1,\  e_2: 2] \isa \textsf{List Number}\\
-s_2 &= s_1 \exec * \textsf{ Convert } \textsf{String}\\
-    &= [ e_1: \quotedstring{1},\  e_2: \quotedstring{2}] \isa \textsf{List String}\\
-\end{align*}
-
-What happens if we convert a string into a number but the string doesn't parse as a number? There are many design choices like this when defining a system of actions, with different tradeoffs. One might choose to yield \textsf{NaN}. Our implementation instead wraps the string in an error value that can be repaired later in the UI.
-
-The \textsf{Convert} action can only convert between atomic types like strings and numbers. Structural transformations are handled with different actions, which is where things get interesting.
-
-insert/delete on elements and fields
 
 Multiplcity change (Challenge \#7) with ListOf
 
-
-There is a special list element ID \mathbox{*}.
 
 
 
@@ -364,6 +346,9 @@ There is a special list element ID \mathbox{*}.
 Transport by example: pluralize, insert
 
 \subsection{Projection and retraction}
+
+deletion and tombstones. note not used currently
+
 
 \subsection{Galois connection}
 
