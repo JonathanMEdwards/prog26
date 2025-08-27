@@ -24,6 +24,8 @@
 \tcbset{colback=black!10, colframe=white, right=-20pt}
 
 \DeclareMathOperator{\exec}{\ \fatsemi\ \ }
+\newcommand{\is}{{:}\ }
+\newcommand{\comma}{,\ }
 \newcommand{\isa}{\dblcolon}
 \newcommand{\quotedstring}[1]{\textsf{\textquotedbl{#1}\textquotedbl}}
 \newcommand{\emptystring}{\textsf{\textquotedbl\ \!\textquotedbl}}
@@ -235,9 +237,9 @@ The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \
   T \Coloneqq & & v \Coloneqq & & T^\varnothing = & &\\
   &  \textsf{String} & & S & & \emptystring & \textrm{string}\\
   & \textsf{Number} & &  N & & \textsf{NaN} & \textrm{number}\\
-  & \textsf{List } T & & [ E : v \  \dots ] & & [] & \textrm{list}\\
-  %& \{ F \  S : T \  \dots \} & & \{ F : v \  \dots \} & & \{ F : T^\varnothing \  \dots \}& \textrm{record}\\
-  & \{ F \  S : T \  \dots \} & & \{ F : v \  \dots \} & & \{ F : T^\varnothing \  \dots \}& \textrm{record}\\
+  & \textsf{List } T & & [ E \is v \  \dots ] & & [] & \textrm{list}\\
+  %& \{ F \  S \is T \  \dots \} & & \{ F \is v \  \dots \} & & \{ F \is T^\varnothing \  \dots \}& \textrm{record}\\
+  & \{ F \  S \is T \  \dots \} & & \{ F \is v \  \dots \} & & \{ F \is T^\varnothing \  \dots \}& \textrm{record}\\
 
   & \bot && \bigtimes & & \bigtimes & \textrm{tombstone}\\
 \end{array}\]
@@ -286,10 +288,10 @@ using infix syntax, placing the target path first, then the action name, followe
   & \textrm{or containing\slash contained record, and $p'$ is deleted}\\
 
 
-  p \textsf{ ListOf } E & \textrm{Convert value at $p$ into a list with one element $E$}\\
+  p \textsf{ ListOf } & \textrm{Convert value at $p$ into a list of one element with ID $\mathbb{1}$}\\
   p \textsf{ IntoFirst } & \textrm{Convert list at $p$ into its first element, else the initial value} \\
 
-  p \textsf{ RecordOf } F & \textrm{Convert value at $p$ into a record with one field $F$} \\
+  p \textsf{ RecordOf } F & \textrm{Convert value at $p$ into a record of one field with ID $F$} \\
   p \textsf{ IntoField } F & \textrm{Convert record at $p$ into value of its field $F$} \\
 
 \end{array}\]
@@ -301,62 +303,69 @@ We execute actions with the \mathbox{\fatsemi} infix operator taking a pre-state
 \begin{align*}
 s_1 &= [] \isa \textsf{List Number}\\
 s_2 &= s_1 \exec \ldotp \textsf{ append } e \exec e \textsf{ write } 1\\
-&= [e: 1] \isa \textsf{List Number}\\
+&= [e \is 1] \isa \textsf{List Number}\\
 \end{align*}
-The \textsf{append} action targets the empty path \mathbox{\ldotp} referring to the whole list. Then the \textsf{write} action targets the new element with the path \mathbox{e} which is an abbreviation for \mathbox{.e}. In all our example we will take IDs like $e$ as given but in practice the Baseline API generates them.
+The \textsf{append} action targets the empty path \mathbox{\ldotp} referring to the whole list. Then the \textsf{write} action targets the new element with the path \mathbox{e} which is an abbreviation for \mathbox{.e}. In all our examples we take IDs like $e$ as given but in practice the Baseline API generates them uniquely.
 
 A \textit{table} is a list of records, the fields of which are the \textit{columns} while the elements of the list are the \textit{rows}. Here is an example of changing the type of a table:
 \begin{align*}
-s_1 &= [\{x : 1,\  y : 2\}] \isa \textsf{List} \{x : \textsf{Number},\  y : \textsf{Number}\}\\
+s_1 &= [\{x \is 1 \comma  y \is 2\}] \isa \textsf{List} \{x \is \textsf{Number}\comma  y \is \textsf{Number}\}\\
 s_2 &= s_1 \exec * \textsf{ Append } z \exec *\ldotp z \textsf{ Define Number}\\
- &= [\{x : 1,\  y : 2,\ z: \textsf{NaN}\}] \isa \textsf{List} \{x : \textsf{Number},\  y : \textsf{Number},\ z: \textsf{Number}\}\\
+ &= [\{x \is 1\comma  y \is 2,\ z\is \textsf{NaN}\}] \isa \textsf{List} \{x \is \textsf{Number}\comma  y \is \textsf{Number}\comma z\is \textsf{Number}\}\\
 \end{align*}
 The \textsf{Append} action targets the path \mathbox{*} which is the record type of the list's elements and adds a new field \mathbox{z} to it, in effect adding a column to the table. The \textsf{Define} action targets the path \mathbox{*\ldotp z} which is the type of the new field (initially the unit type $\{\}$) and changes it to \textsf{Number}. The new field is also inserted into all elements of the list with the initial value \textsf{NaN}.
 
-The \textsf{append} and \textsf{write} actions are \textit{value actions}, meaning they do not modify the type of the state. On the other hand \textsf{Append} and \textsf{Define} are \textit{type actions} that may modify both the type and value. Type actions do what databases call \textit{schema migration}: the value is changed to match the type, iterating over list elements where needed. By convention we capitalize the name of type actions. Baseline has a \textit{user mode} in which only value actions are permitted.
+The \textsf{append} and \textsf{write} actions are \textit{value actions}, meaning they do not modify the type of the state. On the other hand \textsf{Append} and \textsf{Define} are \textit{type actions} that may modify both the type and value. Type actions do what databases call \textit{schema migration}: the value is adapted to match the type while minimizing loss of information, iterating over list elements as needed (think of the $*$ in the type path as a wildcard). By convention we capitalize the name of type actions. Baseline has a \textit{user mode} in which only value actions are permitted.
 
 \begin{remark}
-In this presentation we adopt the standard approach of defining values and types as distinct objects. However Baseline only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped action calculus\cite{denicek}, but that is not the topic of this paper.
+In this presentation we adopt the standard approach of defining values and types as distinct objects. However Baseline only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped version of our approach~\cite{denicek}.
 \end{remark}
 
+Many of the type actions exist in order to do schema migration on values: they are not neeeded just to define a type prior to populating it with data. We think of these actions as \textit{type refactorings}, capturing high-level design changes, and manifesting in the GUI as direct manipulations. Schema migration is also a challenging problem for \textit{live programming}~\cite{challenge-problems}.
 
-Multiplcity change (Challenge \#7) with ListOf
+For example a common design change is when a single value needs to become a list of multiple values. We capture this refactoring in the \textsf{ListOf} action, shown here on a TODO label:
+\begin{align*}
+  s_1 &= [
+    \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \quotedstring{Jack} \}
+    ] \isa
+    \textsf{List}\{ \mathit{what}\is \textsf{String}\comma \mathit{who}\is \textsf{String} \}\\
+s_2 &= s_1 \exec *\ldotp \mathit{who} \textsf{ ListOf } \\
+ &= [
+    \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is [\mathbb{1}\is \quotedstring{Jack}] \}
+    ] \isa
+    \textsf{List}\{ \mathit{what}\is \textsf{String}\comma  \mathit{who}\is \textsf{List String} \}\\
+\end{align*}
+The \textsf{ListOf} action takes any type and wraps it inside a list, and wraps all corresponding values into single-element lists using the element ID $\mathbb{1}$. We will return to this example in the next section.
 
-
-
-
-% These definitions follow naturally:
-% \[ \begin{array}{cl}
-%   \mathbox{\textsf{v} \textsf{ isa } \textsf{T}} & \textrm{iff value \mathbox{\textsf{v}} matches type \mathbox{\textsf{T}}}.\\
-
-%   \mathbox{\textsf{T}\lfloor\textsf{p}\rfloor?} & \textrm{iff path \mathbox{\textsf{p}} exists in type \mathbox{\textsf{T}}} \textrm{, in which case}\\
-%   & \mathbox{\textsf{T}\lfloor\textsf{p}\rfloor} \textrm{ is the type at that path and }\\
-%   & \mathbox{\textsf{T}\lceil\textsf{p} \coloneqq \textsf{T}_\textsf{2}\rceil} \textrm{ is \textsf{T} with } \mathbox{\textsf{T}_\textsf{2}} \textrm{ substituted at that path.}\\
-%   & \textsf{The special element ID \mathbox{*} is defined to access the type of a list, as will any element ID:}\\
-%   & \mathbox{\forall e \in E \ldotp (\textsf{List T})\lfloor e \rfloor = \textsf{T}}.
-%   \\
-
-%   \mathbox{\textsf{v}\lfloor\textsf{p}\rfloor?} &\textrm{iff path \mathbox{\textsf{p}} exists in value \mathbox{\textsf{v}}} \textrm{, in which case }\\
-%   & \mathbox{\textsf{v}\lfloor\textsf{p}\rfloor} \textrm{ is the value at that path and}\\
-%   & \mathbox{\textsf{v}\lceil\textsf{p} \coloneqq \textsf{v}_\textsf{2}\rceil} \textrm{ is \textsf{v} with } \mathbox{\textsf{v}_\textsf{2}} \textrm{ substituted at that path.}\\
-% \end{array}\]
+\section{How to alter a timeline}
 
 
-\section{Transportation}
 Transport by example: pluralize, insert
 
 \subsection{Projection and retraction}
 
-deletion and tombstones. note not used currently
 
+Multiplicity change (Challenge \#7) with ListOf
+
+\subsection{Deletion}
+and tombstones. note not used currently
+Ref the OT problems: https://inria.hal.science/inria-00109039/document
+Explain our novel solution?
+Maybe move this entirely to Appendix and take tombstones out of model.
 
 \subsection{Galois connection}
+
+\subsection{Across the multiverse}
 
 \subsection{Branchless diffing}
 Conceptual model
 Branching by copying
 Open world of copies with no boundaries, not a DAG in a repo
 Algorithm
+
+\subsection{undo}
+https://cedanet.com.au/ceda/ot/selective-undo.php
+maybe appendix
 
 \section{Relationships and normalization}
 
@@ -399,6 +408,10 @@ FP: Monads, Lenses
 Imperative: immutable, React state menagement
 
 \subsection{OT}\label{OT}
+https://en.wikipedia.org/wiki/Operational_transformation
+inclusion/exclusion transform
+https://cedanet.com.au/ceda/ot/ot-control/
+forward/backward transposition https://ieeexplore.ieee.org/document/655755
 
 \subsection{CRDT}\label{CRDT}
 
