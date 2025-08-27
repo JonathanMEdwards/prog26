@@ -15,6 +15,7 @@
 \usepackage{mathtools}
 \usepackage{csquotes}
 \usepackage{stmaryrd}
+ \usepackage{quiver}
 
 % define natbib citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
@@ -217,12 +218,13 @@ as the motivation of our work and we hope as an inspiration for others. The conc
 
 
 
-\section{Simple Historical Structures}
+\section{Simple Structural Action}
 
 We introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}.
 
 \begin{remark}
 IDs and tombstones are invisible to both the user and the program. They only affect action transportation (and performance). We believe they are not necessary and have prototyped implementations without them (in fact Baseline currently doesn't use tombstones), but that adds a lot of complexity. We adopt them here in the interest of simplicity.
+% IDs are replaced with numerical offsets. Much more path adjustment has to happen.
 \end{remark}
 
 The model is homogeneously typed similarly to statically typed functional programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (except tombstones). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list nd the fields of a record must have different IDs.
@@ -248,9 +250,9 @@ The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \
 A \textit{path} is a possibly empty sequence of IDs denoting a path drilling into nested records and lists. Paths can access both values and types. We separate the IDs in a path with dots, and a single dot is the empty (top) path. A special element ID~\mathbox{*} is used to access the element type of a list type.
 
 A \textit{state} pairs a value with its type. We abuse the notation \mathbox{v \isa T} to both denote a state and assert that the value matches the type.
-An \textit{action} is an operation on states, converting a \textit{pre-state} into a \textit{post-state}. Actions are not defined on all pre-states, imposing various preconditions.
+An \textit{action} is an operation on states, converting an \textit{input state} into a \textit{output state}. Actions are not defined on all input states, imposing various preconditions.
 All actions take a \textit{target} path as a parameter indicating that the action is to be performed at that path within the state.
-% For example the \textsf{write} action takes a value as another parameter and writes that value into the target path. Actions are not defined for all pre-states. The \textsf{write} action requires that the target path exists in the value and that its type matches the value parameter.
+% For example the \textsf{write} action takes a value as another parameter and writes that value into the target path. Actions are not defined for all  input states. The \textsf{write} action requires that the target path exists in the value and that its type matches the value parameter.
 We define actions as terms of a grammer,
 using infix syntax, placing the target path first, then the action name, followed by any other parameters. Here are the actions on simple structures:
 
@@ -261,6 +263,7 @@ using infix syntax, placing the target path first, then the action name, followe
 \begin{array}{l|l}
   \textrm{Value actions} & \\
   \hline
+  p \textsf{ noop} & \textrm{Do nothing}\\
   p \textsf{ write } v & \textrm{Write atomic value $v$ at $p$}\\
 
   p \textsf{ insert } E \textsf{ before } E' & \textrm{Insert element ID $E$ into list at $p$ in front of element $E'$}\\
@@ -299,18 +302,18 @@ using infix syntax, placing the target path first, then the action name, followe
 
 
 
-We execute actions with the \mathbox{\fatsemi} infix operator taking a pre-state on the left, an action on the right, and yielding a post-state which may be chained into subsequent executions. Here is an example that starts with an empty list of numbers and adds an element $e$ with value $1$:
+We execute actions with the \mathbox{\fatsemi} infix operator taking an input state on the left, an action on the right, and yielding an output state which may be chained into subsequent executions. Here is an example that starts with an empty list of numbers and adds an element $e$ with value $1$:
 \begin{align*}
-s_1 &= [] \isa \textsf{List Number}\\
-s_2 &= s_1 \exec \ldotp \textsf{ append } e \exec e \textsf{ write } 1\\
+S_1 &= [] \isa \textsf{List Number}\\
+S_2 &= S_1 \exec \ldotp \textsf{ append } e \exec e \textsf{ write } 1\\
 &= [e \is 1] \isa \textsf{List Number}\\
 \end{align*}
 The \textsf{append} action targets the empty path \mathbox{\ldotp} referring to the whole list. Then the \textsf{write} action targets the new element with the path \mathbox{e} which is an abbreviation for \mathbox{.e}. In all our examples we take IDs like $e$ as given but in practice the Baseline API generates them uniquely.
 
 A \textit{table} is a list of records, the fields of which are the \textit{columns} while the elements of the list are the \textit{rows}. Here is an example of changing the type of a table:
 \begin{align*}
-s_1 &= [\{x \is 1 \comma  y \is 2\}] \isa \textsf{List} \{x \is \textsf{Number}\comma  y \is \textsf{Number}\}\\
-s_2 &= s_1 \exec * \textsf{ Append } z \exec *\ldotp z \textsf{ Define Number}\\
+S_1 &= [\{x \is 1 \comma  y \is 2\}] \isa \textsf{List} \{x \is \textsf{Number}\comma  y \is \textsf{Number}\}\\
+S_2 &= S_1 \exec * \textsf{ Append } z \exec *\ldotp z \textsf{ Define Number}\\
  &= [\{x \is 1\comma  y \is 2,\ z\is \textsf{NaN}\}] \isa \textsf{List} \{x \is \textsf{Number}\comma  y \is \textsf{Number}\comma z\is \textsf{Number}\}\\
 \end{align*}
 The \textsf{Append} action targets the path \mathbox{*} which is the record type of the list's elements and adds a new field \mathbox{z} to it, in effect adding a column to the table. The \textsf{Define} action targets the path \mathbox{*\ldotp z} which is the type of the new field (initially the unit type $\{\}$) and changes it to \textsf{Number}. The new field is also inserted into all elements of the list with the initial value \textsf{NaN}.
@@ -325,11 +328,11 @@ Many of the type actions exist in order to do schema migration on values: they a
 
 For example a common design change is when a single value needs to become a list of multiple values. We capture this refactoring in the \textsf{ListOf} action, shown here on a TODO label:
 \begin{align*}
-  s_1 &= [
+  S_1 &= [
     \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \quotedstring{Jack} \}
     ] \isa
     \textsf{List}\{ \mathit{what}\is \textsf{String}\comma \mathit{who}\is \textsf{String} \}\\
-s_2 &= s_1 \exec *\ldotp \mathit{who} \textsf{ ListOf } \\
+S_2 &= S_1 \exec *\ldotp \mathit{who} \textsf{ ListOf } \\
  &= [
     \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is [\mathbb{1}\is \quotedstring{Jack}] \}
     ] \isa
@@ -337,15 +340,95 @@ s_2 &= s_1 \exec *\ldotp \mathit{who} \textsf{ ListOf } \\
 \end{align*}
 The \textsf{ListOf} action takes any type and wraps it inside a list, and wraps all corresponding values into single-element lists using the element ID $\mathbb{1}$. We will return to this example in the next section.
 
-\section{How to alter a timeline}
 
 
-Transport by example: pluralize, insert
+\section{High-fidelity version control}
+In this section we build version control for simple structures that is higher fidelity than standard techniques because it is informed by the history of actions. A \textit{timeline} is an initial state and a sequence of actions executed in order that are each valid on their input state, producing an end state. Baseline records timelines by observing the actions exeuted in the API and the GUI, where actions are manifested as direct-manipulations.
+%represented with the same \mathbox{\exec} notation we have been using.
+We implement version control by comparing and creating timelines. These operations are built upon two primitive functions on timelines: \textsf{Project} and \textsf{Retract}.
 
-\subsection{Projection and retraction}
+\subsection{Projection}
+The \textsf{Project} function takes as inputs two timelines with the same initial state and produces two new timelines continuing from the input timelines and converging on the same final state. It is easier to understand this with the diagrams in Figure~\ref{fig:projection}.
+
+\begin{figure}[t]
+\begin{minipage}{1.25in}
+\center
+\begin{tikzcd}
+	S & T \\
+	U & V
+	\arrow["{\mathit{base}}", from=1-1, to=1-2]
+	\arrow["{\mathit{pre}}"'{pos=0.4}, from=1-1, to=2-1]
+	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{\mathit{post}}"{pos=0.4}, dashed, from=1-2, to=2-2]
+	\arrow["{\mathit{adjust}}"', dashed, from=2-1, to=2-2]
+\end{tikzcd}
+
+a
+\end{minipage}
+\quad
+\begin{minipage}{1.75in}
+\center
+\begin{tikzcd}[column sep=large]
+	0 & 1 \\
+	2 & 2
+	\arrow["{{\ldotp \textsf{ write } 1}}", from=1-1, to=1-2]
+	\arrow["{{\ldotp \textsf{ write } 2}}"'{pos=0.4}, from=1-1, to=2-1]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{\ldotp \textsf{ write } 2}}"{pos=0.4}, dashed, from=1-2, to=2-2]
+	\arrow["{{\ldotp \textsf{ noop}}}"', dashed, from=2-1, to=2-2]
+\end{tikzcd}
+
+b
+\end{minipage}
+\quad
+\begin{minipage}{1.75in}
+\center
+\begin{tikzcd}[column sep=large]
+	0 & {[\mathbb{1}\is 0]} \\
+	2 & {[\mathbb{1}\is 2]}
+	\arrow["{{\ldotp \textsf{ ListOf}}}", from=1-1, to=1-2]
+	\arrow["{{\ldotp \textsf{ write } 2}}"'{pos=0.4}, from=1-1, to=2-1]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{\ldotp\mathbb{1} \textsf{ write } 2}}"{pos=0.4}, dashed, from=1-2, to=2-2]
+	\arrow["{{\ldotp \textsf{ ListOf}}}"', dashed, from=2-1, to=2-2]
+\end{tikzcd}
+
+c
+\end{minipage}
+\caption{\textsf{Projection}}
+\label{fig:projection}
+\end{figure}
+
+asymmetric: pre overrides base
+preserving intention "doing the same thing"
+
+projection rules abstracted from examples
+design tradeoffs between actions and rules. design of actions and rules coupled not arbitrary. example?
+
+conflict
+
+\subsection{Retraction}
+dependencies
 
 
-Multiplicity change (Challenge \#7) with ListOf
+\subsection{Across the multiverse}
+Transport across found diffs
+Transport/transmit/teleport/port by example: pluralize, insert
+porting implies changing!
+
+
+Multiplicity change (Challenge \#7) with ListOf.
+
+\begin{remark} git
+Note state-based diff can't do this accurately.
+rename is hopeless
+like rebase, except mutates action
+like cherry picking except finer grained and without problems
+diffs accumulate noise.
+do this after diffs?
+also conceptual model
+could move to related work but more relevant here
+\end{remark}
 
 \subsection{Deletion}
 and tombstones. note not used currently
@@ -355,9 +438,8 @@ Maybe move this entirely to Appendix and take tombstones out of model.
 
 \subsection{Galois connection}
 
-\subsection{Across the multiverse}
 
-\subsection{Branchless diffing}
+\subsection{Optimal branchless diffing}
 Conceptual model
 Branching by copying
 Open world of copies with no boundaries, not a DAG in a repo
@@ -397,6 +479,9 @@ git, darcs, pijul
 
 git is the most established tool for change management but is also the source of much discontent. Pull refs from schema change paper. santiago's stuff. intentional?
 
+Understanding Version Control as Material Interaction with Quickpose
+%https://dl.acm.org/doi/10.1145/3544548.3581394
+
 \subsection{The impedance mismatch problem} \label{impedance}
 
 orthogonal persistence, ORMs, Linq, single tier (Tier, hop), naked objects, DBOS, durable computation
@@ -408,10 +493,10 @@ FP: Monads, Lenses
 Imperative: immutable, React state menagement
 
 \subsection{OT}\label{OT}
-https://en.wikipedia.org/wiki/Operational_transformation
+%https://en.wikipedia.org/wiki/Operational_transformation
 inclusion/exclusion transform
-https://cedanet.com.au/ceda/ot/ot-control/
-forward/backward transposition https://ieeexplore.ieee.org/document/655755
+%https://cedanet.com.au/ceda/ot/ot-control/
+forward/backward transposition %https://ieeexplore.ieee.org/document/655755
 
 \subsection{CRDT}\label{CRDT}
 
