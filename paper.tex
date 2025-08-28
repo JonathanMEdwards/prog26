@@ -64,8 +64,7 @@
 
 \begin{document}
 
-%\title{The Many-worlds Interpretation of Programming}
-\title{Working Title}
+\title{Baseline: Verson Control All the Way Down}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
 \authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
@@ -348,40 +347,10 @@ In this section we build version control for simple structures that is higher fi
 We implement version control by comparing and creating timelines. These operations are built upon two primitive functions on timelines: \textsf{Project} and \textsf{Retract}.
 
 \subsection{Projection}
-The \textsf{Project} function takes as inputs two timelines with the same initial state and produces two new timelines continuing from the input timelines and converging on the same final state. It is easier to understand this with the diagrams in Figure~\ref{fig:projection}.
 
-\begin{figure}[t]
-\begin{minipage}{1.25in}
-\center
-\begin{tikzcd}
-	S & T \\
-	U & V
-	\arrow["{\mathit{base}}", from=1-1, to=1-2]
-	\arrow["{\mathit{pre}}"'{pos=0.4}, from=1-1, to=2-1]
-	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
-	\arrow["{\mathit{post}}"{pos=0.4}, dashed, from=1-2, to=2-2]
-	\arrow["{\mathit{adjust}}"', dashed, from=2-1, to=2-2]
-\end{tikzcd}
-
-a
-\end{minipage}
-\quad
-\begin{minipage}{1.75in}
-\center
-\begin{tikzcd}[column sep=large]
-	0 & 1 \\
-	2 & 2
-	\arrow["{{\ldotp \textsf{ write } 1}}", from=1-1, to=1-2]
-	\arrow["{{\ldotp \textsf{ write } 2}}"'{pos=0.4}, from=1-1, to=2-1]
-	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
-	\arrow["{{\ldotp \textsf{ write } 2}}"{pos=0.4}, dashed, from=1-2, to=2-2]
-	\arrow["{{\ldotp \textsf{ noop}}}"', dashed, from=2-1, to=2-2]
-\end{tikzcd}
-
-b
-\end{minipage}
-\quad
-\begin{minipage}{1.75in}
+% projection diagrams
+\begin{figure}[h]
+\begin{minipage}[b][][b]{1.75in}
 \center
 \begin{tikzcd}[column sep=large]
 	0 & {[\mathbb{1}\is 0]} \\
@@ -392,20 +361,109 @@ b
 	\arrow["{{\ldotp\mathbb{1} \textsf{ write } 2}}"{pos=0.4}, dashed, from=1-2, to=2-2]
 	\arrow["{{\ldotp \textsf{ ListOf}}}"', dashed, from=2-1, to=2-2]
 \end{tikzcd}
-
-c
+\\[4pt]
+(a)
+\end{minipage}
+\quad
+\begin{minipage}[b][][b]{1.75in}
+\center
+\begin{tikzcd}[column sep=large]
+	0 & 1 \\
+	2 & 2
+	\arrow["{{\ldotp \textsf{ write } 1}}", from=1-1, to=1-2]
+	\arrow["{{\ldotp \textsf{ write } 2}}"'{pos=0.4}, from=1-1, to=2-1]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{\ldotp \textsf{ write } 2}}"{pos=0.4}, dashed, from=1-2, to=2-2]
+	\arrow["{{\ldotp \textsf{ noop}}}"', dashed, from=2-1, to=2-2]
+\end{tikzcd}
+\\[4pt]
+(b)
+\end{minipage}
+\quad
+\begin{minipage}[b][][b]{1.25in}
+\center
+\begin{tikzcd}[column sep=large]
+	S & T \\
+	U & V
+	\arrow["{\mathit{base}}", from=1-1, to=1-2]
+	\arrow["{\mathit{pre}}"'{pos=0.4}, from=1-1, to=2-1]
+	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{\mathit{post}}"{pos=0.4}, dashed, from=1-2, to=2-2]
+	\arrow["{\mathit{adjust}}"', dashed, from=2-1, to=2-2]
+\end{tikzcd}
+\\[4pt]
+(c)
 \end{minipage}
 \caption{\textsf{Projection}}
 \label{fig:projection}
 \end{figure}
 
-asymmetric: pre overrides base
-preserving intention "doing the same thing"
+The \textsf{Project} function takes as inputs two timelines with the same initial state and produces two new timelines continuing from the input timelines and converging on the same final state. It is easier to understand this with diagrams.
+In Figure~\ref{fig:projection}(a) the arrow on the left takes the state $0$ (we elide the obvious type signature) and writes a $2$ over it. The arrow on the top wraps that $0$ into a list with one element $[\mathbb{1}\is 0]$. The projection function takes these two arrows as input and produces the two dashed arrows such that the diagram \textit{commutes}, meaning the dashed arrow actions are valid on the states at their bases, and they both produce the same state $[\mathbb{1}\is 2]$. The way this is acheived is to change the target path of the \textsf{write} action to follow the \textsf{ListOf} action. We say that the \textsf{write} actions have the same \textit{intention} -- they ``do the same thing'' -- they convert the $0$ to a $2$, even though the $0$ has moved to a different location. That is the key principle of projection: it produce a right-hand action that ``does the same thing'' as the left-hand action despite the top action having intervened.
 
-projection rules abstracted from examples
-design tradeoffs between actions and rules. design of actions and rules coupled not arbitrary. example?
+Figure~\ref{fig:projection}(b) shows a messier situation. Here the left and top actions are both writing different values to the same location. This is a \textit{conflict}. The rule is that projection attempts to preserve the intention of the left action, even if that means overriding the top action, which as a consequence gets converted to a \textsf{noop} on the bottom.
 
-conflict
+This last example shows that projection is asymmetric: flipping the diagram on its diagonal to switch left and top yields a different result. And in fact we will have occasion to flip and rotate these diagrams, so we cannot depend on terminology like ``left'' and ``top''. Figure~\ref{fig:projection}(c) shows our orientation-neutral terminology: projection converts the \textit{pre} action into the \textit{post} action, preserving its intent after the \textit{base} action intervenes. The \textit{base} action is converted into the \textit{adjust} action preserving as much of its intention as is allowed by the first rule. We also graphically indicate the orientation of the diagram by placing $\textsf{P}\!\Rightarrow$ into the corner of the initial state.
+
+
+% projection rules
+\begin{figure}[h]
+\begin{minipage}[b][][b]{1.6in}
+\center
+\begin{tikzcd}[column sep=large]
+	\bullet & \bullet \\
+	\bullet & \bullet
+	\arrow["{{p \textsf{ ListOf}}}", from=1-1, to=1-2]
+	\arrow["{{p \ldotp\ldotp q  \ A}}"'{pos=0.4}, from=1-1, to=2-1]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{p \ldotp \mathbb{1} \ldotp\ldotp q \ A}}"{pos=0.4}, dashed, from=1-2, to=2-2]
+	\arrow["{{p \textsf{ ListOf}}}"', dashed, from=2-1, to=2-2]
+\end{tikzcd}
+\\[4pt]
+(a)
+\end{minipage}
+\quad
+\begin{minipage}[b][][b]{1.7in}
+\center
+\begin{tikzcd}[column sep=large]
+	\bullet & \bullet \\
+	\bullet & \bullet
+	\arrow["{{p \textsf{ write } w}}", from=1-1, to=1-2]
+	\arrow["{{p \textsf{ write } v}}"'{pos=0.4}, from=1-1, to=2-1]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{p \textsf{ write } v}}"{pos=0.4}, dashed, from=1-2, to=2-2]
+	\arrow["{{p \textsf{ noop}}}"', dashed, from=2-1, to=2-2]
+\end{tikzcd}
+\\[4pt]
+(b)
+\end{minipage}
+\quad
+\begin{minipage}[b][][b]{1.6in}
+\center
+\begin{tikzcd}[column sep=large]
+	\bullet & \bullet \\
+	\bullet & \bullet
+	\arrow["{{p \ A}}", from=1-1, to=1-2]
+	\arrow["{{p \ A}}"'{pos=0.4}, from=1-1, to=2-1]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{p \textsf{ noop}}}"{pos=0.4}, dashed, from=1-2, to=2-2]
+	\arrow["{{p \textsf{ noop}}}"', dashed, from=2-1, to=2-2]
+\end{tikzcd}
+\\[4pt]
+(c)
+\end{minipage}
+\caption{\textsf{Projection rules}}
+\label{fig:projection-rules}
+\end{figure}
+
+We define projection with a set of rules. Figure~\ref{fig:projection-rules}(a) is a rule covering the \textsf{ListOf} example. The target path of the \textsf{ListOf} is abstracted to $p$, and the \textsf{write} action is abstracted into any action $A$ targeting $p$ or deeper, which is indicated with the path concatenation operator in $p \ldotp\ldotp q$. Action $A$ is projected down into the \textsf{ListOf} with the path $p \ldotp \mathbb{1} \ldotp\ldotp q$.
+
+Figure~\ref{fig:projection-rules}(b) is a rule convering conflicting writes. But note that the rule in (c) must override both of the rules (a) and (b) when an action is projected through an identical action. In that case we want them to cancel out into \textsf{noop} actions, the reason for which will be discussed in ***.
+
+How do we know if these rules are correct, that they do indeed preserve the intentions of actions? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention that may turn out to be more or less in agreement with intuition.
+Later we propose some properties that a sound set of rules should satisfy (see ***). But nevertheless there is still a lot of freedom for design choices, particularly because of the way the rules are coupled to the set of actions. We are frankly just beginning to learn about the nature of this design space.
+
+
 
 \subsection{Retraction}
 dependencies
@@ -509,6 +567,11 @@ just ref challenge problems paper?
 pros and cons
 
 caveats, weaknesses, open problems
+
+Need a rule spec language.
+design alternatives for relational actions.
+
+convergent evolution.
 
 \section{Commencement}
 summary and call to action
