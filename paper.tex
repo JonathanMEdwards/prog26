@@ -357,7 +357,7 @@ We implement version control by comparing and creating timelines. These operatio
 	2 & {[\mathbb{1}\is 2]}
 	\arrow["{{\ldotp \textsf{ ListOf}}}", from=1-1, to=1-2]
 	\arrow["{{\ldotp \textsf{ write } 2}}"'{pos=0.4}, from=1-1, to=2-1]
-	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
 	\arrow["{{\ldotp\mathbb{1} \textsf{ write } 2}}"{pos=0.4}, dashed, from=1-2, to=2-2]
 	\arrow["{{\ldotp \textsf{ ListOf}}}"', dashed, from=2-1, to=2-2]
 \end{tikzcd}
@@ -372,7 +372,7 @@ We implement version control by comparing and creating timelines. These operatio
 	2 & 2
 	\arrow["{{\ldotp \textsf{ write } 1}}", from=1-1, to=1-2]
 	\arrow["{{\ldotp \textsf{ write } 2}}"'{pos=0.4}, from=1-1, to=2-1]
-	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
 	\arrow["{{\ldotp \textsf{ write } 2}}"{pos=0.4}, dashed, from=1-2, to=2-2]
 	\arrow["{{\ldotp \textsf{ noop}}}"', dashed, from=2-1, to=2-2]
 \end{tikzcd}
@@ -383,11 +383,11 @@ We implement version control by comparing and creating timelines. These operatio
 \begin{minipage}[b][][b]{1.25in}
 \center
 \begin{tikzcd}[column sep=large]
-	S & T \\
-	U & V
+	\bullet & \bullet \\
+	\bullet & \bullet
 	\arrow["{\mathit{base}}", from=1-1, to=1-2]
 	\arrow["{\mathit{pre}}"'{pos=0.4}, from=1-1, to=2-1]
-	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
 	\arrow["{\mathit{post}}"{pos=0.4}, dashed, from=1-2, to=2-2]
 	\arrow["{\mathit{adjust}}"', dashed, from=2-1, to=2-2]
 \end{tikzcd}
@@ -415,7 +415,7 @@ This last example shows that projection is asymmetric: flipping the diagram on i
 	\bullet & \bullet
 	\arrow["{{p \textsf{ ListOf}}}", from=1-1, to=1-2]
 	\arrow["{{p \ldotp\ldotp q  \ A}}"'{pos=0.4}, from=1-1, to=2-1]
-	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
 	\arrow["{{p \ldotp \mathbb{1} \ldotp\ldotp q \ A}}"{pos=0.4}, dashed, from=1-2, to=2-2]
 	\arrow["{{p \textsf{ ListOf}}}"', dashed, from=2-1, to=2-2]
 \end{tikzcd}
@@ -430,7 +430,7 @@ This last example shows that projection is asymmetric: flipping the diagram on i
 	\bullet & \bullet
 	\arrow["{{p \textsf{ write } w}}", from=1-1, to=1-2]
 	\arrow["{{p \textsf{ write } v}}"'{pos=0.4}, from=1-1, to=2-1]
-	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
 	\arrow["{{p \textsf{ write } v}}"{pos=0.4}, dashed, from=1-2, to=2-2]
 	\arrow["{{p \textsf{ noop}}}"', dashed, from=2-1, to=2-2]
 \end{tikzcd}
@@ -445,7 +445,7 @@ This last example shows that projection is asymmetric: flipping the diagram on i
 	\bullet & \bullet
 	\arrow["{{p \ A}}", from=1-1, to=1-2]
 	\arrow["{{p \ A}}"'{pos=0.4}, from=1-1, to=2-1]
-	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
 	\arrow["{{p \textsf{ noop}}}"{pos=0.4}, dashed, from=1-2, to=2-2]
 	\arrow["{{p \textsf{ noop}}}"', dashed, from=2-1, to=2-2]
 \end{tikzcd}
@@ -458,24 +458,98 @@ This last example shows that projection is asymmetric: flipping the diagram on i
 
 We define projection with a set of rules. Figure~\ref{fig:projection-rules}(a) is a rule covering the \textsf{ListOf} example. The target path of the \textsf{ListOf} is abstracted to $p$, and the \textsf{write} action is abstracted into any action $A$ targeting $p$ or deeper, which is indicated with the path concatenation operator in $p \ldotp\ldotp q$. Action $A$ is projected down into the \textsf{ListOf} with the path $p \ldotp \mathbb{1} \ldotp\ldotp q$.
 
-Figure~\ref{fig:projection-rules}(b) is a rule convering conflicting writes. But note that the rule in (c) must override both of the rules (a) and (b) when an action is projected through an identical action. In that case we want them to cancel out into \textsf{noop} actions, the reason for which will be discussed in ***.
+Figure~\ref{fig:projection-rules}(b) is the rule for conflicting writes. Note that the rule in (c) must override both of the rules (a) and (b) when an action is projected through an identical action. In that case we want them to cancel out into \textsf{noop} actions (see ***).
+
+
+\subsection{Retraction}
+
+% retraction diagrams
+\begin{figure}[h]
+\begin{minipage}[b][][b]{1.2in}
+\center
+\begin{tikzcd}[column sep=large]
+	\bullet & \bullet \\
+	\bullet & \bullet
+	\arrow["{{\mathit{base}}}", from=1-1, to=1-2]
+	\arrow["{{\mathit{pre}}}"'{pos=0.4}, dashed, from=1-1, to=2-1]
+	\arrow["{{\Leftarrow\textsf{R}}}"{description, pos=0.2}, draw=none, from=1-2, to=2-1]
+	\arrow["{{\mathit{post}}}"{pos=0.4}, from=1-2, to=2-2]
+	\arrow["{{\mathit{adjust}}}"', dashed, from=2-1, to=2-2]
+\end{tikzcd}
+\\[4pt]
+(a)
+\end{minipage}
+\quad
+\begin{minipage}[b][][b]{1.8in}
+\center
+\begin{tikzcd}[column sep=large]
+	0 & {[\mathbb{1}\is 0]} \\
+	2 & {[\mathbb{1}\is 2]}
+	\arrow["{{\ldotp \textsf{ ListOf}}}", from=1-1, to=1-2]
+	\arrow["{{\ldotp \textsf{ write } 2}}"'{pos=0.4}, dashed, from=1-1, to=2-1]
+	\arrow["{{\Leftarrow\textsf{R}}}"{description, pos=0.2}, draw=none, from=1-2, to=2-1]
+	\arrow["{{\ldotp\mathbb{1} \textsf{ write } 2}}"{pos=0.4}, from=1-2, to=2-2]
+	\arrow["{{\ldotp \textsf{ ListOf}}}"', dashed, from=2-1, to=2-2]
+\end{tikzcd}
+\\[4pt]
+(b)
+\end{minipage}
+\quad
+\begin{minipage}[b][][b]{1.75in}
+\center
+\begin{tikzcd}
+	0 & {[\mathbb{1}\is 0]} \\
+	{} & {[\mathbb{1}\is 2\comma e \is \textsf{NaN}]}
+	\arrow["{{\ldotp \textsf{ ListOf}}}", from=1-1, to=1-2]
+	% \arrow["{{}}"'{pos=0.4}, dashed, "/" marking, from=1-1, to=2-1]
+	\arrow["{{\nLeftarrow\textsf{R}}}"{description, pos=0.2}, draw=none, from=1-2, to=2-1]
+	\arrow["{{\ldotp \textsf{ append } e}}"{pos=0.4}, from=1-2, to=2-2]
+	% \arrow["{{}}"', dashed, "/" marking, from=2-1, to=2-2]
+\end{tikzcd}
+\\[4pt]
+(c)
+\end{minipage}
+\caption{\textsf{Retraction}}
+\label{fig:retraction}
+\end{figure}
+
+The \textsf{Retract} function goes in the opposite direction of \textsf{Project}. Figure~\ref{fig:retraction}(a) shows that it starts with two timelines \textit{base} and \textit{post} and produces \textit{pre} and \textit{adjust}. We say that \textit{post} is retracted through \textit{base} into \textit{pre}. The goal as with projection is that \textit{pre} preserves the intention of \textit{post} before \textit{base} happened -- it ``does the same thing''. Likewise \textit{adjust} preserves the intention of \textit{base} but defers to the first rule.
+
+Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in Figure~\ref{fig:projection}(a). Often retraction is the inverse of projection as in this case, but not always, and sometimes retraction is not possible at all. In Figure~\ref{fig:retraction}(c) the list has a new element appended to it. There is no way to do the same thing before the list was created. Projection failures indicates a \textit{dependency} between actions. The \textsf{append} action depends on the prior \textsf{ListOf} action having created the list and cannot be retracted through it.
+
+Retraction is defined with rules like those for projection so we skip that in the interest of brevity.
+
+
+\subsection{Across the multiverse}
+
+
+Transport across found diffs
+Transport/transmit/teleport/port by example: pluralize, insert
+porting implies changing!
+
+
+Multiplicity change (Challenge \#7) with ListOf, insert, delete
+
+\subsection{Deletion}
+and tombstones. note not used currently
+Ref the OT problems: https://inria.hal.science/inria-00109039/document
+Explain our novel solution?
+Maybe move this entirely to Appendix and take tombstones out of model.
+
+\subsection{Galois connection}
 
 How do we know if these rules are correct, that they do indeed preserve the intentions of actions? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention that may turn out to be more or less in agreement with intuition.
 Later we propose some properties that a sound set of rules should satisfy (see ***). But nevertheless there is still a lot of freedom for design choices, particularly because of the way the rules are coupled to the set of actions. We are frankly just beginning to learn about the nature of this design space.
 
 
 
-\subsection{Retraction}
-dependencies
+\subsection{Optimal branchless diffing}
+Conceptual model
+Branching by copying
+Open world of copies with no boundaries, not a DAG in a repo
+Algorithm
 
-
-\subsection{Across the multiverse}
-Transport across found diffs
-Transport/transmit/teleport/port by example: pluralize, insert
-porting implies changing!
-
-
-Multiplicity change (Challenge \#7) with ListOf.
+\subsection{OT}
 
 \begin{remark} git
 Note state-based diff can't do this accurately.
@@ -488,26 +562,17 @@ also conceptual model
 could move to related work but more relevant here
 \end{remark}
 
-\subsection{Deletion}
-and tombstones. note not used currently
-Ref the OT problems: https://inria.hal.science/inria-00109039/document
-Explain our novel solution?
-Maybe move this entirely to Appendix and take tombstones out of model.
-
-\subsection{Galois connection}
-
-
-\subsection{Optimal branchless diffing}
-Conceptual model
-Branching by copying
-Open world of copies with no boundaries, not a DAG in a repo
-Algorithm
 
 \subsection{undo}
 https://cedanet.com.au/ceda/ot/selective-undo.php
 maybe appendix
 
+
 \section{Relationships and normalization}
+
+beef up playable demo claims
+
+Conjecture: first step to DB/PL unification. Ca’t find previous examples of this model. ODMG closest?
 
 \section{Visualizing the multiverse}
 \subsection{Exploring structure}
