@@ -183,7 +183,7 @@ With that said we propose a new technique of change management called the \texti
   \item The key feature of the action calculus is the ability to \textit{transport} individual actions across forking timelines while preserving the actions's intent (which is given a precise meaning).
   %Familiar change management operations like \textit{merging} are implemented with transportation.
   %Differencing is also done through transportation.
-  We say that transportation navigates the \textit{multiverse} of alternate timelines of an artifact\footnote{It is well known that a transporter can access and create alternate timelines\cite{mirrormirror}}.
+  We say that transportation navigates the \textit{multiverse} of alternate timelines of an artifact.
 
   %\item Transportation is itself built upon the core mechanism of the calculus: \textit{time travel}, shifting an action forward or backward in time to generate an alternate timeline with the same final state.
 
@@ -311,9 +311,9 @@ The \textsf{append} action targets the empty path \mathbox{\ldotp} referring to 
 
 A \textit{table} is a list of records, the fields of which are the \textit{columns} while the elements of the list are the \textit{rows}. Here is an example of changing the type of a table:
 \begin{align*}
-S_1 &= [\{x \is 1 \comma  y \is 2\}] \isa \textsf{List} \{x \is \textsf{Number}\comma  y \is \textsf{Number}\}\\
+S_1 &= [e \is \{x \is 1 \comma  y \is 2\}] \isa \textsf{List} \{x \is \textsf{Number}\comma  y \is \textsf{Number}\}\\
 S_2 &= S_1 \exec * \textsf{ Append } z \exec *\ldotp z \textsf{ Define Number}\\
- &= [\{x \is 1\comma  y \is 2,\ z\is \textsf{NaN}\}] \isa \textsf{List} \{x \is \textsf{Number}\comma  y \is \textsf{Number}\comma z\is \textsf{Number}\}\\
+ &= [e \is \{x \is 1\comma  y \is 2,\ z\is \textsf{NaN}\}] \isa \textsf{List} \{x \is \textsf{Number}\comma  y \is \textsf{Number}\comma z\is \textsf{Number}\}\\
 \end{align*}
 The \textsf{Append} action targets the path \mathbox{*} which is the record type of the list's elements and adds a new field \mathbox{z} to it, in effect adding a column to the table. The \textsf{Define} action targets the path \mathbox{*\ldotp z} which is the type of the new field (initially the unit type $\{\}$) and changes it to \textsf{Number}. The new field is also inserted into all elements of the list with the initial value \textsf{NaN}.
 
@@ -324,19 +324,24 @@ In this presentation we adopt the standard approach of defining values and types
 \end{remark}
 
 Many of the type actions exist in order to do schema migration on values: they are not neeeded just to define a type prior to populating it with data. We think of these actions as \textit{type refactorings}, capturing high-level design changes, and manifesting in the GUI as direct manipulations. Schema migration is also a challenging problem for \textit{live programming}~\cite{challenge-problems}.
-
-For example a common design change is when a single value needs to become a list of multiple values. We capture this refactoring in the \textsf{ListOf} action, shown here on a TODO label:
+\begin{figure}[h]
 \begin{align*}
   S_1 &= [
-    \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \quotedstring{Jack} \}
+    e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \quotedstring{Jack} \}
     ] \isa
     \textsf{List}\{ \mathit{what}\is \textsf{String}\comma \mathit{who}\is \textsf{String} \}\\
 S_2 &= S_1 \exec *\ldotp \mathit{who} \textsf{ ListOf } \\
  &= [
-    \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is [\mathbb{1}\is \quotedstring{Jack}] \}
+    e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is [\mathbb{1}\is \quotedstring{Jack}] \}
     ] \isa
     \textsf{List}\{ \mathit{what}\is \textsf{String}\comma  \mathit{who}\is \textsf{List String} \}\\
 \end{align*}
+\vspace{-40pt}
+\caption{\textsf{TODO refactoring}}
+\label{fig:TODO-refactor}
+\end{figure}
+
+For example a common design change is when a single value needs to become a list of multiple values. We capture this refactoring in the \textsf{ListOf} action, shown on a TODO table in Figure~\ref{fig:TODO-refactor}.
 The \textsf{ListOf} action takes any type and wraps it inside a list, and wraps all corresponding values into single-element lists using the element ID $\mathbb{1}$. We will return to this example in the next section.
 
 
@@ -344,7 +349,7 @@ The \textsf{ListOf} action takes any type and wraps it inside a list, and wraps 
 \section{High-fidelity version control}
 In this section we build version control for simple structures that is higher fidelity than standard techniques because it is informed by the history of actions. A \textit{timeline} is an initial state and a sequence of actions executed in order that are each valid on their input state, producing an end state. Baseline records timelines by observing the actions exeuted in the API and the GUI, where actions are manifested as direct-manipulations.
 %represented with the same \mathbox{\exec} notation we have been using.
-We implement version control by comparing and creating timelines. These operations are built upon two primitive functions on timelines: \textsf{Project} and \textsf{Retract}.
+We implement version control by comparing and altering timelines. These operations are built upon two primitive functions on timelines: \textsf{Project} and \textsf{Retract}.
 
 \subsection{Projection}
 
@@ -517,10 +522,64 @@ The \textsf{Retract} function goes in the opposite direction of \textsf{Project}
 
 Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in Figure~\ref{fig:projection}(a). Often retraction is the inverse of projection as in this case, but not always, and sometimes retraction is not possible at all. In Figure~\ref{fig:retraction}(c) the list has a new element appended to it. There is no way to do the same thing before the list was created. Projection failures indicates a \textit{dependency} between actions. The \textsf{append} action depends on the prior \textsf{ListOf} action having created the list and cannot be retracted through it.
 
-Retraction is defined with rules like those for projection so we skip that in the interest of brevity.
+Retraction is defined with rules like those for projection so we skip over that in the interest of brevity.
 
 
 \subsection{Across the multiverse}
+What are the versions that version control controls? We see them as the result of \textit{branching} timelines: two timelines that branch off of an earlier common state. We can diagram branching like this:
+\[\begin{tikzcd}
+	A & {} & {} & O & {} & {} & B
+	\arrow["{{a_n}}"', from=1-2, to=1-1]
+	\arrow[dotted, from=1-3, to=1-2]
+	\arrow["{{a_1}}"', from=1-4, to=1-3]
+	\arrow["{b_1}", from=1-4, to=1-5]
+	\arrow[dotted, from=1-5, to=1-6]
+	\arrow["{b_m}", from=1-6, to=1-7]
+\end{tikzcd}\]
+Here the versions are $A$ and $B$ diverging with actions $a_i$ and $b_i$ from a common state $O$. Our approach to version control is based on the ability to \textit{transport}\footnote{It is well known that a transporter can access alternate timelines\cite{mirrormirror}} an action from one branch to another, which we define digrammatically:
+
+\[
+\textsf{Transport}(a_{1\ldots n}, O, b_{1\ldots m}) = b' \textrm{ in }\quad
+\begin{tikzcd}[column sep = huge]
+	A_{n-1} & O & B \\
+	A_n & {O'} & {B'}
+	\arrow["{a_n}"', from=1-1, to=2-1]
+	\arrow["{\textsf{R}\Rightarrow}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{a_{n-1}\,\ldots\  a_1}"', from=1-2, to=1-1]
+	\arrow["{b_1\,\ldots \  b_m}", from=1-2, to=1-3]
+	\arrow["o", dashed, from=1-2, to=2-2]
+	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.2}, draw=none, from=1-2, to=2-3]
+	\arrow["{b'}", dashed, from=1-3, to=2-3]
+	\arrow[dashed, from=2-2, to=2-1]
+	\arrow[dashed, from=2-2, to=2-3]
+\end{tikzcd}\]
+
+Transportation retracts $a_n$ backwards through all earlier actions on the $A$ timeline onto the original state $O$ and then projects that action forwards through all the actions of the $B$ timeline. The final result is the action $b'$ that yields a new version $B'$. The effect of transportation is that the final action $b'$ preserves the intention of the original action $a_n$ given all the actions traversed traveling backward in time to $O$ and then forward to $B$.
+
+
+As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor}.
+\begin{align*}
+  O &= [
+    e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \quotedstring{Jack} \}
+    ] \\
+  a_1 &= e\ldotp\mathit{what}\textsf{ write } \quotedstring{tidy}\\
+  a_2 &= e\ldotp\mathit{who}\textsf{ write } \quotedstring{Jill}\\
+  A &= [
+    e \is \{ \mathit{what}\is \quotedstring{tidy}\comma  \mathit{who}\is \quotedstring{Jill} \}
+    ] \\
+  b_1 &= *\ldotp \mathit{who} \textsf{ ListOf } \\
+  % b_2 &= e\ldotp\mathit{who}\ldotp\mathbb{1} \textsf{ write } \quotedstring{Tom}\\
+  b_2 &= e\ldotp\mathit{who} \textsf{ insert } g \textsf{ before } \mathbb{1} \\
+  b_3 &= e\ldotp\mathit{who}\ldotp g \textsf{ write } \quotedstring{Tom} \\
+  b_4 &= e\ldotp\mathit{who}\ldotp\mathbb{1} \textsf{ write } \quotedstring{Jacque} \\
+  B &= [
+    e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is
+    [ g \is \quotedstring{Tom} \comma \mathbb{1}\is \quotedstring{Jacque}] \}
+    ] \\
+\end{align*}
+
+
+
 
 
 Transport across found diffs
@@ -530,11 +589,7 @@ porting implies changing!
 
 Multiplicity change (Challenge \#7) with ListOf, insert, delete
 
-\subsection{Deletion}
-and tombstones. note not used currently
-Ref the OT problems: https://inria.hal.science/inria-00109039/document
-Explain our novel solution?
-Maybe move this entirely to Appendix and take tombstones out of model.
+building git ops out of transport?
 
 \subsection{Galois connection}
 
@@ -544,6 +599,8 @@ Later we propose some properties that a sound set of rules should satisfy (see *
 
 
 \subsection{Optimal branchless diffing}
+beyond the repo
+
 Conceptual model
 Branching by copying
 Open world of copies with no boundaries, not a DAG in a repo
@@ -562,10 +619,19 @@ also conceptual model
 could move to related work but more relevant here
 \end{remark}
 
+\subsection{Deletion}
+and tombstones. note not used currently
+Ref the OT problems: https://inria.hal.science/inria-00109039/document
+Explain our novel solution?
+Maybe move this entirely to Appendix and take tombstones out of model.
+
 
 \subsection{undo}
 https://cedanet.com.au/ceda/ot/selective-undo.php
 maybe appendix
+
+Reasonable to expect inverses. Why don't I have them? Lossy operations. Undo must reconstruct loss info in a group ambler2006refactoring
+Inverses of ListFrom and ListInto? ListInto wants to use first not an ID.
 
 
 \section{Relationships and normalization}
