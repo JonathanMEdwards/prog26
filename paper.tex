@@ -338,7 +338,7 @@ S_2 &= S_1 \exec *\ldotp \mathit{who} \textsf{ ListOf } \\
     \textsf{List}\{ \mathit{what}\is \textsf{String}\comma  \mathit{who}\is \textsf{List String} \}\\
 \end{align*}
 \vspace{-40pt}
-\caption{\textsf{TODO refactoring}}
+\caption{TODO refactoring}
 \label{fig:TODO-refactor}
 \end{figure}
 
@@ -347,7 +347,7 @@ The \textsf{ListOf} action takes any type and wraps it inside a list, and wraps 
 
 
 
-\section{High-fidelity version control}
+\section{High-fidelity low-fuss version control}
 In this section we build version control for simple structures that is higher fidelity than standard techniques because it is informed by the history of actions. A \textit{timeline} is an initial state and a sequence of actions executed in order that are each valid on their input state, producing an end state. Baseline records timelines by observing the actions exeuted in the API and the GUI, where actions are manifested as direct-manipulations.
 %represented with the same \mathbox{\exec} notation we have been using.
 We implement version control by comparing and altering timelines. These operations are built upon two primitive functions on timelines: \textsf{Project} and \textsf{Retract}.
@@ -400,7 +400,7 @@ We implement version control by comparing and altering timelines. These operatio
 \\[4pt]
 (c)
 \end{minipage}
-\caption{\textsf{Projection}}
+\caption{Projection}
 \label{fig:projection}
 \end{figure}
 
@@ -458,7 +458,7 @@ This last example shows that projection is asymmetric: flipping the diagram on i
 \\[4pt]
 (c)
 \end{minipage}
-\caption{\textsf{Projection rules}}
+\caption{Projection rules}
 \label{fig:projection-rules}
 \end{figure}
 
@@ -515,7 +515,7 @@ Figure~\ref{fig:projection-rules}(b) is the rule for conflicting writes. Note th
 \\[4pt]
 (c)
 \end{minipage}
-\caption{\textsf{Retraction}}
+\caption{Retraction}
 \label{fig:retraction}
 \end{figure}
 
@@ -538,8 +538,9 @@ What are the versions that version control controls? We see them as the result o
 	\arrow[dotted, from=1-5, to=1-6]
 	\arrow["{b_m}", from=1-6, to=1-7]
 \end{tikzcd}\]
-Here the versions are $A$ and $B$ diverging with actions $a_i$ and $b_i$ from a common state $O$. Our approach to version control is based on the ability to \textit{transport}\footnote{It is well known that a transporter can access alternate timelines\cite{mirrormirror}} an action from one branch to another, which we define digrammatically:
-
+Here the versions are $A$ and $B$ diverging with actions $a_i$ and $b_i$ from a common state $O$. Our approach to version control is based on the ability to \textit{transport}\footnote{It is well known that a transporter can access alternate timelines\cite{mirrormirror}} an action from one branch to another, which we define digrammatically in Figure~\ref{fig:transportation}.
+\vspace{-16pt}
+\begin{figure}[h]
 \[
 \textsf{Transport}(a_{1\ldots n}, O, b_{1\ldots m}) = b' \textrm{ in }\quad
 \begin{tikzcd}[column sep = huge]
@@ -552,9 +553,13 @@ Here the versions are $A$ and $B$ diverging with actions $a_i$ and $b_i$ from a 
 	\arrow["o", dashed, from=1-2, to=2-2]
 	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.2}, draw=none, from=1-2, to=2-3]
 	\arrow["{b'}", dashed, from=1-3, to=2-3]
-	\arrow[dashed, from=2-2, to=2-1]
-	\arrow[dashed, from=2-2, to=2-3]
+	\arrow["{\mathit{adjust}_a}"', dashed, from=2-2, to=2-1]
+	\arrow["{\mathit{adjust}_b}", dashed, from=2-2, to=2-3]
 \end{tikzcd}\]
+\vspace{-16pt}
+\caption{Transportation}
+\label{fig:transportation}
+\end{figure}
 
 Transportation retracts $a_n$ backwards through all earlier actions on the $A$ timeline onto the original state $O$ and then projects that action forwards through all the actions of the $B$ timeline. The final result is the action $b'$ that yields a new version $B'$. The effect of transportation is that the final action $b'$ preserves the intention of the original action $a_n$ given all the actions traversed traveling backward in time to $O$ and then forward to $B$.
 Since transportation uses retraction it may fail, because of a dependency on an earlier action in the $A$ branch. However it is always possible to do a group transport that includes all the transitive dependencies.
@@ -588,7 +593,7 @@ If we transport $a_1$ into $B$ the change from Jack to Jill gets applied to the 
     [ g \is \quotedstring{Tom} \comma \mathbb{1}\is \textbf{\quotedstring{Jill}}] \}
 ]}.
 
-This example demonstrates how transportation can propagate changes bidirectionally through structural changes. We offer this as a solution to challenge problem \#7 in \citet{challenge-problems}, where no plausible state invariant is found able to generate the epxected behavior. Our solution is that action histories let us track how locations shift through time in a way that cannot be inferred just by comparing states -- in effect the IDs we add to the state are a cache of this historical information.
+This example demonstrates how transportation can propagate changes bidirectionally through structural changes. We offer this as a solution to challenge problem \#7 in \citet{challenge-problems}, where no plausible state invariant is found able to generate the expected behavior. Our solution is that action histories let us track how locations shift through time in a way that cannot be inferred just by comparing states -- in effect the IDs we add to the state are a cache of this historical information.
 
 % Problem of null and delete from Cambria paper? Need ListOf to do deleting on blank required values, or for a list of required values to auto-delete blanks.
 
@@ -609,32 +614,34 @@ O; a \leq O; b \quad\textrm{iff} \quad
 	\arrow[dashed, from=2-1, to=2-2]
 \end{tikzcd}
 \]
-in other words, projection produces a fixpoint. The \textbf{Roundtrip Monotonicity} principle is that (a) \mathbox{\leq} is a partial order, and (b) roundtripping a timeline through a projection and retraction or the reverse results in a timeline $\leq$ the original.
+in other words, projection produces a fixpoint. The \textbf{Roundtrip Monotonicity} principle asserts that (a) \mathbox{\leq} is a partial order, and (b) roundtripping a timeline through a projection and retraction or the reverse results in a timeline $\leq$ the original.
 
 
+\subsection{Branch minimization and synthesis}
 
-\subsection{Optimal branchless diffing}
-free range version control
-open world version control
-% beyond the repo
+We have been discussing transportation assuming we are given branching timelines. But these might be redundant: there chould be changes duplicated in both branches, either by accident or by explicit transportation. There could also be redundant changes within a branch that override earlier ones. Such redundancies are undesireable because they add noise to a visualization of differences, and in some cases can cause transportation to produce surprising results. Luckily transportation itself can be used in a simple algorithm to minimize branches.
 
-% Conceptual model
-% Branching by copying
-% Open world of copies with no boundaries, not a DAG in a repo
-% Algorithm
+Note that in Figure~\ref{fig:transportation} transportation produces on the bottom of the diagram two new timelines $\mathit{adjust}_a$ and $\mathit{adjust}_b$ branching from a new shared state $O'$. These \textit{adjusted} timelines eliminate the redundancy of the original action and its transported image. Clearly after executing a transportation we should drop the original branching timelines and use the adjusted ones instead. We can exploit this side-effect of transportation to minimize branching timelines by removing all redundancies. Given a pair of branching timelines we iterate over all the actions on both sides in time order. For each action we try to transport it to the other branch. If the transportation succeeds and its result is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the action makes no difference when transported to the other side then it isn't really a difference, and we only want to include actual differences in the branching timelines. Therefore we remove it and apply it to the shared state.
+
+Branch minimization means we can synthesize optimal branching timelines from the action histories of any two states. A complete action history always starts from the unit value as its initial state. So all complete histories are branches from the initial state. GIven any two histories we can apply the branch minimization algorithm to synthesize optimal branching timelines for their final states. It is optimal in the sensse that the history of the shared state is maximal while the timelines branching off of it are minimal.
+
+\subsection{Low-fuss version control}
+
+The ability to synthesize optimal branching timelines for any two states lets us simplify version control by eliminating the \textit{repo}. In conventional version control systems the repo is a database recording versions (typically batched into user-initiated \textit{commits}), and tracking the history of branching and mergeing operations, forming a DAG of commits. The differences between two commits are calculated with \textit{3-way differencing} which depends upon finding thire last common ancestor in the DAG. As we have pointed out this can be imprecise. But the bigger problem is that the repo imposes a large burden of management and training. In particular git is infamous for causing confusion and frustration~\cite{perez13, church2014case}.
+
+We propose a simpler model: an artifact (database, file, directory tree, etc.) under version control will record its action history internally or in an attachment (or only store the history and derive/cache the state). These histories are append-only. To branch an alternate version of an artifact, just make a copy, which will include the history up to that moment. The copies can then diverge. That's it: branches are copies. We don't need to record branching events in a repo, because we can synthesize it on need by comparing the artifact histories, and we can do so more precisely than the historical branching DAG.
+Instead of a confusion of operations like merge, rebase, and cherry-pick there is the single operation of transportation which can be grouped into larger bulk operations.
+
+Eliminating the repo has another benefit beyond simplicity: artifacts no longer need to belong to a repo. Artifacts are self-sufficient entities in an open world participating in overlapping and shifting webs of collaboration beyond the boundaries of a repo. We essentially return to good old file sharing, which has withstood the test of time. Nevertheless it must be admitted that repos and their tool ecosystems provide benefits lacking in our proposal, especially for large projects and large teams. However the possibility that a conceptually simpler and lighter-weight approach could benefit many   less-intensive contexts deserves investigation.
+
+
+% not just about simplicity, also better:
+% Note state-based VC loses information.
+% applies to structure not just text (list of list of character)
+% rename is hopeless
 
 \subsection{OT}
-
-%\begin{remark} git
-% Note state-based diff can't do this accurately.
-% rename is hopeless
-% like rebase, except mutates action
-% like cherry picking except finer grained and without problems
-% diffs accumulate noise.
-% do this after diffs?
-% also conceptual model
-% could move to related work but more relevant here
-% \end{remark}
+% defer to rleated work or handle here while hot?
 
 \subsection{Deletion}
 
@@ -673,10 +680,13 @@ open world version control
 % Reasonable to expect inverses. Why don't I have them? Lossy operations. Undo must reconstruct loss info in a group ambler2006refactoring
 % Inverses of ListFrom and ListInto? ListInto wants to use first not an ID.
 
+
+
 \section{Relationships and normalization}
-% beef up playable demo claims
 
 % Conjecture: first step to DB/PL unification. Ca’t find previous examples of this model. ODMG closest?
+
+
 
 \section{Visualizing and manipulating the multiverse}
 
@@ -690,6 +700,9 @@ open world version control
 % iterations on UI
 
 \subsection{A playable demo}
+% beef up playable demo clain im contributions
+
+
 
 \section{Queries as hypothetical timelines}
 \subsection{PbD}
