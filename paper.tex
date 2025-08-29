@@ -264,6 +264,7 @@ using infix syntax, placing the target path first, then the action name, followe
   \hline
   p \textsf{ noop} & \textrm{Do nothing}\\
   p \textsf{ write } v & \textrm{Write atomic value $v$ at $p$}\\
+  % p \textsf{ init } & \textrm{Set $p$ to initial value}\\
 
   p \textsf{ insert } E \textsf{ before } E' & \textrm{Insert element ID $E$ into list at $p$ in front of element $E'$}\\
   p \textsf{ append } E & \textrm{Append element ID $E$ to end of list at $p$}\\
@@ -526,6 +527,7 @@ Retraction is defined with rules like those for projection so we skip over that 
 
 
 \subsection{Across the multiverse}
+
 What are the versions that version control controls? We see them as the result of \textit{branching} timelines: two timelines that branch off of an earlier common state. We can diagram branching like this:
 \[\begin{tikzcd}
 	A & {} & {} & O & {} & {} & B
@@ -555,98 +557,138 @@ Here the versions are $A$ and $B$ diverging with actions $a_i$ and $b_i$ from a 
 \end{tikzcd}\]
 
 Transportation retracts $a_n$ backwards through all earlier actions on the $A$ timeline onto the original state $O$ and then projects that action forwards through all the actions of the $B$ timeline. The final result is the action $b'$ that yields a new version $B'$. The effect of transportation is that the final action $b'$ preserves the intention of the original action $a_n$ given all the actions traversed traveling backward in time to $O$ and then forward to $B$.
+Since transportation uses retraction it may fail, because of a dependency on an earlier action in the $A$ branch. However it is always possible to do a group transport that includes all the transitive dependencies.
 
-
-As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor}.
+As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor} into two branches: branch $A$ reassigns the TODO from Jack to Jill; branch $B$ converts the assignment into a list, changes the assignment from Jack to Jacque and inserts a new assignment to Tom:
 \begin{align*}
   O &= [
     e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \quotedstring{Jack} \}
     ] \\
-  a_1 &= e\ldotp\mathit{what}\textsf{ write } \quotedstring{tidy}\\
-  a_2 &= e\ldotp\mathit{who}\textsf{ write } \quotedstring{Jill}\\
+  % a_1 &= e\ldotp\mathit{what}\textsf{ write } \quotedstring{tidy}\\
+  a_1 &= e\ldotp\mathit{who}\textsf{ write } \quotedstring{Jill}\\
   A &= [
-    e \is \{ \mathit{what}\is \quotedstring{tidy}\comma  \mathit{who}\is \quotedstring{Jill} \}
+    e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \quotedstring{Jill} \}
     ] \\
   b_1 &= *\ldotp \mathit{who} \textsf{ ListOf } \\
   % b_2 &= e\ldotp\mathit{who}\ldotp\mathbb{1} \textsf{ write } \quotedstring{Tom}\\
-  b_2 &= e\ldotp\mathit{who} \textsf{ insert } g \textsf{ before } \mathbb{1} \\
-  b_3 &= e\ldotp\mathit{who}\ldotp g \textsf{ write } \quotedstring{Tom} \\
-  b_4 &= e\ldotp\mathit{who}\ldotp\mathbb{1} \textsf{ write } \quotedstring{Jacque} \\
+  b_2 &= e\ldotp\mathit{who}\ldotp\mathbb{1} \textsf{ write } \quotedstring{Jacque} \\
+  b_3 &= e\ldotp\mathit{who} \textsf{ insert } g \textsf{ before } \mathbb{1} \exec e\ldotp\mathit{who}\ldotp g \textsf{ write } \quotedstring{Tom} \\
   B &= [
     e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is
     [ g \is \quotedstring{Tom} \comma \mathbb{1}\is \quotedstring{Jacque}] \}
     ] \\
-\end{align*}
+  \end{align*}
+  \vspace{-30pt}\\
+If we transport $b_2$ into $A$ the change from Jack to Jacque gets applied to the \textsf{who} field (showing the change in bold):\\
+\mathbox{A' =
+[e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \textbf{\quotedstring{Jacque}} \}]}.
+If we transport $a_1$ into $B$ the change from Jack to Jill gets applied to the list element containing Jack, even though it has been wrapped and shifted:\\
+\mathbox{B' = [
+    e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is
+    [ g \is \quotedstring{Tom} \comma \mathbb{1}\is \textbf{\quotedstring{Jill}}] \}
+]}.
 
+This example demonstrates how transportation can propagate changes bidirectionally through structural changes. We offer this as a solution to challenge problem \#7 in \citet{challenge-problems}, where no plausible state invariant is found able to generate the epxected behavior. Our solution is that action histories let us track how locations shift through time in a way that cannot be inferred just by comparing states -- in effect the IDs we add to the state are a cache of this historical information.
 
+% Problem of null and delete from Cambria paper? Need ListOf to do deleting on blank required values, or for a list of required values to auto-delete blanks.
 
+\subsection{Correctness}
 
+How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of actions? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. They may turn out to be more or less in agreement with intuition. We have learned that these rules are closely coupled to the semantics of the actions and offer many alternative design choices.
 
-Transport across found diffs
-Transport/transmit/teleport/port by example: pluralize, insert
-porting implies changing!
-
-
-Multiplicity change (Challenge \#7) with ListOf, insert, delete
-
-building git ops out of transport?
-
-\subsection{Galois connection}
-
-How do we know if these rules are correct, that they do indeed preserve the intentions of actions? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention that may turn out to be more or less in agreement with intuition.
-Later we propose some properties that a sound set of rules should satisfy (see ***). But nevertheless there is still a lot of freedom for design choices, particularly because of the way the rules are coupled to the set of actions. We are frankly just beginning to learn about the nature of this design space.
+Nevertheless there are some principles we can expect any system of transportation rules to follow. One of them is that projection and retraction should be inverses -- that transporting an action to a different branch and then back again should return it unchanged. Doing the same thing should be a symmetric relation. Unfortunately that principle is violated by the examples we have already seen where an action gets wiped out during transport into a \textsf{noop}, which will always return as a \textsf{noop}. We need to weaken the principle to say that roundtripping an action must return an action that does the same thing or less than the original. Accordingly we define an ordering on branches \mathbox{\leq}:
+\[
+O; a \leq O; b \quad\textrm{iff} \quad
+\begin{tikzcd}
+	O & B \\
+	A & B
+	\arrow["{b}", from=1-1, to=1-2]
+	\arrow["{a}"'{pos=0.4}, from=1-1, to=2-1]
+	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
+	\arrow[dashed, from=1-2, to=2-2]
+	\arrow[dashed, from=2-1, to=2-2]
+\end{tikzcd}
+\]
+in other words, projection produces a fixpoint. The \textbf{Roundtrip Monotonicity} principle is that (a) \mathbox{\leq} is a partial order, and (b) roundtripping a timeline through a projection and retraction or the reverse results in a timeline $\leq$ the original.
 
 
 
 \subsection{Optimal branchless diffing}
-beyond the repo
+free range version control
+open world version control
+% beyond the repo
 
-Conceptual model
-Branching by copying
-Open world of copies with no boundaries, not a DAG in a repo
-Algorithm
+% Conceptual model
+% Branching by copying
+% Open world of copies with no boundaries, not a DAG in a repo
+% Algorithm
 
 \subsection{OT}
 
-\begin{remark} git
-Note state-based diff can't do this accurately.
-rename is hopeless
-like rebase, except mutates action
-like cherry picking except finer grained and without problems
-diffs accumulate noise.
-do this after diffs?
-also conceptual model
-could move to related work but more relevant here
-\end{remark}
+%\begin{remark} git
+% Note state-based diff can't do this accurately.
+% rename is hopeless
+% like rebase, except mutates action
+% like cherry picking except finer grained and without problems
+% diffs accumulate noise.
+% do this after diffs?
+% also conceptual model
+% could move to related work but more relevant here
+% \end{remark}
 
 \subsection{Deletion}
-and tombstones. note not used currently
-Ref the OT problems: https://inria.hal.science/inria-00109039/document
-Explain our novel solution?
-Maybe move this entirely to Appendix and take tombstones out of model.
+
+% handle cambria problem?
+% Use delete flag instead of tombstone: simplifies projection rules
+% Add this here as an extension to model, leave out of primary model
+% Alt syntax on colon: slash overlay or % or division sign ÷ \div
+% List of required value auto-deletes blank values. Moves out of projection rules into engine!
+% But then manual delete can get confused by projecting writes through it to mantain zombie state. Delete has to discard writes to be sticky. In which case there is no point to zombie state.
+% simpler model is to auto-convert blank elements to tombstones
+% but then a fresh insert auto-deletes, though assignining into it undeletes. UI would need to reveal autodelete?
+
+
+% and tombstones. note not used currently
+% Ref the OT problems: https://inria.hal.science/inria-00109039/document
+% Explain our novel solution?
+% Maybe move this entirely to Appendix and take tombstones out of model.
+
+\subsection{much ado about nothing}
+% Possibly merge with deletion
+% Conjecture: don’t need Null, Option, Result
+% Snobol and verse show we don't need Results
+% Conjecture: common-sense solution to the conundrum of nulls.
+% Mention along with sums?
+% Or just skip as irrelevant and argument-triggering
+% but this is an independent decision
+% Exception is numbers, but already have familiar NaN
+% Maybe skip initial values?
+
 
 
 \subsection{undo}
-https://cedanet.com.au/ceda/ot/selective-undo.php
-maybe appendix
+% https://cedanet.com.au/ceda/ot/selective-undo.php
+% maybe appendix
 
-Reasonable to expect inverses. Why don't I have them? Lossy operations. Undo must reconstruct loss info in a group ambler2006refactoring
-Inverses of ListFrom and ListInto? ListInto wants to use first not an ID.
-
+% Reasonable to expect inverses. Why don't I have them? Lossy operations. Undo must reconstruct loss info in a group ambler2006refactoring
+% Inverses of ListFrom and ListInto? ListInto wants to use first not an ID.
 
 \section{Relationships and normalization}
+% beef up playable demo claims
 
-beef up playable demo claims
+% Conjecture: first step to DB/PL unification. Ca’t find previous examples of this model. ODMG closest?
 
-Conjecture: first step to DB/PL unification. Ca’t find previous examples of this model. ODMG closest?
+\section{Visualizing and manipulating the multiverse}
 
-\section{Visualizing the multiverse}
 \subsection{Exploring structure}
+
 \subsection{Finding commonality}
-hard problem is seeing what \textit{hasn't} changed, just moved
+% hard problem is seeing what \textit{hasn't} changed, just moved
+
 \subsection{Design tradeoffs}
-Ultorg.
-iterations on UI
+% Ultorg.
+% iterations on UI
+
 \subsection{A playable demo}
 
 \section{Queries as hypothetical timelines}
@@ -656,56 +698,65 @@ iterations on UI
 
 \section{Related work}
 
-actually related work:
-Alex's worlds. Roly. Ask them for comment?
-Challenge problem paper.
-I\&S: cambria, peritext, universal version control
-Braid time machine https://braid.org/time-machines
+% actually related work:
+% Alex's worlds. Roly. Ask them for comment?
+% Challenge problem paper.
+% I&S: cambria, peritext, universal version control
+% Braid time machine https://braid.org/time-machines
 
 \subsection{Version control}\label{VC}
 
-git, darcs, pijul
+% git, darcs, pijul
 
-git is the most established tool for change management but is also the source of much discontent. Pull refs from schema change paper. santiago's stuff. intentional?
+% git is the most established tool for change management but is also the source of much discontent. Pull refs from schema change paper. santiago's stuff. intentional?
 
-Understanding Version Control as Material Interaction with Quickpose
-%https://dl.acm.org/doi/10.1145/3544548.3581394
+% Understanding Version Control as Material Interaction with Quickpose
+% https://dl.acm.org/doi/10.1145/3544548.3581394
 
 \subsection{The impedance mismatch problem} \label{impedance}
 
-orthogonal persistence, ORMs, Linq, single tier (Tier, hop), naked objects, DBOS, durable computation
+% orthogonal persistence, ORMs, Linq, single tier (Tier, hop), naked objects, DBOS, durable computation
 
 \subsection{PL state management}\label{PLstate}
 
-FP: Monads, Lenses
+% FP: Monads, Lenses
 
-Imperative: immutable, React state menagement
+% Imperative: immutable, React state menagement
+
+% Remark: lenses and state libraries
+% Built in Mutable structure semantics?
+% Pure FP uses lenses
+% Imperative langs put it in libraries “immutable data” libraries and “reactive state management” libraries have cursors/paths (check immutable.js)
+% We just add a path to values and build it into basic semantics
+% Value + Path = context, pointed value, ?? “call-by-context”?
+% Note UI manifest selection
+
 
 \subsection{OT}\label{OT}
-%https://en.wikipedia.org/wiki/Operational_transformation
-inclusion/exclusion transform
-%https://cedanet.com.au/ceda/ot/ot-control/
-forward/backward transposition %https://ieeexplore.ieee.org/document/655755
+% https://en.wikipedia.org/wiki/Operational_transformation
+% inclusion/exclusion transform
+% https://cedanet.com.au/ceda/ot/ot-control/
+% forward/backward transposition %https://ieeexplore.ieee.org/document/655755
 
 \subsection{CRDT}\label{CRDT}
 
 \subsection{Schema Evolution}\label{schema}
-just ref challenge problems paper?
+% just ref challenge problems paper?
 
 
 
 \section{Discussion}
-pros and cons
+% pros and cons
 
-caveats, weaknesses, open problems
+% caveats, weaknesses, open problems
 
-Need a rule spec language.
-design alternatives for relational actions.
+% Need a rule spec language.
+% design alternatives for relational actions.
 
-convergent evolution.
+% convergent evolution.
 
 \section{Commencement}
-summary and call to action
+% summary and call to action
 
 \printbibliography
 
