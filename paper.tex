@@ -348,7 +348,10 @@ The \textsf{ListOf} action takes any type and wraps it inside a list, and wraps 
 
 
 \section{High-fidelity low-fuss version control}
-In this section we build version control for simple structures that is higher fidelity than standard techniques because it is informed by the history of actions. A \textit{timeline} is an initial state and a sequence of actions executed in order that are each valid on their input state, producing an end state. Baseline records timelines by observing the actions executed in the API and in a GUI that manifests actions as direct manipulations.
+In this section we build version control for simple structures that is higher fidelity than standard techniques because it is informed by the history of actions.
+% example of move/rename vs insert/delete?
+% or just example of rename is enough?
+A \textit{timeline} is an initial state and a sequence of actions executed in order that are each valid on their input state, producing an end state. Baseline records timelines by observing the actions executed in the API and in a GUI that manifests actions as direct manipulations.
 We implement version control by comparing and altering timelines using two primitive functions: \textsf{Project} and \textsf{Retract}.
 
 \subsection{Projection}
@@ -560,8 +563,8 @@ Here the versions are $A$ and $B$ diverging with actions $a_i$ and $b_i$ from a 
 \label{fig:transportation}
 \end{figure}
 
-Transportation retracts $a_n$ backwards through all earlier actions on the $A$ timeline onto the original state $O$ and then projects that action forwards through all the actions of the $B$ timeline. The final result is the action $b'$ that yields a new version $B'$. The effect of transportation is that the final action $b'$ preserves the intention of the original action $a_n$ given all the actions traversed traveling backward in time to $O$ and then forward to $B$.
-Since transportation uses retraction it may fail, because of a dependency on an earlier action in the $A$ branch. However it is always possible to do a group transport that includes all the transitive dependencies.
+Transportation\footnote{In our previous publications transportation was called migration.} retracts $a_n$ backwards through all earlier actions on the $A$ timeline onto the original state $O$ and then projects that action forwards through all the actions of the $B$ timeline. The final result is the action $b'$ that yields a new version $B'$. The effect of transportation is that the final action $b'$ preserves the intention of the original action $a_n$ given all the actions traversed traveling backward in time to $O$ and then forward to $B$.
+Since transportation uses retraction it may fail, because of a dependency on an earlier action in the $A$ branch. We offer a \textit{forced transport} that chains together all the transitive dependencies.
 
 As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor} into two branches: branch $A$ reassigns the TODO from Jack to Jill; branch $B$ converts the assignment into a list, changes the assignment from Jack to Jacque and inserts a new assignment to Tom:
 \begin{align*}
@@ -592,7 +595,10 @@ If we transport $a_1$ into $B$ the change from Jack to Jill gets applied to the 
     [ g \is \quotedstring{Tom} \comma \mathbb{1}\is \textbf{\quotedstring{Jill}}] \}
 ]}.
 
-This example demonstrates how transportation can propagate changes bidirectionally through structural changes. We offer this as a solution to challenge problem \#7 in \citet{challenge-problems}, where no plausible state invariant is found able to generate the expected behavior. Our solution is that action histories let us track how locations shift through time in a way that cannot be inferred just by comparing states -- in effect the IDs we add to the state are a cache of this historical information.
+This example demonstrates how transportation can propagate changes bidirectionally through structural changes. We offer this as a solution to challenge problem \#7 in \citet{challenge-problems}, where no plausible state invariant is found able to generate the expected behavior. Our solution relies upon action histories which let us track how locations shift through time in a way that cannot be inferred just by comparing states -- in effect the ID annotations in the state are a cache of this historical information.
+
+Baseline provides higher-level version control operations as sets of transportations. All the changes in one branch can be transported to the other. Only all type or data changes can be transported. The forced transport mentioned above includes dependencies. To synchronize two branches all changes are transported from one to the other and then all changes remaining in the other branch are transported back. Note that the order in which this is done determines how conflicts are resolved, so synchronization has a direction: syncing $A$ into $B$ resolves conflicts in favor of $A$.
+
 
 % Problem of null and delete from Cambria paper? Need ListOf to do deleting on blank required values, or for a list of required values to auto-delete blanks.
 
@@ -631,7 +637,8 @@ The ability to synthesize optimal branching timelines for any two states lets us
 We propose a simpler model: an artifact (database, file, directory tree, etc.) under version control will record its action history internally or in an attachment (or only store the history and derive/cache the state). These histories are append-only. To branch an alternate version of an artifact, make a copy, which will include the history up to that moment. The copies can then diverge. That's it: branches are copies. We don't need to record branching events in a repo, because we can synthesize it on need by comparing the artifact histories, and we can do so more precisely than the historical branching DAG.
 Instead of a confusion of operations (like git's merge, rebase, and cherry-pick) there is the single operation of transportation which can be grouped into larger bulk operations.
 
-Eliminating the repo has another benefit beyond simplicity: branches of an artifact no longer need to belong to a repo. You can share a branch without sharing the whole repo. Every branch is a self-sufficient entity in an open world that can participate in overlapping and shifting webs of collaboration beyond the boundaries of a repo. Essentially we are arguing for the benefits of good old file copying, with the key new feature that you can diff and merge the copies. Nevertheless it must be admitted that repos and their tool ecosystems provide benefits lacking in our proposal, especially for large projects and large teams.
+Eliminating the repo has another benefit beyond simplicity: branches of an artifact no longer need to belong to a repo. You can share a branch without sharing the whole repo. Every branch is a self-sufficient entity in an open world and can participate in overlapping and shifting webs of collaboration beyond the boundaries of a repo. Essentially we are arguing for the flexibility of the ubiquitous folk practice of sharing copies of files~\cite{Burnett14, Basman19}, with the key new feature that you can diff and merge the copies.
+%Nevertheless it must be admitted that repos and their tool ecosystems provide benefits for large projects and large teams.
 
 % argue for high fidelity
 % not just about simplicity, also better:
@@ -759,15 +766,17 @@ Eliminating the repo has another benefit beyond simplicity: branches of an artif
 
 
 
-\section{Discussion}
+\section{Evaluation/Discussion}
 % pros and cons
 
+% eval: challenge problems, playable demo
+% tech dims https://tomasp.net/techdims/#footer=index,navigation;left=catalogue,list;top=catalogue,index
 % caveats, weaknesses, open problems
 
 % Need a rule spec language.
 % design alternatives for relational actions.
 
-% convergent evolution.
+% convergent evolution of insertions - move
 
 \section{Commencement}
 % summary and call to action
