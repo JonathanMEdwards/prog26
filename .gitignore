@@ -15,7 +15,7 @@
 build.*
 *SAVE-ERROR
 *-blx.bib
-# paper.pdf
+paper.pdf
 revisions.pdf
 *.tex.bak
 .DS_Store
