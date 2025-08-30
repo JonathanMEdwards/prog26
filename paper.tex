@@ -271,8 +271,8 @@ using infix syntax, placing the target path first, then the action name, followe
 
   p \textsf{ delete } E & \textrm{Delete element ID $E$ in list at $p$}\\
 
-  p \textsf{ moveFrom } p' & \textrm{List element at $p$ is overwritten from $p'$ in the same list}\\
-  & \textrm{or cousin in nested lists, and $p'$ is deleted}\\
+  p \textsf{ move } p' & \textrm{List element at $p$ is copied to $p'$ in the same list}\\
+  & \textrm{or cousin in nested lists, and then $p$ is deleted}\\
   \hline
 
   \textrm{Type actions} & \rule[0pt]{0pt}{16pt}\\
@@ -287,8 +287,8 @@ using infix syntax, placing the target path first, then the action name, followe
 
   p \textsf{ Delete } F & \textrm{Delete field ID $F$ in record at $p$}\\
 
-  p \textsf{ MoveFrom } p' & \textrm{Record field at $p$ is overwritten from $p'$ in the same record}\\
-  & \textrm{or containing\slash contained record, and $p'$ is deleted}\\
+  p \textsf{ Move } p' & \textrm{Record field at $p$ is copied to $p'$ in the same record}\\
+  & \textrm{or containing\slash contained record, and then $p$ is deleted}\\
 
 
   p \textsf{ ListOf } & \textrm{Convert value at $p$ into a list of one element with ID $\mathbb{1}$}\\
