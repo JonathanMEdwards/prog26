@@ -217,7 +217,7 @@ as the motivation of our work and we hope as an inspiration for others. The conc
 
 
 
-\section{Simple Structural Action}
+\section{Simple Structure Actions}
 
 We introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}.
 
@@ -347,7 +347,7 @@ The \textsf{ListOf} action takes any type and wraps it inside a list, and wraps 
 
 
 
-\section{High-fidelity low-fuss version control}
+\section{High-fidelity Low-fuss Version Control}
 In this section we build version control for simple structures that is higher fidelity than standard techniques because it is informed by the history of actions.
 % example of move/rename vs insert/delete?
 % or just example of rename is enough?
@@ -528,7 +528,7 @@ Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in 
 Retraction is defined with rules like those for projection so we skip over that in the interest of brevity.
 
 
-\subsection{Across the multiverse}
+\subsection{Across the Multiverse}
 
 What are the versions that version control controls? We see them as the result of \textit{branching} timelines: two timelines that branch off of an earlier common state. We can diagram branching like this:
 \[\begin{tikzcd}
@@ -622,7 +622,9 @@ O; a \leq O; b \quad\textrm{iff} \quad
 in other words, projection produces a fixpoint. The \textbf{Roundtrip Monotonicity} principle asserts that (a) \mathbox{\leq} is a partial order, and (b) roundtripping a timeline through a projection and retraction or the reverse results in a timeline $\leq$ the original.
 
 
-\subsection{Branch minimization and synthesis}
+\subsection{Branch Minimization and Synthesis}
+
+% Call a pair of branching timelines a diff. Then talk about diff minimization and synth
 
 We have been discussing transfer assuming we are given branching timelines. But these might be redundant: there chould be changes duplicated in both branches, either by accident or by explicit transfers. There could also be redundant changes within a branch that override earlier ones. Such redundancies are undesireable because they add noise to a visualization of differences, and in some cases can cause transfer to produce surprising results. Luckily transfer itself can be used in a simple algorithm to minimize branches.
 
@@ -630,7 +632,7 @@ Note that in Figure~\ref{fig:transfer} transfer produces on the bottom of the di
 
 Branch minimization means we can synthesize optimal branching timelines from the action histories of any two states. A complete action history always starts from the unit value as its initial state. So all complete histories are branches from the initial state. GIven any two histories we can apply the branch minimization algorithm to synthesize optimal branching timelines for their final states. It is optimal in the sensse that the history of the shared state is maximal while the timelines branching off of it are minimal.
 
-\subsection{Low-fuss version control}
+\subsection{Low-fuss Version Control}
 
 The ability to synthesize optimal branching timelines for any two states lets us simplify version control by eliminating the \textit{repo}. In conventional version control systems the repo is a database recording versions (typically batched into user-initiated \textit{commits}), and tracking the history of branching and mergeing operations, forming a DAG of commits. The differences between two commits are calculated with \textit{3-way differencing} which depends upon finding thire last common ancestor in the DAG. As we have pointed out this can be imprecise. But the bigger problem is that the repo imposes a large burden of management and training. In particular git~\cite{ProGit} is infamous for causing confusion and frustration~\cite{perez13, church2014case}.
 
@@ -666,7 +668,7 @@ Eliminating the repo has another benefit beyond simplicity: branches of an artif
 % Explain our novel solution?
 % Maybe move this entirely to Appendix and take tombstones out of model.
 
-\subsection{much ado about nothing}
+\subsection{Much Ado About Nothing}
 % Possibly merge with deletion
 % Conjecture: don’t need Null, Option, Result
 % Snobol and verse show we don't need Results
@@ -679,7 +681,7 @@ Eliminating the repo has another benefit beyond simplicity: branches of an artif
 
 
 
-\subsection{undo}
+\subsection{Undo}
 % https://cedanet.com.au/ceda/ot/selective-undo.php
 % maybe appendix
 
@@ -688,36 +690,36 @@ Eliminating the repo has another benefit beyond simplicity: branches of an artif
 
 
 
-\section{Relationships and normalization}
+\section{Relationships and Normalization}
 
 % Conjecture: first step to DB/PL unification. Can’t find previous examples of this model. ODMG closest?
 
 
 
-\section{Visualizing and manipulating the multiverse}
+\section{Visualizing and Manipulating the Multiverse}
 
-\subsection{Exploring structure}
+\subsection{Exploring Structure}
 
-\subsection{Finding commonality}
+\subsection{Finding Commonality}
 % hard problem is seeing what \textit{hasn't} changed, just moved
 
-\subsection{Design tradeoffs}
+\subsection{Design Tradeoffs}
 % Ultorg.
 % iterations on UI
 
-\subsection{A playable demo}
+\subsection{A Playable Demo}
 % beef up playable demo clain im contributions
 
 
 
-\section{Queries as hypothetical timelines}
+\section{Queries as Hypothetical Timelines}
 % could model source text as lists lists chars, but that is boring
 
 \subsection{PbD}
-\subsection{Query rewriting via projection}
+\subsection{Query Rewriting via Projection}
 
 
-\section{Related work}
+\section{Related Work}
 
 % actually related work:
 % Alex's worlds. Roly. Ask them for comment?
@@ -725,7 +727,7 @@ Eliminating the repo has another benefit beyond simplicity: branches of an artif
 % I&S: cambria, peritext, universal version control
 % Braid time machine https://braid.org/time-machines
 
-\subsection{Version control}\label{VC}
+\subsection{Version Control}\label{VC}
 
 % git, darcs, pijul
 
@@ -734,11 +736,11 @@ Eliminating the repo has another benefit beyond simplicity: branches of an artif
 % Understanding Version Control as Material Interaction with Quickpose
 % https://dl.acm.org/doi/10.1145/3544548.3581394
 
-\subsection{The impedance mismatch problem} \label{impedance}
+\subsection{The Impedance Mismatch Problem} \label{impedance}
 
 % orthogonal persistence, ORMs, Linq, single tier (Tier, hop), naked objects, DBOS, durable computation
 
-\subsection{PL state management}\label{PLstate}
+\subsection{PL State Management}\label{PLstate}
 
 % FP: Monads, Lenses
 
