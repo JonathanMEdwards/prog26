@@ -101,7 +101,7 @@ he can be reached at \email{tomas@tomasp.net}.}
 Action calculus is a technique of change management that generalizes conventional version control and collaborative editing systems to handle refactorings, transformations, schema evolution, and database differencing. We take the first steps of extending it into a new kind of query language. Altogether we solve four of the eight challenge problems of schema evolution identified in a prior paper.
 The theory is presented semi-formally and a prototype implementation is discussed. A playable demo is submitted as an artifact.
 
-The superpower of the action calculus is transporting actions across alternate timelines while preserving their intention. The \textit{Many-worlds Interpretation of Programming}
+The superpower of the action calculus is transferring actions across alternate timelines while preserving their intention. The \textit{Many-worlds Interpretation of Programming}
 is a research vision to extend this power into a unified PL/DB/UI, solve the impedance mismatch problem, and integrate facilities for testing, package management, and deployment.
 Realizing that vision would in effect be a revival of the beloved Lisp/SmallTalk unified programming experience, reimagined for the modern world.
 
@@ -148,7 +148,7 @@ Problems of change management appear in many guises:
 
   \item Much code is required to translate data changes between a UI, PL data structures, and a DB. It seems like much less code ought to be needed, but extensive research on this \textit{impedance mismatch problem} has not produced a decisive solution (\S\ref{impedance}).
 
-  \item Collaborative editing and data synchronization engines are concerned with automatically transporting and reconciling changes, applying the techniques of Operational Transformation (OT \S\ref{OT}) and Convergent Replicated DataTypes (CRDTs \S\ref{CRDT}).
+  \item Collaborative editing and data synchronization engines are concerned with automatically transferring and reconciling changes, applying the techniques of Operational Transformation (OT \S\ref{OT}) and Convergent Replicated DataTypes (CRDTs \S\ref{CRDT}).
 
   \item Database schema change necessitates data migration and query rewriting. Live programming faces a similar problem when state becomes stale. There has been much research on \textit{schema evolution} but in practice it is still largely manual and ad hoc (\S \ref{schema}).
 
@@ -180,12 +180,12 @@ With that said we propose a new technique of change management called the \texti
   \item Timelines can be compared to compute the differences between artifacts, expressed as a hypothetical timeline in which a maximally common ancestor was first created and then the two artifacts forked off with minimally diverging timelines. Note that this common ancestor may not have ever actually existed.
   Differential timelines are more accurate than lower-level techniques because they take into account structural transformations and refactorings.
 
-  \item The key feature of the action calculus is the ability to \textit{transport} individual actions across forking timelines while preserving the actions's intent (which is given a precise meaning).
-  %Familiar change management operations like \textit{merging} are implemented with transportation.
-  %Differencing is also done through transportation.
-  We say that transportation navigates the \textit{multiverse} of alternate timelines of an artifact.
+  \item The key feature of the action calculus is the ability to \textit{transfer} individual actions across forking timelines while preserving the actions's intent (which is given a precise meaning).
+  %Familiar change management operations like \textit{merging} are implemented with transference.
+  %Differencing is also done through transference.
+  We say that transference navigates the \textit{multiverse} of alternate timelines of an artifact.
 
-  %\item Transportation is itself built upon the core mechanism of the calculus: \textit{time travel}, shifting an action forward or backward in time to generate an alternate timeline with the same final state.
+  %\item transference is itself built upon the core mechanism of the calculus: \textit{time travel}, shifting an action forward or backward in time to generate an alternate timeline with the same final state.
 
 \end{enumerate}
 
@@ -204,7 +204,7 @@ as the motivation of our work and we hope as an inspiration for others. The conc
 
   \item We submit a \textit{playable demo} as an acccompanying artifact. This demo lets you directly experience the GUI and be guided through the database normalization scenario. We hope that playable demos offer a new way to evaluate HCI research.
 
-  \item We take the first steps of extending the action calculus into a query language. Although only a preliminary prototype it demonstrates the key idea that a function can be seen as a hypothetical timeline of imperative actions that extracts the result from the final state. We show one benefit of this approach: Programming by Demonstration (PbD). Another benefit is that \textit{query rewriting} falls out for free from transporting schema changes. We communicate these very preliminary results because the community may find them intriguing and controversial.
+  \item We take the first steps of extending the action calculus into a query language. Although only a preliminary prototype it demonstrates the key idea that a function can be seen as a hypothetical timeline of imperative actions that extracts the result from the final state. We show one benefit of this approach: Programming by Demonstration (PbD). Another benefit is that \textit{query rewriting} falls out for free from transferring schema changes. We communicate these very preliminary results because the community may find them intriguing and controversial.
 
   \item Altogether we solve four of the eight challenge problems of schema evolution in a prior paper\cite{challenge-problems}.
 
@@ -222,7 +222,7 @@ as the motivation of our work and we hope as an inspiration for others. The conc
 We introduce action calculus in a simple and familiar setting: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}.
 
 \begin{remark}
-IDs and tombstones are invisible to both the user and the program. They only affect action transportation (and performance). We believe they are not necessary and have prototyped implementations without them (in fact Baseline currently doesn't use tombstones), but that adds a lot of complexity. We adopt them here in the interest of simplicity.
+IDs and tombstones are invisible to both the user and the program. They only affect action transfer (and performance). We believe they are not necessary and have prototyped implementations without them (in fact Baseline currently doesn't use tombstones), but that adds a lot of complexity. We adopt them here in the interest of simplicity.
 % IDs are replaced with numerical offsets. Much more path adjustment has to happen.
 \end{remark}
 
@@ -540,11 +540,11 @@ What are the versions that version control controls? We see them as the result o
 	\arrow[dotted, from=1-5, to=1-6]
 	\arrow["{b_m}", from=1-6, to=1-7]
 \end{tikzcd}\]
-Here the versions are $A$ and $B$ diverging with actions $a_i$ and $b_i$ from a common state $O$. Our approach to version control is based on the ability to \textit{transport}\footnote{It is well known that a transporter can access alternate timelines\cite{mirrormirror}} an action from one branch to another, which we define digrammatically in Figure~\ref{fig:transportation}.
+Here the versions are $A$ and $B$ diverging with actions $a_i$ and $b_i$ from a common state $O$. Our approach to version control is based on the ability to \textit{transfer} an action from one branch to another, which we define digrammatically in Figure~\ref{fig:transfer}.
 \vspace{-16pt}
 \begin{figure}[h]
 \[
-\textsf{Transport}(a_{1\ldots n}, O, b_{1\ldots m}) = b' \textrm{ in }\quad
+\textsf{Transfer}(a_{1\ldots n}, O, b_{1\ldots m}) = b' \textrm{ in }\quad
 \begin{tikzcd}[column sep = huge]
 	A_{n-1} & O & B \\
 	A_n & {O'} & {B'}
@@ -559,12 +559,12 @@ Here the versions are $A$ and $B$ diverging with actions $a_i$ and $b_i$ from a 
 	\arrow["{\mathit{adjust}_b}", dashed, from=2-2, to=2-3]
 \end{tikzcd}\]
 \vspace{-16pt}
-\caption{Transportation}
-\label{fig:transportation}
+\caption{Transfer}
+\label{fig:transfer}
 \end{figure}
 
-Transportation\footnote{In our previous publications transportation was called migration.} retracts $a_n$ backwards through all earlier actions on the $A$ timeline onto the original state $O$ and then projects that action forwards through all the actions of the $B$ timeline. The final result is the action $b'$ that yields a new version $B'$. The effect of transportation is that the final action $b'$ preserves the intention of the original action $a_n$ given all the actions traversed traveling backward in time to $O$ and then forward to $B$.
-Since transportation uses retraction it may fail, because of a dependency on an earlier action in the $A$ branch. We offer a \textit{forced transport} that chains together all the transitive dependencies.
+Transfer\footnote{In our previous publications transfer was called migration.} retracts $a_n$ backwards through all earlier actions on the $A$ timeline onto the original state $O$ and then projects that action forwards through all the actions of the $B$ timeline. The final result is the action $b'$ that yields a new version $B'$. The effect of transfer is that the final action $b'$ preserves the intention of the original action $a_n$ given all the actions traversed traveling backward in time to $O$ and then forward to $B$.
+Since transfer uses retraction it may fail, because of a dependency on an earlier action in the $A$ branch. We offer a \textit{dependency transfer} that chains together all the transitive dependencies.
 
 As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor} into two branches: branch $A$ reassigns the TODO from Jack to Jill; branch $B$ converts the assignment into a list, changes the assignment from Jack to Jacque and inserts a new assignment to Tom:
 \begin{align*}
@@ -586,18 +586,18 @@ As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor} i
     ] \\
   \end{align*}
   \vspace{-30pt}\\
-If we transport $b_2$ into $A$ the change from Jack to Jacque gets applied to the \textsf{who} field (showing the change in bold):\\
+If we transfer $b_2$ into $A$ the change from Jack to Jacque gets applied to the \textsf{who} field (showing the change in bold):\\
 \mathbox{A' =
 [e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \textbf{\quotedstring{Jacque}} \}]}.
-If we transport $a_1$ into $B$ the change from Jack to Jill gets applied to the list element containing Jack, even though it has been wrapped and shifted:\\
+If we transfer $a_1$ into $B$ the change from Jack to Jill gets applied to the list element containing Jack, even though it has been wrapped and shifted:\\
 \mathbox{B' = [
     e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is
     [ g \is \quotedstring{Tom} \comma \mathbb{1}\is \textbf{\quotedstring{Jill}}] \}
 ]}.
 
-This example demonstrates how transportation can propagate changes bidirectionally through structural changes. We offer this as a solution to challenge problem \#7 in \citet{challenge-problems}, where no plausible state invariant is found able to generate the expected behavior. Our solution relies upon action histories which let us track how locations shift through time in a way that cannot be inferred just by comparing states -- in effect the ID annotations in the state are a cache of this historical information.
+This example demonstrates how transfer can propagate changes bidirectionally through structural changes. We offer this as a solution to challenge problem \#7 in \citet{challenge-problems}, where no plausible state invariant is found able to generate the expected behavior. Our solution relies upon action histories which let us track how locations shift through time in a way that cannot be inferred just by comparing states -- in effect the ID annotations in the state are a cache of this historical information.
 
-Baseline provides higher-level version control operations as sets of transportations. All the changes in one branch can be transported to the other. Only all type or data changes can be transported. The forced transport mentioned above includes dependencies. To synchronize two branches all changes are transported from one to the other and then all changes remaining in the other branch are transported back. Note that the order in which this is done determines how conflicts are resolved, so synchronization has a direction: syncing $A$ into $B$ resolves conflicts in favor of $A$.
+Baseline provides higher-level version control operations as sets of transfers. All the changes in one branch can be transferred to the other. Or just the type or data changes can be transferreded. Dependency transfer includes transitive dependencies. To synchronize two branches all changes are transferred from one to the other and then all changes remaining in the other branch are transferred back. Note that the order in which this is done determines how conflicts are resolved, so synchronization has a direction: syncing $A$ into $B$ resolves conflicts in favor of $A$.
 
 
 % Problem of null and delete from Cambria paper? Need ListOf to do deleting on blank required values, or for a list of required values to auto-delete blanks.
@@ -606,7 +606,7 @@ Baseline provides higher-level version control operations as sets of transportat
 
 How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of actions? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. They may turn out to be more or less in agreement with intuition. We have learned that these rules are closely coupled to the semantics of the actions and offer many alternative design choices.
 
-Nevertheless there are some principles we can expect any system of transportation rules to follow. One of them is that projection and retraction should be inverses -- that transporting an action to a different branch and then back again should return it unchanged. Doing the same thing should be a symmetric relation. Unfortunately that principle is violated by the examples we have already seen where an action gets wiped out during transport into a \textsf{noop}, which will always return as a \textsf{noop}. We need to weaken the principle to say that roundtripping an action must return an action that does the same thing or less than the original. Accordingly we define an ordering on branches \mathbox{\leq}:
+Nevertheless there are some principles we can expect any system of transfer rules to follow. One of them is that projection and retraction should be inverses -- that transferring an action to a different branch and then back again should return it unchanged. Doing the same thing should be a symmetric relation. Unfortunately that principle is violated by the examples we have already seen where an action gets wiped out during transfer into a \textsf{noop}, which will always return as a \textsf{noop}. We need to weaken the principle to say that roundtripping an action must return an action that does the same thing or less than the original. Accordingly we define an ordering on branches \mathbox{\leq}:
 \[
 O; a \leq O; b \quad\textrm{iff} \quad
 \begin{tikzcd}
@@ -624,9 +624,9 @@ in other words, projection produces a fixpoint. The \textbf{Roundtrip Monotonici
 
 \subsection{Branch minimization and synthesis}
 
-We have been discussing transportation assuming we are given branching timelines. But these might be redundant: there chould be changes duplicated in both branches, either by accident or by explicit transportation. There could also be redundant changes within a branch that override earlier ones. Such redundancies are undesireable because they add noise to a visualization of differences, and in some cases can cause transportation to produce surprising results. Luckily transportation itself can be used in a simple algorithm to minimize branches.
+We have been discussing transfer assuming we are given branching timelines. But these might be redundant: there chould be changes duplicated in both branches, either by accident or by explicit transfers. There could also be redundant changes within a branch that override earlier ones. Such redundancies are undesireable because they add noise to a visualization of differences, and in some cases can cause transfer to produce surprising results. Luckily transfer itself can be used in a simple algorithm to minimize branches.
 
-Note that in Figure~\ref{fig:transportation} transportation produces on the bottom of the diagram two new timelines $\mathit{adjust}_a$ and $\mathit{adjust}_b$ branching from a new shared state $O'$. These \textit{adjusted} timelines eliminate the redundancy of the original action and its transported image. Clearly after executing a transportation we should drop the original branching timelines and use the adjusted ones instead. We can exploit this side-effect of transportation to minimize branching timelines by removing all redundancies. Given a pair of branching timelines we iterate over all the actions on both sides in time order. For each action we try to transport it to the other branch. If the transportation succeeds and its result is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the action makes no difference when transported to the other side then it isn't really a difference, and we only want to include actual differences in the branching timelines. Therefore we remove it and apply it to the shared state.
+Note that in Figure~\ref{fig:transfer} transfer produces on the bottom of the diagram two new timelines $\mathit{adjust}_a$ and $\mathit{adjust}_b$ branching from a new shared state $O'$. These \textit{adjusted} timelines eliminate the redundancy of the original action and its transferred image. Clearly after executing a transfer we should drop the original branching timelines and use the adjusted ones instead. We can exploit this side-effect of transfer to minimize branching timelines by removing all redundancies. Given a pair of branching timelines we iterate over all the actions on both sides in time order. For each action we try to transfer it to the other branch. If the transfer succeeds and its result is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the action makes no difference when transferred to the other side then it isn't really a difference, and we only want to include actual differences in the branching timelines. Therefore we remove it and apply it to the shared state.
 
 Branch minimization means we can synthesize optimal branching timelines from the action histories of any two states. A complete action history always starts from the unit value as its initial state. So all complete histories are branches from the initial state. GIven any two histories we can apply the branch minimization algorithm to synthesize optimal branching timelines for their final states. It is optimal in the sensse that the history of the shared state is maximal while the timelines branching off of it are minimal.
 
@@ -635,7 +635,7 @@ Branch minimization means we can synthesize optimal branching timelines from the
 The ability to synthesize optimal branching timelines for any two states lets us simplify version control by eliminating the \textit{repo}. In conventional version control systems the repo is a database recording versions (typically batched into user-initiated \textit{commits}), and tracking the history of branching and mergeing operations, forming a DAG of commits. The differences between two commits are calculated with \textit{3-way differencing} which depends upon finding thire last common ancestor in the DAG. As we have pointed out this can be imprecise. But the bigger problem is that the repo imposes a large burden of management and training. In particular git~\cite{ProGit} is infamous for causing confusion and frustration~\cite{perez13, church2014case}.
 
 We propose a simpler model: an artifact (database, file, directory tree, etc.) under version control will record its action history internally or in an attachment (or only store the history and derive/cache the state). These histories are append-only. To branch an alternate version of an artifact, make a copy, which will include the history up to that moment. The copies can then diverge. That's it: branches are copies. We don't need to record branching events in a repo, because we can synthesize it on need by comparing the artifact histories, and we can do so more precisely than the historical branching DAG.
-Instead of a confusion of operations (like git's merge, rebase, and cherry-pick) there is the single operation of transportation which can be grouped into larger bulk operations.
+Instead of a confusion of operations (like git's merge, rebase, and cherry-pick) there is the single operation of transfer which can be grouped into larger bulk operations.
 
 Eliminating the repo has another benefit beyond simplicity: branches of an artifact no longer need to belong to a repo. You can share a branch without sharing the whole repo. Every branch is a self-sufficient entity in an open world and can participate in overlapping and shifting webs of collaboration beyond the boundaries of a repo. Essentially we are arguing for the flexibility of the ubiquitous folk practice of sharing copies of files~\cite{Burnett14, Basman19}, with the key new feature that you can diff and merge the copies.
 %Nevertheless it must be admitted that repos and their tool ecosystems provide benefits for large projects and large teams.
