@@ -64,7 +64,10 @@
 
 \begin{document}
 
-\title{Baseline: High-fidelity Low-fuss Structural Version Control}
+\title{Baseline: Rebasing Version Control}
+% \title{Rebasing Version Control}
+% \title{Baseline: Generalizing Version Control}
+%\title{Baseline: High-fidelity Low-fuss Structural Version Control}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
 \authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
@@ -98,120 +101,76 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \begin{abstract}
 
-Action calculus is a technique of change management that generalizes conventional version control and collaborative editing systems to handle refactorings, transformations, schema evolution, and database differencing. We take the first steps of extending it into a new kind of query language. Altogether we solve four of the eight challenge problems of schema evolution identified in a prior paper.
-The theory is presented semi-formally and a prototype implementation is discussed. A playable demo is submitted as an artifact.
+% Action calculus is a technique of change management that generalizes conventional version control and collaborative editing systems to handle refactorings, transformations, schema evolution, and database differencing. We take the first steps of extending it into a new kind of query language. Altogether we solve four of the eight challenge problems of schema evolution identified in a prior paper.
+% The theory is presented semi-formally and a prototype implementation is discussed. A playable demo is submitted as an artifact.
 
-The superpower of the action calculus is transferring actions across alternate timelines while preserving their intention. The \textit{Many-worlds Interpretation of Programming}
-is a research vision to extend this power into a unified PL/DB/UI, solve the impedance mismatch problem, and integrate facilities for testing, package management, and deployment.
-Realizing that vision would in effect be a revival of the beloved Lisp/SmallTalk unified programming experience, reimagined for the modern world.
+% The superpower of the action calculus is transferring actions across alternate timelines while preserving their intention. The \textit{Many-worlds Interpretation of Programming}
+% is a research vision to extend this power into a unified PL/DB/UI, solve the impedance mismatch problem, and integrate facilities for testing, package management, and deployment.
+% Realizing that vision would in effect be a revival of the beloved Lisp/SmallTalk unified programming experience, reimagined for the modern world.
 
 \noindent\rule{\textwidth}{1pt}
 
 % Each submission must be accompanied by a plain-language abstract of up to 500 words that presents the key points in the paper in a manner understandable by experienced practitioners and researchers in nearby disciplines. The abstract should avoid mathematical symbols whenever possible, and it must address the following:
 % Context: What is the broad context of the work? What is the importance of the general research area?
-Context: The programming tech stack has inflated to mind-boggling proportions. We must seek ways to simplify programming, if only in certain domains.
+% Context: The programming tech stack has inflated to mind-boggling proportions. We must seek ways to simplify programming, if only in certain domains.
 
 % Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?
-Inquiry: Problems of change management recur in many guises throughout programming. Is this a point of attack where a general technique can leverage widespread benefits? We generalize upon prior work in version control and collaborative editing systems.
+% Inquiry: Problems of change management recur in many guises throughout programming. Is this a point of attack where a general technique can leverage widespread benefits? We generalize upon prior work in version control and collaborative editing systems.
 
 % Approach: What was done that unveiled new knowledge?
-Approach: In prior work we identified eight challenge problems of schema evolution in programming systems. We developed the action calculus initially to solve two of these. The key move was to shift the focus from states to high-level actions.
+% Approach: In prior work we identified eight challenge problems of schema evolution in programming systems. We developed the action calculus initially to solve two of these. The key move was to shift the focus from states to high-level actions.
 
 % Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?
-Knowledge: We discovered a new technique of change management that works on timelines of high-level actions, not primitive state edits. It offers a much-simplified conceptual model for version control. We iteratively designed a new GUI for visualizing nesting and relationships and differencing them.
+% Knowledge: We discovered a new technique of change management that works on timelines of high-level actions, not primitive state edits. It offers a much-simplified conceptual model for version control. We iteratively designed a new GUI for visualizing nesting and relationships and differencing them.
 
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
-Grounding: We solve four of the eight challenge problems of schema evolution identified in prior work.
-The action calculus has iterated through two prior workshop papers. Demos were used for feedback on the GUI, leading to two complete redesigns.
+% Grounding: We solve four of the eight challenge problems of schema evolution identified in prior work.
+% The action calculus has iterated through two prior workshop papers. Demos were used for feedback on the GUI, leading to two complete redesigns.
 
 % Importance: Why does this work matter?
-Importance: Version control and schema evolution are sources of much complaint that deserve improved solutions. More generally we need to research cures for the Complexity Cancer afflicting programming.
+% Importance: Version control and schema evolution are sources of much complaint that deserve improved solutions. More generally we need to research cures for the Complexity Cancer afflicting programming.
 
 \end{abstract}
 
 
 
-
-
-
 \section{Introduction}
 
-We observe that \textit{change managment} is a central problem throughout the theory and practice of programming, albeit appearing in many guises. The goal of this paper is to convert that observation into a research vision of new general purpose techniques for change management that can yield benefits across diverse aspects of programming and software development. To motivate and substantiate this vision we offer a first step: a technique of change managment called \textit{action calculus} that we apply to demonstrate several novel capabilities.
+It is hard to imagine programming without version control. But it is easy to imagine version control being simpler, and smarter, and applicable beyond text. In this paper we try to make progress on all these fronts:
 
-Problems of change management appear in many guises:
 \begin{itemize}
 
-  \item Programming ultimately happens by changing code. There are well-established tools for managing changes to source code but also much discontent with them, indicating a pent-up demand for something better (\S\ref{VC}).
-  % Because extant version control systems work at the level of text, they lose much of the intention of programmers, so for example a system-wide rename refactoring appears as many differences and conflicts rather than one.
+  \item The dominant version control system, git~\cite{ProGit}, is infamous as a cause of confusion and frustration~\cite{perez13, church2014case, xkcd1597} and is a barrier to non-technical users. Many front ends to git have sought to ease these problems, but a fundamentally simpler experience may require us to explore fundamentally different approaches.
 
-  \item Managing state change is a deep concern in the design of programming languages. A central principle of functional programming is to reject mutable state in favor of abstractions like monads and lenses. For their part, imperative languages utilize complex state management libraries. (\S\ref{PLstate})
+  \item Version control systems are ignorant of the intention behind changes. For example a rename refactoring is a single operation in the IDE but shows up as numerous scattered changes, and each of them is treated as a conflict with any other changes on the same line, even though the type system may guarantee they are not conflicts. There have been many efforts to infer information about intentions, but they are all heuristic approximations with varying levels of precision~\cite{alikhanifard24, difftastic}.
 
-  \item Much code is required to translate data changes between a UI, PL data structures, and a DB. It seems like much less code ought to be needed, but extensive research on this \textit{impedance mismatch problem} has not produced a decisive solution (\S\ref{impedance}).
+  \item Once we become accustomed to the benefits of version control we sorely miss it in other domains, for it gives us the confidence to explore alternative branches and accelerates collaboration. Why can't we version control spreadsheets or documents? For that matter why can't we version control databases? DevOps~\cite{kim2022devops} would benefit from applying version control to migrating databases, or rebuilding containers, or updating software dependencies.
 
-  \item Collaborative editing and data synchronization engines are concerned with automatically transferring and reconciling changes, applying the techniques of Operational Transformation (OT \S\ref{OT}) and Convergent Replicated DataTypes (CRDTs \S\ref{CRDT}).
-
-  \item Database schema change necessitates data migration and query rewriting. Live programming faces a similar problem when state becomes stale. There has been much research on \textit{schema evolution} but in practice it is still largely manual and ad hoc (\S \ref{schema}).
-
-  \item Tests sometimes simulate input changes, mock output changes, and check for expected changes. Tests sometimes snapshot a system state for convenient comparison, but then can't detect when it is stale.
-
-  \item Changes in dev must be deployed to prod.
-  % Why must that be more involved than switching branches?
-  Sometimes code changes are wrapped inside feature flags that turn them into runtime changes.
-  % Why can't that be an automated refactoring?
-
-  \item Changes in upstream dependencies must be installed, often via elaborate and fragile package management systems.
-  % Why must that be more complicated than accepting a pull request?
+  \item If we are allowed to speculate, could we get the benefits of version control even at runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we explore and merge alternative runtime states~\cite{warth11}?
 
 \end{itemize}
 
-% commented out criticisms above becuase they may just invite objections
-\medskip
-The list could go on. But it is all too easy to notice patterns and draw analogies. Is there some shared essence that can be distilled into a theory and leveraged in a tool to practical benefit? We conjecture yes, though with the caveat that it may be necessary to break compatibility with the established tech stack, at least at first. We believe it would still be a valuable result to show that a unified approach to change management can  simplify multiple aspects of programming, even if at first only in a Petri dish.
-Likewise we argue that performance concerns be deferred.
+Among systems that manage change there is a dichotomy between \textit{state-based} and \textit{operation-based} approaches~\cite{diff3, Shapiro11}. State-based approaches see only the before and after of a change, while operation-based approaches record the execution of a set of operations. The benefit of operation-based approaches is that they can capture more information than can be inferred from the states as in the above example of a rename refactoring.
+%For example comparing record definitions cannot distinguish a move and rename from an insert and a delete.
+The benefit of state-based approaches is that they can observe other systems from the outside.
 
-With that said we propose a new technique of change management called the \textit{action calculus}. Action calculus differs from familiar techniques in that:
-\begin{enumerate}
-
-  \item It starts by defining the data model of a class of artifacts along with a system of actions upon that model. These actions capture high-level design changes such as transformations and refactorings, not just primitive edit operations in the model (or even worse, edits to a textual syntax).
-
-  \item The history of actions on an artifact is recorded in a \textit{timeline} by monitoring the API and a GUI that manifests actions as direct manipulations.
-  Because actions know more about the user's intent than primitive edits, an action timeline contains more information than the final state or even the entire history of states.
-
-  \item Timelines can be compared to compute the differences between artifacts, expressed as a hypothetical timeline in which a maximally common ancestor was first created and then the two artifacts forked off with minimally diverging timelines. Note that this common ancestor may not have ever actually existed.
-  Differential timelines are more accurate than lower-level techniques because they take into account structural transformations and refactorings.
-
-  \item The key feature of the action calculus is the ability to \textit{transfer} individual actions across forking timelines while preserving the actions's intent (which is given a precise meaning).
-  %Familiar change management operations like \textit{merging} are implemented with transference.
-  %Differencing is also done through transference.
-  We say that transference navigates the \textit{multiverse} of alternate timelines of an artifact.
-
-  %\item transference is itself built upon the core mechanism of the calculus: \textit{time travel}, shifting an action forward or backward in time to generate an alternate timeline with the same final state.
-
-\end{enumerate}
-
-Our research conjecture is that the action calculus can be applied beneficially to the varied problems of change management in programming that were listed above, and more. Since the action calculus navigates the multiverse of alternate histories we call our conjecture the Many-worlds Interpretation of Programming.
-
-Realizing that conjecture would in effect be a revival of the beloved Lisp/SmallTalk unified programming experience, reimagined for the modern world. But for now this is a far-off research vision that we offer
-as the motivation of our work and we hope as an inspiration for others. The concrete contributions of this paper are:
+To date all version control systems have been state-based, with the pragmatic benefit of working with the established ecosystem of text-based tooling. Additionally there is a strong cultural norm in software development that editors are a matter of personal choice. In this paper we set aside these pragmatic considerations while we explore what would be possible with operation-based version control. We make the following contributions:
 
 \begin{enumerate}
 
-  \item We semi-formally define the action calculus on a simple data model. The capabilities of the calculus are explained by example. We simplify the baroque conceptual models of version control into an open world of artifacts with append-only histories where branching is just copying. Transforming between a scalar and a list is used as a point of comparison with other techniques.
+\item We introduce \textit{Operational Version Control}, which is based on histories of operations rather than states. We start in the setting of nested lists and records, supplied with rich operations including refactorings and schema migrations. By understanding these operations we are able to see many changes as independent when state-based approaches conflate them as conflicts. For example a rename operation only conflicts with an alternate renaming, not all changes on affected lines. We call this benefit \textit{high-fidelity} version control.
 
-  \item We extend the simple data model to include relationships, along with actions to handle common schema refactorings in relational databases. The motivating example is normalizing a table by splitting and deduping.
+\item Operational version control does not need a repo to record branching and merging. An artifact under version control has an append-only history of operations attached to it (or deriving it). Branching is just making a copy of the artifact with its history. Branches as copies offers the simplicity and flexibility of the ubiquitous practice of file copying but with the advantage of diffing and merging. We call this benefit \textit{low-fuss} version control.
 
-  \item We present a GUI design for visualizing nesting and relationships. It also visualizes differences even in the presence of structural transformations. We discuss the design tradeoffs explored in the iterative evolution of this GUI.
+\item We add first-class relationships to the data model, combining features of a statically typed FP language and a (nested) relational database. The operations include database normalization and schema migration. We demonstrate version control on databases that works across schema changes, and indeed can be used to manage schema migrations.
 
-  \item We submit a \textit{playable demo} as an acccompanying artifact. This demo lets you directly experience the GUI and be guided through the database normalization scenario. We hope that playable demos offer a new way to evaluate HCI research.
+\item We describe the design of a direct manipuation GUI for the combined data model. Miller columns are used to drill into nested data and cross relationhips, where each column contains an indented outline or flat table. We recount our design iterations on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. [Playable demo? Video demo?]
 
-  \item We take the first steps of extending the action calculus into a query language. Although only a preliminary prototype it demonstrates the key idea that a function can be seen as a hypothetical timeline of imperative actions that extracts the result from the final state. We show one benefit of this approach: Programming by Demonstration (PbD). Another benefit is that \textit{query rewriting} falls out for free from transferring schema changes. We communicate these very preliminary results because the community may find them intriguing and controversial.
+\item We conjecture that queries and formulas can be interpreted as timelines of operations embodied as \textit{hypothetical branches}, repurposing operational version control as a PL semantics. We explore this idea with a query language fragment (selects and joins) and demonstrate two potential benefits: (1) Programning by Demonstration where \textit{querying by schema change} in a branch can be abstracted into a formula and (2) schema change performs \textit{query rewriting}\cite{curino08} as a consequence of the version control semantics.
 
-  \item Altogether we solve four of the eight challenge problems of schema evolution in a prior paper\cite{challenge-problems}.
+\item Altogether we develop solutions to four of the eight challenge problems of schema evolution in programming systems presented in a prior paper\cite{challenge-problems}.
 
 \end{enumerate}
-
-
-
 
 
 
@@ -595,7 +554,7 @@ If we transfer $a_1$ into $B$ the change from Jack to Jill gets applied to the l
     [ g \is \quotedstring{Tom} \comma \mathbb{1}\is \textbf{\quotedstring{Jill}}] \}
 ]}.
 
-This example demonstrates how transfer can propagate changes bidirectionally through structural changes. We offer this as a solution to challenge problem \#7 in \citet{challenge-problems}, where no plausible state invariant is found able to generate the expected behavior. Our solution relies upon action histories which let us track how locations shift through time in a way that cannot be inferred just by comparing states -- in effect the ID annotations in the state are a cache of this historical information.
+This example demonstrates how transfer can propagate changes bidirectionally through structural changes. Conventional state-based veersion control would see only a big conflict and require a human to pick out and propagate smaller changes correctly. We offer this example as a solution to challenge problem \#7 in \citet{challenge-problems}, where no plausible state invariant is found able to generate the expected behavior. Our solution relies upon action histories which let us track how locations shift through time in a way that cannot be inferred just by comparing states -- in effect the ID annotations in the state are a cache of this historical information.
 
 Baseline provides higher-level version control operations as sets of transfers. All the changes in one branch can be transferred to the other. Or just the type or data changes can be transferreded. Dependency transfer includes transitive dependencies. To synchronize two branches all changes are transferred from one to the other and then all changes remaining in the other branch are transferred back. Note that the order in which this is done determines how conflicts are resolved, so synchronization has a direction: syncing $A$ into $B$ resolves conflicts in favor of $A$.
 
@@ -619,7 +578,7 @@ O; a \leq O; b \quad\textrm{iff} \quad
 	\arrow[dashed, from=2-1, to=2-2]
 \end{tikzcd}
 \]
-in other words, projection produces a fixpoint. The \textbf{Roundtrip Monotonicity} principle asserts that (a) \mathbox{\leq} is a partial order, and (b) roundtripping a timeline through a projection and retraction or the reverse results in a timeline $\leq$ the original.
+in other words, projecting $a$ through $b$ makes no difference. The \textbf{Roundtrip Monotonicity} principle asserts that (a) \mathbox{\leq} is a partial order, and (b) roundtripping a timeline through a projection and retraction or the reverse results in a timeline $\leq$ the original.
 
 
 \subsection{Branch Minimization and Synthesis}
@@ -769,16 +728,16 @@ Eliminating the repo has another benefit beyond simplicity: branches of an artif
 
 
 \section{Evaluation/Discussion}
-% pros and cons
-
 % eval: challenge problems, playable demo
 % tech dims https://tomasp.net/techdims/#footer=index,navigation;left=catalogue,list;top=catalogue,index
-% caveats, weaknesses, open problems
 
-% Need a rule spec language.
+% pros and cons
+% con: need structural editor for code, or infer structure changes using known technique
+% con: realtionship refactorings have been difficult, prob not right. family collapse not right
 % design alternatives for relational actions.
-
 % convergent evolution of insertions - move
+% Need a rule spec language.
+
 
 \section{Commencement}
 % summary and call to action

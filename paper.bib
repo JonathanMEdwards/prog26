@@ -951,7 +951,7 @@ usability study.},
 }
 
 
-@inproceedings{Khanna07,
+@inproceedings{diff3,
   abstract  = {The diff3 algorithm is widely considered the gold standard for merging uncoordinated changes to list-structured data such as text files. Surprisingly, its fundamental properties have never been studied in depth.},
   address   = {Berlin, Heidelberg},
   author    = {Khanna, Sanjeev and Kunal, Keshav and Pierce, Benjamin C.},
@@ -963,6 +963,7 @@ usability study.},
   title     = {A Formal Investigation of Diff3},
   year      = {2007}
 }
+
 @article{Kleppmann21,
   author  = {Kleppmann, Martin and Mulligan, Dominic P. and Gomes, Victor B. F. and Beresford, Alastair},
   journal = {IEEE Transactions on Parallel and Distributed Systems},
@@ -1850,15 +1851,6 @@ keywords = {Distributed objects, components, Application-aware adaptation, conta
   pages={9295-9306},
   doi={10.1109/TKDE.2022.3222538}}
 
-
-@misc{mirrormirror,
-  author       = {{Wikipedia contributors}},
-  title        = {Mirror, Mirror (Star Trek: The Original Series) --- {Wikipedia}{,} The Free Encyclopedia},
-  year         = {2025},
-  howpublished = {\url{https://en.wikipedia.org/w/index.php?title=Mirror,_Mirror_(Star_Trek:_The_Original_Series)&oldid=1294096972}},
-  note         = {[Online; accessed 23-August-2025]}
-}
-
 @article{challenge-problems,
   title     = {Schema Evolution in Interactive Programming Systems},
   volume    = {9},
@@ -1914,4 +1906,88 @@ keywords = {Distributed objects, components, Application-aware adaptation, conta
   url     = {https://www.youtube.com/watch?v=WPCxtFkLa7g},
   author  = {von Franqué, Alexander},
     note   = {[Online; accessed 29-August-2025]}
+}
+@article{myers86,
+  author     = {Myers, Eugene W.},
+  title      = {AnO(ND) difference algorithm and its variations},
+  year       = {1986},
+  issue_date = {Nov 1986},
+  publisher  = {Springer-Verlag},
+  address    = {Berlin, Heidelberg},
+  volume     = {1},
+  number     = {1–4},
+  issn       = {0178-4617},
+  url        = {https://doi.org/10.1007/BF01840446},
+  doi        = {10.1007/BF01840446},
+  abstract   = {The problems of finding a longest common subsequence of two sequencesA andB and a shortest edit script for transformingA intoB have long been known to be dual problems. In this paper, they are shown to be equivalent to finding a shortest/longest path in an edit graph. Using this perspective, a simpleO(ND) time and space algorithm is developed whereN is the sum of the lengths ofA andB andD is the size of the minimum edit script forA andB. The algorithm performs well when differences are small (sequences are similar) and is consequently fast in typical applications. The algorithm is shown to haveO(N+D2) expected-time performance under a basic stochastic model. A refinement of the algorithm requires onlyO(N) space, and the use of suffix trees leads to anO(N logN+D2) time variation.},
+  journal    = {Algorithmica},
+  month      = nov,
+  pages      = {251–266},
+  numpages   = {16},
+  keywords   = {Longest common subsequence, Shortest edit script, Edit graph, File comparison}
+}
+
+@article{alikhanifard24,
+  author     = {Alikhanifard, Pouria and Tsantalis, Nikolaos},
+  title      = {A Novel Refactoring and Semantic Aware Abstract Syntax Tree Differencing Tool and a Benchmark for Evaluating the Accuracy of Diff Tools},
+  year       = {2025},
+  issue_date = {February 2025},
+  publisher  = {Association for Computing Machinery},
+  address    = {New York, NY, USA},
+  volume     = {34},
+  number     = {2},
+  issn       = {1049-331X},
+  url        = {https://doi.org/10.1145/3696002},
+  doi        = {10.1145/3696002},
+  abstract   = {Software undergoes constant changes to support new requirements, address bugs, enhance performance, and ensure maintainability. Thus, developers spend a great portion of their workday trying to understand and review the code changes of their teammates. Abstract Syntax Tree (AST) diff tools were developed to overcome the limitations of line-based diff tools, which are used by the majority of developers. Despite the notable improvements brought by AST diff tools in understanding complex changes, they still suffer from serious limitations, such as (1) lacking multi-mapping support, (2) matching semantically incompatible AST nodes, (3) ignoring language clues to guide the matching process, (4) lacking refactoring awareness, and (5) lacking commit-level diff support. We propose a novel AST diff tool based on RefactoringMiner that resolves all aforementioned limitations. First, we improved RefactoringMiner to increase its statement mapping accuracy, and then we developed an algorithm that generates AST diff for a given commit or pull request based on the refactoring instances and pairs of matched program element declarations provided by RefactoringMiner. To evaluate the accuracy of our tool and compare it with the state-of-the-art tools, we created the first benchmark of AST node mappings, including 800 bug-fixing commits and 188 refactoring commits. Our evaluation showed that our tool achieved a considerably higher precision and recall, especially for refactoring commits, with an execution time that is comparable with that of the faster tools.},
+  journal    = {ACM Trans. Softw. Eng. Methodol.},
+  month      = jan,
+  articleno  = {40},
+  numpages   = {63},
+  keywords   = {Source code differencing, Abstract Syntax Trees, Benchmark}
+}
+@book{kim2022devops,
+  title     = {The DevOps Handbook, Second Edition: How to Create World-Class Agility, Reliability, \& Security in Technology Organizations},
+  author    = {Kim, Gene and Humble, Jez and Debois, Patrick},
+  year      = {2022},
+  publisher = {IT Revolution},
+  isbn      = {978-1942788003}
+}
+@inproceedings{warth11,
+  author    = {Warth, Alessandro and Ohshima, Yoshiki and Kaehler, Ted and Kay, Alan},
+  title     = {Worlds: controlling the scope of side effects},
+  year      = {2011},
+  isbn      = {9783642226540},
+  publisher = {Springer-Verlag},
+  address   = {Berlin, Heidelberg},
+  abstract  = {The state of an imperative program--e.g., the values stored in global and local variables, arrays, and objects' instance variables--changes as its statements are executed. These changes, or side effects, are visible globally: when one part of the program modifies an object, every other part that holds a reference to the same object (either directly or indirectly) is also affected. This paper introduces worlds, a language construct that reifies the notion of program state and enables programmers to control the scope of side effects. We investigate this idea by extending both JavaScript and Squeak Smalltalk with support for worlds, provide examples of some of the interesting idioms this construct makes possible, and formalize the semantics of property/field lookup in the presence of worlds. We also describe an efficient implementation strategy (used in our Squeak-based prototype), and illustrate the practical benefits of worlds with two case studies.},
+  booktitle = {Proceedings of the 25th European Conference on Object-Oriented Programming},
+  pages     = {179–203},
+  numpages  = {25},
+  location  = {Lancaster, UK},
+  series    = {ECOOP'11}
+}
+@techreport{Sundmark02,
+  author      = {Daniel Sundmark},
+  title       = {Replay Debugging of Embedded Real-Time Systems: A State of the Art Report},
+  year        = {2002},
+  institution = {M\"alardalen University, Department of Computer Science and Engineering},
+  number      = {Technical Report 63},
+  month       = {September},
+  url         = {http://www.es.mdu.se/pdf_publications/646.pdf}
+}
+@misc{ocallahan16,
+  title         = {Lightweight User-Space Record And Replay},
+  author        = {Robert O'Callahan and Chris Jones and Nathan Froyd and Kyle Huey and Albert Noll and Nimrod Partush},
+  year          = {2016},
+  eprint        = {1610.02144},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.PL},
+  url           = {https://arxiv.org/abs/1610.02144}
+}
+@misc{difftastic,
+  title   = {difftastic},
+  url     = {https://difftastic.wilfred.me.uk},
+  author  = {Wilfred Hughes},
+  note    = {[Online; accessed 29-August-2025]}
 }
