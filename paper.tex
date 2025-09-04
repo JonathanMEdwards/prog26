@@ -64,7 +64,9 @@
 
 \begin{document}
 
-\title{Baseline: Managing Data Evolution}
+\title{Baseline: the Language of Data Evolution}
+% \title{Baseline: Managing Data Evolution}
+% \title{Baseline: Rebasing Data}
 % \title{The Many-worlds Interpretation of Data}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
@@ -307,12 +309,16 @@ The \textsf{ListOf} operation takes any type and wraps it inside a list, and wra
 \section{Operational Differencing}
 % Op VC? Invokes text framing so wrong?
 
-In this section we introduce \textit{Operational Differencing}, which manages differences by comparing operation histories, unlike standard techniques that only compare states.
-Among techniques for managing change there is a dichotomy between \textit{state-based} and \textit{operation-based} techniques~\cite{diff3, Shapiro11, edit-lenses}. The benefit of operation-based techniques is that they can capture more information than can be inferred from the states.
-For example a \textsf{Rename} operation can appear to have made many changes throughout the state, and standard version control systems will see these changes as conflicting with any other changes on the same text lines. In contrast operational differencing sees renaming as a single change that conflicts only with renaming to a different name. The benefit of state-based techniques is that they can observe other systems from the outside, which may explain why all existing version control systems are state-based. In this section we construct operation-based version control.
+Change management systems deal with what happens when two copies/replicas/branches of something diverge.
+Among these systems there is a dichotomy between \textit{state-based} and \textit{operation-based} techniques~\cite{diff3, Shapiro11, edit-lenses}.
+In this section we introduce a new form of operation-based change management: \textit{Operational Differencing}.
+
+The benefit of operation-based techniques is that they can capture more information than can be inferred from the states.
+For example a \textsf{Rename} operation makes many changes throughout the state, and standard version control systems will see these changes as unrelated and conflicting with any other changes on the same text lines. In contrast operational differencing sees a renaming as a single change that conflicts only with renaming to a different name.
+The benefit of state-based techniques is that they can observe other systems from the outside, which may explain why all existing version control systems are state-based.
 
 \begin{remark}
-We use source code version control systems like git as a point of reference, but we do not propose to compete with them. In particular git is highly adapted to the needs of intensive development in the Unix environment and the cultural norms of Unix developers. In that context version control must be state-based in order to be compatible with existing tools. We have other goals: we want to research techniques for operation-based version control and focus first on rich data not source code.
+We discuss source code version control systems like git as a point of reference, but we do not propose to compete with them. Git is highly adapted to the needs of intensive development in the Unix environment and the cultural norms of Unix developers. In that context version control must be state-based in order to interoperate with existing tools. We have other goals: focus first on rich data not source code, and we want to explore the potential benefits of operation-based version control.
 \end{remark}
 
 We define a \textit{timeline} to be an initial state and a sequence of operations executed in order that are each valid on their input state, producing an end state.
@@ -507,7 +513,7 @@ A \textit{diff} between two states $A$ and $B$ is a pair of timelines that branc
 	\arrow["{b_m}", from=1-6, to=1-7]
 \end{tikzcd}\]
 
-The two timelines are called the \textit{branches} of the diff and we call their operations the \textit{differences}. Many version control systems use something like a diff by looking for the \textit{last common ancestor} in a tree of branching versions, which is then used for \textit{3-way diffing}. We do not do that -- we will discuss how to calculate a diff in \S\ref{diff-synth} but for the moment let us take them as given. The key operation on a diff is to
+The two timelines are called the \textit{branches} of the diff and we call their operations the \textit{differences}. Many version control systems use something like a diff by looking for the \textit{last common ancestor} in a tree of branching versions, which is then used for \textit{3-way diffing}~\cite{diff3}. We do not do that -- we will discuss how to calculate a diff in \S\ref{diff-synth} but for the moment let us take them as given. The key operation on a diff is to
 \textit{transfer} an operation from one side to another, which we define digrammatically in Figure~\ref{fig:transfer} (where we lift projection and retraction from operations to timelines in the obvious way).
 \vspace{-16pt}
 \begin{figure}[h]
@@ -567,6 +573,8 @@ If we transfer $a_1$ into $B$ the change from Jack to Jill gets applied to the l
     [ g \is \quotedstring{Tom} \comma \mathbb{1}\is \textbf{\quotedstring{Jill}}] \}
 ]}.
 
+% diagram one of these examples?
+
 This example demonstrates how transference can propagate changes bidirectionally through structural changes. Standard state-based version control techniques would see only a big conflict and require a human to pick out and propagate finer-grained changes correctly. We offer this example as a solution to challenge problem \#7~\cite{challenge-problems} which arises when we want different versions of code to interoperate even though they have different schema. The problem is that techniques like lenses~\cite{Foster2007} generate counter-intuitive behavior, for example losing the connection between Jacque and Jill. Our diagnosis is that such state-based techniques are limited because they are blind to the intentions expressed in operations. We can provide more intuitive behavior in this case because operation histories let us track how locations shift through time, which cannot be inferred just by observing states.
 
 Version control systems like git provide a variety of operations like \textit{merge}, \textit{rebase}, and \textit{cherry-pick} with subtly different semantics. Our approach is to provide the transfer function as the sole primitive and then build coarser-grained operations out of sets of transfers. For example all the changes in one branch can be transferred to the other. Just the type changes or just the data changes can be transferred. Dependency transfer batches transitive dependencies. To synchronize two branches all changes are transferred from one to the other and then all changes remaining in the other branch are transferred back. Note that synchronization has a direction: syncing $A$ into $B$ resolves all conflicts in favor of $A$.
@@ -582,11 +590,11 @@ Diff optimization lets us synthesize an optimal diff from the histories of any t
 
 \subsection{Low-fuss Version Control}
 
-The ability to synthesize diffs for any two histories eliminates the need for the \textit{repo} that version control systems use to record the tree of branching versions. The last common ancestor in this tree is used to determine the differences applied in version control operations like merging. As we have seen that can be sub-optimal. But more importantly, understanding and maintaining the repo imposes a large burden on the users of version control systems. In particular git~\cite{ProGit} is infamous for causing confusion and frustration~\cite{perez13, church2014case, xkcd1597}.
+The ability to synthesize diffs for any two histories eliminates the need for the \textit{repo} that version control systems use to record the tree of branching versions. The last common ancestor in this tree is used to determine the differences applied in version control operations like merging. As we have seen that can be sub-optimal. But more importantly, understanding and maintaining the repo imposes a large burden on the users of version control systems. Git~\cite{ProGit} is infamous for causing confusion and frustration~\cite{perez13, church2014case, xkcd1597}.
 
-We employ a simpler conceptual model: every document has an append-only history. To branch an alternate version of a document, simply copy it. The copies can then diverge, and their histories can be compared at any time to compute their diff which can then be used to transfer differences between them.
+We present the user with a simpler conceptual model: every document has an append-only history. To branch an alternate version of a document, simply copy it. The copies can then diverge, and their histories can be compared at any time to compute their diff which can then be used to transfer differences between them.
 
-Another benefit beyond simplicity is that since versions and branches no longer belong to a a repo they can be shared without sharing the whole repo. They are self-sufficient entities like files that can participate in overlapping and shifting webs of collaboration. We regain the flexibility of the ubiquitous practice of file copying~\cite{Burnett14, Basman19}, but without losing the ability to diff and merge.
+We also offer a more flexible model: since versions and branches no longer belong to a repo they can be shared without sharing the whole repo. They are like files (and likely implemented as files): independent storage units that can participate in overlapping and shifting webs of collaboration. We regain the flexibility of the ubiquitous practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
 
 \subsection{Correctness}
@@ -608,16 +616,19 @@ O; a \leq O; b \quad\textrm{iff} \quad
 \]
 in other words, projecting $a$ through $b$ makes no difference. The \textbf{Roundtrip Monotonicity} principle asserts that (a) \mathbox{\leq} is a partial order, and (b) roundtripping a timeline through a projection and retraction or the reverse will result in a timeline $\leq$ the original.
 
-Diff synthesis carries some proof obligations too: we need to show that the result is indeed optimal. We have found it is more helpful to produce a normal form, which needs to be proved.
+We also need to prove that diffs are indeed optimal.
 
+\subsection{Comparison to Operational Transformation}
 
-\subsection{OT \& CRDTs}
-% defer to releated work or handle here while hot?
+% defer to related work or handle here while hot?
+Operational Differencing is in a way a generalization of Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06}.
+OT ensures that multiple replicas distributed across a network will automatically converge to the same state regardless of the order in which operations propagate across the network. It does so by predetermining how conflicts will be resolved using distributed timestamps. We are concerned with a different problem: how to allow copies to diverge and then partially reconverge under human control picking what differences to transfer and which side to win conflicts. We assume that every document lives in some location serializing all operations on it. So we are addressing very different problems. But there is a formal similarity: our Project and Retract functions can be seen as generalizing the Inclusion Transformation (IT) and Exclusion Transformation (ET) of OT. Our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2 of OT. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and allowing retraction (exclusion) to fail because of dependencies.
+
 
 \subsection{Lenses}
 % static transform written in a complex language
+% edit lenses transform values edits not type edits.
 % can't transform transforms
-% can't calc differences
 % transform is static and outside the data
 
 \subsection{Deletion}
@@ -660,6 +671,15 @@ Diff synthesis carries some proof obligations too: we need to show that the resu
 
 
 \section{Relationships and Normalization}
+
+
+
+
+
+
+
+
+
 
 % Conjecture: first step to DB/PL unification. Can’t find previous examples of this model. ODMG closest?
 
