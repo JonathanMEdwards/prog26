@@ -15,7 +15,8 @@
 \usepackage{mathtools}
 \usepackage{csquotes}
 \usepackage{stmaryrd}
- \usepackage{quiver}
+\usepackage{quiver}
+\usepackage{hhline}
 
 % define natbib citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
@@ -64,8 +65,8 @@
 
 \begin{document}
 
-\title{Baseline: the Language of Data Evolution}
-% \title{Baseline: Managing Data Evolution}
+\title{Baseline: Managing Data Evolution}
+% \title{Baseline: the Language of Data Evolution}
 % \title{Baseline: Rebasing Data}
 % \title{The Many-worlds Interpretation of Data}
 
@@ -176,7 +177,7 @@ To date all version control systems have been state-based, with the pragmatic be
 
 
 
-\section{Rich Data Operations}
+\section{Rich Data Operations}\label{rich-data}
 
 We start with simple and familiar data structures: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}.
 
@@ -237,7 +238,7 @@ We define operations with an infix syntax, placing the target path first, then t
   \textrm{Type operations} & \rule[0pt]{0pt}{16pt}\\
   \hline
   p \textsf{ Define } T & \textrm{Define $p$ to have type $T$, initializing values}\\
-  p \textsf{ Convert } T & \textrm{Convert $p$ to atomic type $T$}\\
+  p \textsf{ Convert } T & \textrm{Convert atomically-typed $p$ to atomic type $T$}\\
 
   p \textsf{ Rename } S & \textrm{Rename record field $p$ to string $S$}\\
 
@@ -378,7 +379,7 @@ Baseline records histories by observing the operations executed in the API and i
 \end{figure}
 
 The \textsf{Project} function takes as inputs two timelines with the same initial state and produces two new timelines continuing from the input timelines and converging on the same final state. It is easier to understand this with diagrams.
-In Figure~\ref{fig:projection}(a) the arrow on the left takes the state $0$ (we elide the obvious type signature) and writes a $2$ over it. The arrow on the top wraps that $0$ into a list with one element $[\mathbb{1}\is 0]$. The projection function takes these two arrows as input and produces the two dashed arrows such that the diagram \textit{commutes}, meaning the dashed arrow operations are valid on the states at their bases, and they both produce the same state $[\mathbb{1}\is 2]$. The way this is acheived is to map the target path of the \textsf{write} operation through the \textsf{ListOf} operation. We say that the two \textsf{write} operations have the same \textit{intention} -- they ``do the same thing'' -- they convert the $0$ to a $2$, even though the $0$ has moved to a different location. That is the key principle of projection: it produce a right-hand operation that ``does the same thing'' as the left-hand operation despite the top operation having intervened.
+In Figure~\ref{fig:projection}(a) the arrow on the left takes the state $0$ (we elide the obvious type signature) and writes a $2$ over it. The arrow on the top wraps that $0$ into a list with one element $[\mathbb{1}\is 0]$. The projection function takes these two arrows as input and produces the two dashed arrows such that the diagram \textit{commutes}, meaning the dashed arrow operations are valid on the states at their bases, and they both produce the same state $[\mathbb{1}\is 2]$. The way this is acheived is to map the target path of the \textsf{write} operation through the \textsf{ListOf} operation. We say that the two \textsf{write} operations have the same \textit{intention}---they ``do the same thing''---they convert the $0$ to a $2$, even though the $0$ has moved to a different location. That is the key principle of projection: it produce a right-hand operation that ``does the same thing'' as the left-hand operation despite the top operation having intervened.
 
 Figure~\ref{fig:projection}(b) shows a messier situation. Here the left and top operations are both writing different values to the same location. This is called a \textit{conflict}. The rule is that projection attempts to preserve the intention of the left operation, even if that means overriding the top operation, which as a consequence gets converted to a \textsf{noop} on the bottom.
 
@@ -493,7 +494,7 @@ Figure~\ref{fig:projection-rules}(c) is a generic rule that identical operations
 \label{fig:retraction}
 \end{figure}
 
-The \textsf{Retract} function goes in the opposite direction of \textsf{Project}. Figure~\ref{fig:retraction}(a) shows that it starts with two timelines \textit{base} and \textit{post} and produces \textit{pre} and \textit{adjust}. We say that \textit{post} is retracted through \textit{base} into \textit{pre}. The goal as with projection is that \textit{pre} preserves the intention of \textit{post} before \textit{base} happened -- it ``does the same thing''. Likewise \textit{adjust} preserves the intention of \textit{base} but defers to the first rule.
+The \textsf{Retract} function goes in the opposite direction of \textsf{Project}. Figure~\ref{fig:retraction}(a) shows that it starts with two timelines \textit{base} and \textit{post} and produces \textit{pre} and \textit{adjust}. We say that \textit{post} is retracted through \textit{base} into \textit{pre}. The goal as with projection is that \textit{pre} preserves the intention of \textit{post} before \textit{base} happened---it ``does the same thing''. Likewise \textit{adjust} preserves the intention of \textit{base} but defers to the first rule.
 
 Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in Figure~\ref{fig:projection}(a). Often retraction is the inverse of projection as in this case, but not always, and sometimes retraction is not possible at all. In Figure~\ref{fig:retraction}(c) the list has a new element appended to it. There is no way to do the same thing before the list was created. Projection failures indicates a \textit{dependency} between operations. The \textsf{append} operation depends on the prior \textsf{ListOf} operation having created the list and cannot be retracted through it.
 
@@ -513,7 +514,7 @@ A \textit{diff} between two states $A$ and $B$ is a pair of timelines that branc
 	\arrow["{b_m}", from=1-6, to=1-7]
 \end{tikzcd}\]
 
-The two timelines are called the \textit{branches} of the diff and we call their operations the \textit{differences}. Many version control systems use something like a diff by looking for the \textit{last common ancestor} in a tree of branching versions, which is then used for \textit{3-way diffing}~\cite{diff3}. We do not do that -- we will discuss how to calculate a diff in \S\ref{diff-synth} but for the moment let us take them as given. The key operation on a diff is to
+The two timelines are called the \textit{branches} of the diff and we call their operations the \textit{differences}. Many version control systems use something like a diff by looking for the \textit{last common ancestor} in a tree of branching versions, which is then used for \textit{3-way diffing}~\cite{diff3}. We do not do that---we will discuss how to calculate a diff in \S\ref{diff-synth} but for the moment let us take them as given. The key operation on a diff is to
 \textit{transfer} an operation from one side to another, which we define digrammatically in Figure~\ref{fig:transfer} (where we lift projection and retraction from operations to timelines in the obvious way).
 \vspace{-16pt}
 \begin{figure}[h]
@@ -540,7 +541,7 @@ The two timelines are called the \textit{branches} of the diff and we call their
 Transfer\footnote{Transfer was called migrate in previous publications.} retracts $a_n$ backwards through all earlier operations on the $A$ timeline onto the original state $O$ and then projects that operation forwards through all the operations of the $B$ timeline. The final result is the operation $b'$ that yields a new version $B'$. The effect of the transfer is that the final operation $b'$ preserves the intention of the original operation $a_n$ given all the operations traversed while traveling backward in time to $O$ and then forward to $B$.
 % Borrowing a metaphor from SciFi, transfer can be seen as travel across the multiverse of alternative timelines, but in which we are also transformed along the way.
 
-In this definition we transfered the last operation of the $A$ branch -- an earlier operation can be transfered by using the corresponding truncation of $A$.
+In this definition we transfered the last operation of the $A$ branch---an earlier operation can be transfered by using the corresponding truncation of $A$.
 Since transfer uses retraction it may fail because of a dependency on an earlier operation in the $A$ branch. To handle that situation we offer a \textit{dependency transfer} function that chains together and transfers all the transitive dependencies without fail.
 
 As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor} into two branches: branch $A$ reassigns the TODO from Jack to Jill; branch $B$ converts the assignment into a list, changes the assignment from Jack to Jacque and inserts a new assignment to Tom:
@@ -584,7 +585,7 @@ Version control systems like git provide a variety of operations like \textit{me
 
 We have been discussing transference assuming we are given a diff that specifies a shared state and timelines branching off of it. The intuition is that the shared state should contain everything the two final states have in common, and the branches should represent the differences. Not all branching timelines will satisfy that intuition. There might be redundant operations duplicated in both branches, either by coincidence or by explicit transfers. There could also be redundant changes within a branch that override earlier ones. All of these sorts of redundancies are undesireable because they add noise to a visualization of differences, and in some cases can cause transfer to produce surprising results\footnote{Cherry-picking in git can cause such anomalies, which is why some recommend avoiding it~\cite{philomatics-git}}. There is a simple algorithm that can be used to produce optimal diffs using transference itself.
 
-Note that in Figure~\ref{fig:transfer} the bottom of the diagram has two new timelines $\mathit{adjust}_a$ and $\mathit{adjust}_b$ branching from a new shared state $O'$. These \textit{adjusted} timelines eliminate the redundancy of the original operation and its transferred image. Clearly after executing a transfer we should drop the original diff and use the adjusted timelines instead. In the same way we can use transfers to remove redundancies in diffs as follows. Given a pair of branching timelines we iterate over all the actions on both sides in time order. For each operation we try to transfer it to the other branch. If the transfer succeeds and its result is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the transferred operation makes no to the other side then it isn't really a difference, so we append it to the history of the shared state. After we have tried every transfer from both sides the result will be optimal in the sensse that the history of the shared state is maximal while the timelines branching off of it are minimal, without redundancies. Note however that this maximal shared state may not have ever actually occured in either history -- it is the \textit{hypothetical} ideal last common ancestor if history had happened in a fortuitously non redundant order.
+Note that in Figure~\ref{fig:transfer} the bottom of the diagram has two new timelines $\mathit{adjust}_a$ and $\mathit{adjust}_b$ branching from a new shared state $O'$. These \textit{adjusted} timelines eliminate the redundancy of the original operation and its transferred image. Clearly after executing a transfer we should drop the original diff and use the adjusted timelines instead. In the same way we can use transfers to remove redundancies in diffs as follows. Given a pair of branching timelines we iterate over all the actions on both sides in time order. For each operation we try to transfer it to the other branch. If the transfer succeeds and its result is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the transferred operation makes no to the other side then it isn't really a difference, so we append it to the history of the shared state. After we have tried every transfer from both sides the result will be optimal in the sensse that the history of the shared state is maximal while the timelines branching off of it are minimal, without redundancies. Note however that this maximal shared state may not have ever actually occured in either history---it is the \textit{hypothetical} ideal last common ancestor if history had happened in a fortuitously non redundant order.
 
 Diff optimization lets us synthesize an optimal diff from the histories of any two states. A history always starts from the unit value as its initial state. So all histories are branches from the initial state and we just optimize that primordial diff.
 
@@ -601,7 +602,7 @@ We also offer a more flexible model: since versions and branches no longer belon
 
 How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. They may turn out to be more or less in agreement with intuition. We have learned that these rules are closely coupled to the semantics of the operations and offer many alternative design choices.
 
-Nevertheless there are some principles we can expect any system of transfer rules to follow. One of them is that projection and retraction should be inverses -- that transferring an operation to a different branch and then back again should return it unchanged. After all ``doing the same thing'' semms like a symmetric relation. Unfortunately we have aleady seen examples where an operation gets wiped out during transfer into a \textsf{noop}, which will always return as a \textsf{noop}. Therefore we weaken the principle to say that roundtripping an operation must return an operation that does the same thing or less than the original. To make that precise we define an ordering on branches \mathbox{\leq}:
+Nevertheless there are some principles we can expect any system of transfer rules to follow. One of them is that projection and retraction should be inverses---that transferring an operation to a different branch and then back again should return it unchanged. After all ``doing the same thing'' semms like a symmetric relation. Unfortunately we have aleady seen examples where an operation gets wiped out during transfer into a \textsf{noop}, which will always return as a \textsf{noop}. Therefore we weaken the principle to say that roundtripping an operation must return an operation that does the same thing or less than the original. To make that precise we define an ordering on branches \mathbox{\leq}:
 \[
 O; a \leq O; b \quad\textrm{iff} \quad
 \begin{tikzcd}
@@ -670,18 +671,189 @@ OT ensures that multiple replicas distributed across a network will automaticall
 
 
 
-\section{Relationships and Normalization}
+
+
+\section{Database Evolution}
+% \section{Relationships}
+% \section{Relational Databases}
+
+\begin{figure}
+\begin{subfigure}[b]{35em}\vspace{0pt}
+  \sffamily
+  \small
+  \begin{tabular}{ r|l|r|r|l|l|}
+  \multicolumn{2}{l}{orders:}\\
+     \hhline{~-----}
+     ID & item & quantity & ship\_date & name & address \\
+     \hhline{~=====}
+
+     $e_1$ & Anvil & 1 & 2/3/23 & Wile E Coyote & 123 Desert Station \\
+     \hhline{~-----}
+     $e_2$ & Dynamite & 2 & & Daffy Duck & White Rock Lake \\
+     \hhline{~-----}
+     $e_3$ & Bird Seed & 1 & & Wile E Coyote & 123 Desert Station \\
+     \hhline{~-----}
+  \end{tabular}
+  \caption{Single orders table}
+  \label{fig:tables-single}
+\end{subfigure}
+\\[-0.5em]~\\
+\begin{subfigure}[b]{40em}\vspace{0pt}
+  \sffamily
+  \small
+  \begin{tabular}{ r|l|r|r|r|cr|l|l|}
+  \multicolumn{2}{l}{orders:}&\multicolumn{4}{l}{}&\multicolumn{2}{l}{customers:}\\
+     \hhline{~----~~--}
+     ID & item & quantity & ship\_date & customer && ID & name & address \\
+     \hhline{~====~~==}
+
+     $e_1$ & Anvil & 1 & 2/3/23 & $\rightarrow\!e_1$ && $e_1$ & Wile E Coyote & 123 Desert Station \\
+     \hhline{~----~~--}
+     $e_2$ & Dynamite & 2 & & $\rightarrow\!e_2$ && $e_2$ & Daffy Duck & White Rock Lake \\
+     \hhline{~----~~--}
+     $e_3$ & Bird Seed & 1 & & $\rightarrow\!e_3$ && $e_3$ & Wile E Coyote & 123 Desert Station \\
+     \hhline{~----~~--}
+  \end{tabular}
+  \caption{Split orders and customers tables}
+  \label{fig:tables-split}
+\end{subfigure}
+\\[-0.5em]~\\
+\begin{subfigure}[b]{40em}\vspace{0pt}
+  \sffamily
+  \small
+  \begin{tabular}{ r|l|r|r|r|cr|l|l|}
+  \multicolumn{2}{l}{orders:}&\multicolumn{4}{l}{}&\multicolumn{2}{l}{customers:}\\
+     \hhline{~----~~--}
+     ID & item & quantity & ship\_date & customer && ID & name & address \\
+     \hhline{~====~~==}
+
+     $e_1$ & Anvil & 1 & 2/3/23 & $\rightarrow\!e_1$ && $e_1$ & Wile E Coyote & 123 Desert Station \\
+     \hhline{~----~~--}
+     $e_2$ & Dynamite & 2 & & $\rightarrow\!e_2$ && $e_2$ & Daffy Duck & White Rock Lake \\
+     \hhline{~----~~--}
+     $e_3$ & Bird Seed & 1 & & $\rightarrow\!e_1$ && \multicolumn{3}{l}{}$e_3$\\
+     \hhline{~----~~~~}
+  \end{tabular}
+  \caption{Deduped customers}
+  \label{fig:tables-dedup}
+\end{subfigure}
+\caption{Table schema change}
+\label{fig:tables}
+\end{figure}
+\begin{figure}
+% relationship syntax table
+% \vspace{-4em}
+\tcbox{
+\[ \begin{array}{r@{\ }l|r@{\ }l|r@{\ }l|l}
+  \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
+  \hline
+
+  & \rightarrow\! p & & \rightarrow\! E & & \rightarrow\! *
+  & \textrm{link into list } p \\
+
+  % multi-link
+  % & \rightarrow\! p & & \rightarrow\! [ E \  \dots ] & & \rightarrow\! []
+  % & \textrm{link into list } p \\
+\end{array}\]
+}
+  \caption{Additional database syntax}
+  \label{fig:db-syntax}
+\end{figure}
+\begin{figure}
+% relationship operations table
+% \vspace{-4em}
+\tcbox{
+\[
+% \hspace{-22pt}
+\begin{array}{l|l}
+  \textrm{Value operations} & \\
+  \hline
+
+  p \textsf{ link } E & \textrm{Link to element } E \textsf{ (unlink if $*$)} \\
+
+  % multi-link
+  % p \textsf{ link } E & \textrm{Link to element } E \\
+  % p \textsf{ unlink } E & \textrm{Unlink from element } E \\
+  \hline
+
+  \textrm{Type operations} & \rule[0pt]{0pt}{16pt}\\
+  \hline
+
+  p \textsf{ Link } p' & \textrm{Define $p$ as link to list $p'$} \\
+
+  p \textsf{ Split } p' & \textrm{Split from column $p$ creating linked table $p'$}\\
+  p \textsf{ Join } & \textrm{Join link column $p$ deleteing linked table}\\
+
+\end{array}\]
+}
+  \caption{Additional database operations}
+  \label{fig:db-operations}
+\end{figure}
+
+In this section we apply Operational Differencing to the problem of \textit{schema evolution} in relational databases. We do this by adding relational database features into our data types and operations.
+We use as a running example \textit{Challenge Problem \#2: Extract Entity}~\cite{challenge-problems}. Figure~\ref{fig:tables-single} shows a table of orders for the Acme Corporation. A database professional will immediately see a problem: the customer name and address is duplicated across all orders by the same customer, so any changes to that information would need to be duplicated.
+Database textbooks teach to avoid this sort of problem by properly \textit{normalizing} the schema before adding any data. However in practice the need for schema changes often arises after there is data, which must then be \textit{migrated} into the changed schema. There is a plethora of tools and DSLs and research projects to assist in schema migration (see \S\ref{schema-evolution}) but in practice it typically comes down to writing custom SQL code.
+
+One approach a SQL migration program could take is to populate a new \textsf{customers} table from a query projecting out the \textsf{name} and \textsf{address} columns and excluding duplicates. Then it would need to generate primary keys for the deduped customers (the name cannot be the primary key because it is mutable). A new column \textsf{customer} would be added to \textsf{orders} declared as a foreign key containing the customer's primary key. Finally the \textsf{name} and \textsf{address} columns in the \textsf{orders} table would be dropped.
+
+To perform the migration in Baseline we first need to add support for relational data.
+We already support tables: they are lists of records, where the elements of the list are the rows and the fields of the record are the columns, which are homogeneously typed as in a relational database. We need to add \textit{relationships} between tables, which relational databases model through primary and foreign keys. We take a different approach.
+Instead of primary keys exposed as user data fields we annotate list elements with IDs that are unique, permanent, and opaque. Instead of foreign keys we add the \textit{link} data type in Figure~\ref{fig:db-syntax}: the type of a link defines the table (or list) it ranges over; the value of a link is an element ID in that range, or $*$ for a null link. We also add the operations defined in Figure~\ref{fig:db-operations}.
+
+The first step in evolving the Acme database is to \textsf{Split} out a \textsf{Customers} table with the following operations starting from the state in Figure~\ref{fig:tables-single}:
+\[
+\begin{array}{l}
+\{ \textsf{orders}\is [ \textit{orders}\ldots]\} \exec\\
+\ldotp \textsf{ Append } \textsf{customers} \exec \\
+\textsf{orders}\ldotp * \ldotp \textsf{name Split customers} \exec \\
+\textsf{orders}\ldotp * \ldotp \textsf{name Rename } \quotedstring{customer}
+\end{array}\]
+(1) The \textsf{Append} operation adds a \textsf{customers} field to hold the new table. (2) The \textsf{Split} operation then splits the \textsf{orders} tables in two starting at the \textsf{name} column, copying those columns into the \textsf{customers} table, the rows of which are given the same IDs as in the \textsf{orders} table.
+The original \textsf{name} column in \textsf{orders} is replaced with links to the corresponding \textsf{customers} rows.
+(3) The \textsf{Rename} operation renames the links column to be \textsf{customer}\footnote{Abusing notation by conflating the name and ID}.
+The result is shown in Figure~\ref{fig:tables-split}.
+
+The last step of this database evolution is to de-duplicate the customers, for which we use the \textsf{move} operation from Figure~\ref{fig-operations}. Thus:
+\[
+\textsf{customers}\ldotp e_3 \textsf{ move } \textsf{customers}\ldotp e_1
+\]
+The \textsf{move} operation merges $e_3$ into $e_1$, resulting in the state shown in  Figure~\ref{fig:tables-dedup}. Note that the order for Bird Seed has had its link to $e_3$ forwarded to $e_1$. This completes the schema evolution.
+
+\begin{remark}
+  The \textit{Impedance Mismatch Problem}~\cite{Chen1996} is the fact that PLs and DBs use very different data models, requiring a lot of ad hoc code to translate between them. The Baseline project wants to avoid this problem by developing a unified data model. However that goal is tangential to the subject of this paper so we have included the bare minimum. We believe a fuller unified model should include:
+  \begin{itemize}
+    \item Sum types and type aliases.
+    \item Set-valued links and multiplicity/integrity constraints on them.
+    \item Virtual inverse links.
+    \item Declarative deduplication op instead of explicit \textsf{move} ops.
+    \item Nested tables and deep links into them.
+    \item Generalizing Split/Join into a complete set of nested table ops.
+  \end{itemize}
+\end{remark}
+
+
+\subsection{Database Version Control}
+
+Schema evolution is typically implemented as a one-time one-way event, which becomes problematic when there are multiple replicas of the database in production. Operational Differencing is more flexible because it can transfer changes forward through the schema evolution and backwards as long as they aren't dependent on the schema evolution itself. This could allow distributed migrations to happen asynchronously.
+The scheme evolution operations themselves can be transfered between copies of a database, so migrating a database instance can be done by pulling in the type changes from the dev branch instead of an elaborate DevOps procedure.
+
+For example say that the Order Fullfillment department at Acme Corporation is happy with the old version of the database because they don't have to do a query to find the customer name and address. So they don't want to deploy the schema changes made by the Customer Relationship department. They could instead continue to use the old database and transfer updates to new database. Likewise when a new order is entered in the new database it can be transferred to fulfillment in its unnormalized form. But new orders to new customers can't be transferred backwards because customer creation is dependent on the \textsf{Split} operation creating the customers table. In those cases the new order will transfer back with blank name and address fields. This problem is an instance of the classic \textit{View Update Problem}\cite{Bancilhon81, Foster2007}. With that caveat we offer this as a solution to \textit{Challenge Problem \#6: Divergence Control for Extract Entity}~\cite{challenge-problems}.
+
+Even with the limitations on view updates, Operational Differencing brings many of the advantages of version control to the domain of databases. It is possible to calculate the precise differences between two database instances despite intervening schema changes. It is always possible to transfer all the differences from one to the other, and often possible to transfer individual differences.
 
 
 
+\section{Queries as Branches}
+% \section{Queries as Hypothetical Timelines}
 
 
 
+% Challenge #3: Code Co-evolution for Extract Entity
 
 
 
-
-% Conjecture: first step to DB/PL unification. Can’t find previous examples of this model. ODMG closest?
+\subsection{PbD}
+\subsection{Query Rewriting via Projection}
 
 
 
@@ -700,12 +872,6 @@ OT ensures that multiple replicas distributed across a network will automaticall
 % beef up playable demo clain im contributions
 
 
-
-\section{Queries as Hypothetical Timelines}
-% could model source text as lists lists chars, but that is boring
-
-\subsection{PbD}
-\subsection{Query Rewriting via Projection}
 
 
 \section{Related Work}
@@ -752,9 +918,11 @@ OT ensures that multiple replicas distributed across a network will automaticall
 
 \subsection{CRDT}\label{CRDT}
 
-\subsection{Schema Evolution}\label{schema}
-% just ref challenge problems paper?
+\subsection{Schema Evolution}\label{schema-evolution}
+% copy from challenge problems paper
 
+% \citet{ambler06} propose in \textit{Refactoring Databases} the \textit{Split Table} refactoring and sketch the SQL needed. \citet(curino08) include \textit{Decompose Table} in a set of \textit{Schema Modification Operations} that automate evolutions. In our example these actions would split out the \textit{name} and \textit{address} columns into a new \textit{Customers} table and add a \textit{order} column as a \textit{foreign key} copying the \textit{primary key} of the order. But that does not solve the problem---we still have duplicate customers.
+% BiDEL is only thing that solves problem
 
 
 \section{Evaluation/Discussion}
