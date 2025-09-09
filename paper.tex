@@ -66,6 +66,7 @@
 \begin{document}
 
 \title{Baseline: Managing Data Evolution}
+% \title{Baseline: Operational Data Evolution}
 % \title{Baseline: the Language of Data Evolution}
 % \title{Baseline: Rebasing Data}
 % \title{The Many-worlds Interpretation of Data}
@@ -663,6 +664,7 @@ OT ensures that multiple replicas distributed across a network will automaticall
 
 
 \subsection{Undo}
+% needed for query rewriting where it is called inverse
 % https://cedanet.com.au/ceda/ot/selective-undo.php
 % maybe appendix
 
@@ -781,7 +783,7 @@ OT ensures that multiple replicas distributed across a network will automaticall
 
   p \textsf{ Link } p' & \textrm{Define $p$ as link to list $p'$} \\
 
-  p \textsf{ Split } p' & \textrm{Split from column $p$ creating linked table $p'$}\\
+  p \textsf{ Split } p' & \textrm{Split at column $p$ creating linked table $p'$}\\
   p \textsf{ Join } & \textrm{Join link column $p$ deleteing linked table}\\
 
 \end{array}\]
@@ -796,8 +798,10 @@ Database textbooks teach to avoid this sort of problem by properly \textit{norma
 
 One approach a SQL migration program could take is to populate a new \textsf{customers} table from a query projecting out the \textsf{name} and \textsf{address} columns and excluding duplicates. Then it would need to generate primary keys for the deduped customers (the name cannot be the primary key because it is mutable). A new column \textsf{customer} would be added to \textsf{orders} declared as a foreign key containing the customer's primary key. Finally the \textsf{name} and \textsf{address} columns in the \textsf{orders} table would be dropped.
 
-To perform the migration in Baseline we first need to add support for relational data.
-We already support tables: they are lists of records, where the elements of the list are the rows and the fields of the record are the columns, which are homogeneously typed as in a relational database. We need to add \textit{relationships} between tables, which relational databases model through primary and foreign keys. We take a different approach.
+To perform the migration in Baseline we first need to add support for relational data into our types and operations.
+We already support tables: they are lists of records, where the elements of the list are the rows and the fields of the record are the columns, which are homogeneously typed as in a relational database.
+Throughout the rest of the paper we will refer to any Baseline document containing tables as a \textit{database}.
+What is missing so far is \textit{relationships} between tables, which relational databases model through primary and foreign keys. We take a more PL-oriented approach.
 Instead of primary keys exposed as user data fields we annotate list elements with IDs that are unique, permanent, and opaque. Instead of foreign keys we add the \textit{link} data type in Figure~\ref{fig:db-syntax}: the type of a link defines the table (or list) it ranges over; the value of a link is an element ID in that range, or $*$ for a null link. We also add the operations defined in Figure~\ref{fig:db-operations}.
 
 The first step in evolving the Acme database is to \textsf{Split} out a \textsf{Customers} table with the following operations starting from the state in Figure~\ref{fig:tables-single}:
@@ -820,7 +824,7 @@ The last step of this database evolution is to de-duplicate the customers, for w
 The \textsf{move} operation merges $e_3$ into $e_1$, resulting in the state shown in  Figure~\ref{fig:tables-dedup}. Note that the order for Bird Seed has had its link to $e_3$ forwarded to $e_1$. This completes the schema evolution.
 
 \begin{remark}
-  The \textit{Impedance Mismatch Problem}~\cite{Chen1996} is the fact that PLs and DBs use very different data models, requiring a lot of ad hoc code to translate between them. The Baseline project wants to avoid this problem by developing a unified data model. However that goal is tangential to the subject of this paper so we have included the bare minimum. We believe a fuller unified model should include:
+  The \textit{Impedance Mismatch Problem}~\cite{Chen1996} is the fact that PLs and DBs use very different data models, requiring a lot of ad hoc code to translate between them. In our experience it is a large source of inessential complexity in application software. The Baseline project wants to avoid this problem by developing a data model coherently unifying the needs of both PLs and DBs. However that goal is tangential to the subject of this paper so we have included the bare minimum. We believe a fuller unified model should additionally include:
   \begin{itemize}
     \item Sum types and type aliases.
     \item Set-valued links and multiplicity/integrity constraints on them.
@@ -837,31 +841,157 @@ The \textsf{move} operation merges $e_3$ into $e_1$, resulting in the state show
 Schema evolution is typically implemented as a one-time one-way event, which becomes problematic when there are multiple replicas of the database in production. Operational Differencing is more flexible because it can transfer changes forward through the schema evolution and backwards as long as they aren't dependent on the schema evolution itself. This could allow distributed migrations to happen asynchronously.
 The scheme evolution operations themselves can be transfered between copies of a database, so migrating a database instance can be done by pulling in the type changes from the dev branch instead of an elaborate DevOps procedure.
 
-For example say that the Order Fullfillment department at Acme Corporation is happy with the old version of the database because they don't have to do a query to find the customer name and address. So they don't want to deploy the schema changes made by the Customer Relationship department. They could instead continue to use the old database and transfer updates to new database. Likewise when a new order is entered in the new database it can be transferred to fulfillment in its unnormalized form. But new orders to new customers can't be transferred backwards because customer creation is dependent on the \textsf{Split} operation creating the customers table. In those cases the new order will transfer back with blank name and address fields. This problem is an instance of the classic \textit{View Update Problem}\cite{Bancilhon81, Foster2007}. With that caveat we offer this as a solution to \textit{Challenge Problem \#6: Divergence Control for Extract Entity}~\cite{challenge-problems}.
+For example say that the Order Fullfillment department at Acme Corporation is happy with the old version of the database because they don't have to do a query to find the customer name and address. So they don't want to deploy the schema changes made by the Customer Relationship department. They could instead continue to use the old database and transfer updates to new database. Likewise when a new order is entered in the new database it can be transferred to Fulfillment in its unnormalized form. But new orders to new customers can't be transferred backwards because customer creation is dependent on the \textsf{Split} operation creating the customers table. In those cases the new order will transfer back with blank name and address fields. This problem is an instance of the classic \textit{View Update Problem}\cite{Bancilhon81, Foster2007}. With that caveat we offer this as a solution to \textit{Challenge Problem \#6: Divergence Control for Extract Entity}~\cite{challenge-problems}.
 
 Even with the limitations on view updates, Operational Differencing brings many of the advantages of version control to the domain of databases. It is possible to calculate the precise differences between two database instances despite intervening schema changes. It is always possible to transfer all the differences from one to the other, and often possible to transfer individual differences.
 
 
 
-\section{Queries as Branches}
+
+
+\section{Operational Queries}
+% \section{Queries as Branches}
 % \section{Queries as Hypothetical Timelines}
+% \section{Query by Schema Change}
+% \section{Query by Sculpting}
+
+We saw in the last section that although the Fullfillment department preferred the unnormalized view of orders it would be forced to migrate to the normalized database to stay fully in sync with all changes. Relational databases offer a better solution: \textit{queries}. In this section we discuss how Operational Differencing can build queries and updatable views. But the simplest solution doesn't even require a query. We can just make a copy of the database and denormalize it.
+
+The \textsf{Join} operation in Figure~\ref{fig:db-operations} is the inverse of \textsf{Split}. It replaces a link column with all the columns of the linked table, copying their contents to match the link values\footnote{With the set-valued links discussed earlier it becomes a relational join operation.}. Specifically:
+\[
+\textsf{orders}\ldotp * \ldotp \textsf{customer Join} \\
+\]
+resulting in exactly the database we started with in Figure~\ref{fig:tables-single}. It is easy for the Fullfillment department to do this because the Baseline GUI surfaces operations as direct manipulation actions (\S\ref{GUI}). Now Fullfillment can operate in their preferred schema and bidirectionally sync changes with the normalized primary database in the Cutomer Relationship department. Bidirectional sync works now when it didn't before because the \textsf{Join} operation does not create any dependencies. We could make this even more convenient by automatically syncing on all changes. We have essentially built an updatable view by doing schema changes on a copy, and we did this in the GUI without programming.
+
+This example raises an interesting question: could we generalize it into a general technqiue for building queries? Instead of writing a query in an abstract language we make a copy of the database and perform schema change operations in the GUI to sculpt it into the desired form. This sculpted database acts like a query if we automatically sync changes from the primary database into it. Such forward projection is always possible. We can also update the scultped view and sync those changes back to the real database, limited to those cases where a traditional query-based view would also be updatable. ``Querying by Sculpting''~\cite{sculpin} is a new kind of \textit{Programming by Demonstration}~\cite{cypher93-pbd}. We can draw another analogy: query languages are a classic example of pure functional programming that avoids mutation. Pure functions can often be implemented by copying values, mutating them, then returning the result. That is exactly what we are
+doing: computing a query by mutating a copy of the database. We call this approach \textit{Operational Queries}.
+
+It takes more than a join operation to make a query language. We can take another step with a simple predicate. When the Fullfillment department ships an order it sets the date in the \textsf{ship\_date} field. They would like a view showing just the pending orders, which lack a ship date. We can further sculpt the view with the \textsf{deletePresent} operation in Figure~\ref{fig:query-operations}:
+\[
+\textsf{orders}\ldotp * \ldotp \textsf{ship\_date deletePresent} \\
+\]
+that deletes all orders with a ship date, producing the desired view. When a ship date is entered into this view the change will transfer back into the primary database, which has the effect of dropping that order from the recalculated view.
+%\footnote{Operation transfer computes the changes in both directions incrementally which is called \textit{incremental view maintenance}\cite{gupta93}. However performance is not a design goal at this time.}
+General purpose queries require a general language of predicates. We could embed a predicate as a Boolean-valued computed column and then use the \textsf{removePresent/removeAbsent} operations. That would be consistent with the philosophy of ``querying by sculpting'' but we plan to also explore adding predicates into the language of operations.
 
 
 
-% Challenge #3: Code Co-evolution for Extract Entity
+\begin{figure}
+% query syntax
+% \vspace{-4em}
+\tcbox{
+\[ \begin{array}{r@{\ }l|r@{\ }l|r@{\ }l|l}
+  \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
+  \hline
+
+  & \langle \mathit{op}\fatsemi \ldots \ \uparrow\! p \rangle &&
+  % \textrm{return value} && \textrm{return value} &
+  && &
+  \textrm{Formula returning value at $p$.} \\
+
+\end{array}\]
+}
+  \caption{Additional query syntax}
+  \label{fig:query-syntax}
+\end{figure}
+\begin{figure}
+% query operations
+% \vspace{-4em}
+\tcbox{
+\[
+% \hspace{-22pt}
+\begin{array}{l|l}
+  \textrm{Value operations} & \\
+  \hline
+
+  p \textsf{ deletePresent } E & \textrm{Delete rows where column $p$ has non-initial value.} \\
+  p \textsf{ deleteAbsent } E & \textrm{Delete rows where column $p$ has initial value.} \\
+
+  % p \textsf{ return} & \textrm{Return value at $p$ as result of query.}\\
+
+  \hline
+
+  \textrm{Type operations} & \rule[0pt]{0pt}{16pt}\\
+  \hline
+
+\end{array}\]
+}
+  \caption{Additional query operations}
+  \label{fig:query-operations}
+\end{figure}
+
+
+\subsection{Formulas as Future Timelines}
+
+We have seen how an auto-synced branch of a database can serve as a query on it, and how we can build that query by sculpting the datanase in the GUI. But that leaves us having to hop around different branches to view queries. It is more convenient to embed multiple queries into the database itself as \textit{formulas}. A field defined as a formula has its value computed by evaluating the formula, like a formula in a spreadsheet cell. Matching the form of operational queries, we define a formula as a type in Figure~\ref{fig:query-syntax} consisting of a timeline of operations ending with a \textit{return path}. A formula is evaluated by executing the timeline of operations starting with the current state of the database and then returning the final value of the return path. In this sense a formula is a \textit{future timeline}---it is a speculatively executed branch off of the present that returns a value from that hypothetical future.
+
+Formulas as future timelines makes it easy to program them by demonstration. In the previous example we created a query by making a copy of the database and ``sculpting'' it into the result we wanted with \textsf{Join} and \textsf{deletePresent} operations. The GUI lets us view the differences between the original and sculpted databases (\S\ref{GUI-diffs}). The GUI provides a command \textit{Transfer into Formula} that takes the timeline of differences on one branch of the diff and injects them as a formula into the other side. The return path of the formula is set from the location currently selected in the GUI. Applied to the previous example after selecting the denormalized \textsf{orders} table it will append a formula to the normalized database with the operations:
+\[
+\begin{array}{l}
+  \ldotp \textsf{ Append } \textit{new-formula} \exec\\
+  \textit{new-formula} \textsf{ Define } \\
+  \quad \langle
+\textsf{orders}\ldotp * \ldotp \textsf{customer Join} \exec
+\textsf{orders}\ldotp * \ldotp \textsf{ship\_date deletePresent} \exec
+\!\!\uparrow \textsf{orders}
+  \rangle\\
+\end{array}
+\]
+Henceforth the \textit{new-formula} field's value will be the result of a query  denormalizing and filtering the current contents of the orders table.
+
+% The \textit{Transfer into Formula} command essentially converts a branch into a future. Instead of autosyncing that branch from the primary database to evaluate a query, the same operations are lazily executed as a speculative branch off of the current state of the primary database whenever the value of the formula is requested.
+
+% The similarity between diff branches and formulas is exploited by the GUI to display the content of a formula: it is displayed like a diff.
+
+% formula as computed column to be path-mapped into instance - * replaced
+% but examples are all global - skip?
 
 
 
-\subsection{PbD}
-\subsection{Query Rewriting via Projection}
+\subsection{Query Rewriting}
+
+There is another benefit to treating queries as timelines of operations: operation transfer gives us \textit{query rewriting}~\cite{curino08, herrmann17} for free. When a database schema changes, some of the queries written for it may need to change too. This scenario is called forward rewriting---backward rewriting is backporting a query on a new schema to an older one.
+In practice query rewriting is done manually by SQL programmers. The just-cited research adapts query optimization techniques to build specialized rewriting algorithms.
+Baseline handles query rewriting with the existng machinery of transferance: the \textsf{Define} operation defining the query is transfered through the schema change operations.
+
+For example, we can transfer the prior example query on the normalized database back into the original unnormalized database we started with in Figure~\ref{fig:tables-single}. Doing so retracts the \textsf{Define} operation backwards through the \textsf{Split} operation that normalized the database (ignoring the deduping \textsf{move} because it is a value operation that doesn't affect the schema). Retracting a formula definition simply retracts its timeline of operations. Thus the formula's \textsf{Join} operation retracts through the database branch's \textsf{Split} operation, which cancels out into a \textsf{noop}, which is dropped from the formula. The formula's \textsf{deletePresent} operations retracts without change. The result of the transfer is executed on the original database:
+\[
+\begin{array}{l}
+  \ldotp \textsf{ Append } \textit{new-formula} \exec\\
+  \textit{new-formula} \textsf{ Define } \\
+  \quad \langle
+\textsf{orders}\ldotp * \ldotp \textsf{ship\_date deletePresent} \exec
+\!\!\uparrow \textsf{orders}
+  \rangle\\
+\end{array}
+\]
+which defines a query to filter the pending orders from the unnormalized orders table.
+
+Forward rewriting is more complicated. To transfer a formula forward through a type operation it's inverse is prepended to the formula. The intuition here is that the query was written to apply to the old schema, so to preserve its meaning in the new schema we must first convert the schema back again
+\footnote{This algorithm can clutter up the formula with irrelevant schema changes. We simplify them out by retracting the original formula back through them as much as possible, retaining only those schema changes the formula is dependent upon.}.
+For example if we were to transfer the prior backported query forward again through the \textsf{Split} operation then the inverse operation \textsf{Join} would be prepended to the \textsf{deletePresent} operation, recnstructing the original query.
+
+Forward rewriting is automatically done on all formulas within a database whenever a type operation (i.e., schema change) is executed on it. We offer this as a solution to \textit{Challenge Problem \#3: Code Co-evolution for Extract Entity}~\cite{challenge-problems}.
 
 
 
-\section{Visualizing and Manipulating the Multiverse}
+
+
+
+% \subsection{Future Work}
+% This example is a far cry from a fully fledged query language, much less a general programming language. We hope however that it is an argues that the idea of formulas as futures is promising enough to deserves further work.
+% full query and formula language
+% query editing
+% bidirectional execution with limits
+% branches as branches
+
+
+
+\section{Visualizing and Manipulating the Multiverse}\label{GUI}
 
 \subsection{Exploring Structure}
 
-\subsection{Finding Commonality}
+\subsection{Visualizing Diffs}\label{GUI-diffs}
 % hard problem is seeing what \textit{hasn't} changed, just moved
 
 \subsection{Design Tradeoffs}
@@ -881,6 +1011,8 @@ Even with the limitations on view updates, Operational Differencing brings many 
 % Challenge problem paper.
 % I&S: cambria, peritext, universal version control
 % Braid time machine https://braid.org/time-machines
+
+% cite hatra/paint papers!
 
 \subsection{Version Control}\label{VC}
 
@@ -935,6 +1067,8 @@ Even with the limitations on view updates, Operational Differencing brings many 
 % design alternatives for relational actions.
 % convergent evolution of insertions - move
 % Need a rule spec language.
+
+% Does query rewriting hold up? Frankly this solution seems a bit too easy---we wonder if it will hold up as we fill out the capabilities of the query language.
 
 
 \section{Commencement}
