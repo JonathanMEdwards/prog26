@@ -65,11 +65,10 @@
 
 \begin{document}
 
-\title{Baseline: Managing Data Evolution}
-% \title{Baseline: Operational Data Evolution}
+\title{Baseline: Fluent Data Evolution}
+% \title{Baseline: Managing Data Evolution}
 % \title{Baseline: the Language of Data Evolution}
 % \title{Baseline: Rebasing Data}
-% \title{The Many-worlds Interpretation of Data}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
 \authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
@@ -138,49 +137,48 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \section{Introduction}
 
-It is hard to imagine programming without version control. But it is easy to imagine version control being simpler, and smarter, and applicable beyond text. In this paper we try to make progress on all these fronts:
+Data changes in multiple dimensions. It changes over time, indeed often that is the whole point. It changes over space between replicas and variant copies. Data also changes in meaning: as needs and understanding evolve so must the shape and interpretation of the data. In practice we handle these different dimensions of change with different technologies embodying different abstractions. Programming languages, file systems, and databases all have distinct ways of managing data change over time. There are many different techniques for distributing, replicating, and collaborating on data, although few for version control of data. There is a plethora of tools to assist in evolving the schema of databases.
 
-\begin{itemize}
+Baseline is a research project to develop a general purpose mechanism for data change in all these dimensions, and to provide it conveniently to both programs and humans.
+To ground this research we first surveyed one of the most problematic aspects of data change: schema evolution. In \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems} we and others formulated a suite of challenge problems across a range of contexts, including traditional database programming as well as live front-end programming, model-driven development, and collaboration in computational documents.
+% This paper reports solutions to four of those eight challenge problems.
 
-  \item The dominant version control system, git~\cite{ProGit}, is infamous as a cause of confusion and frustration~\cite{perez13, church2014case, xkcd1597} and is a barrier to non-technical users. Many front ends to git have sought to ease these problems, but a fundamentally simpler experience may require us to explore fundamentally different approaches.
+Systems that manage change split into \textit{state-based} and \textit{operation-based} approaches~\cite{diff3, Shapiro11, edit-lenses}. State-based approaches observe only the before and after of (sequences of) changes, while operation-based approaches record the execution sequence over a set of possible operations.
+The benefit of state-based approaches is that since they observe from the outside they more easily interoprerate with existing tools.
+The benefit of operation-based approaches is that they can capture user intentions more accurately than can be inferred from the states. For example comparing states of a table schema, a move followed by a rename is indistinguishable from a delete followed by an insert, but that makes a big difference to the data.
 
-  \item Version control systems are ignorant of the intention behind changes. For example a rename refactoring is a single operation in the IDE but shows up as numerous scattered changes, and each of them is treated as a conflict with any other changes on the same line, even though the type system may guarantee they are not conflicts. There have been many efforts to infer information about intentions, but they are all heuristic approximations with varying levels of precision~\cite{alikhanifard24, difftastic}.
-
-  \item Once we become accustomed to the benefits of version control we sorely miss it in other domains, for it gives us the confidence to explore alternative branches and accelerates collaboration. Why can't we version control spreadsheets or documents? For that matter why can't we version control databases? DevOps~\cite{kim2022devops} would benefit from applying version control to migrating databases, or rebuilding containers, or updating software dependencies.
-
-  \item If we are allowed to speculate, could we get the benefits of version control even at runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we explore and merge alternative runtime states~\cite{warth11}?
-
-\end{itemize}
-
-Among systems that manage change there is a dichotomy between \textit{state-based} and \textit{operation-based} approaches~\cite{diff3, Shapiro11}. State-based approaches see only the before and after of a change, while operation-based approaches record the execution of a set of operations. The benefit of operation-based approaches is that they can capture more information than can be inferred from the states as in the above example of a rename refactoring.
-%For example comparing record definitions cannot distinguish a move and rename from an insert and a delete.
-The benefit of state-based approaches is that they can observe other systems from the outside.
-
-To date all version control systems have been state-based, with the pragmatic benefit of working with the established ecosystem of text-based tooling. Additionally there is a strong cultural norm in software development that editors are a matter of personal choice. In this paper we set aside these pragmatic considerations while we explore the possible benefits of operation-based version control. We make the following contributions:
+In this paper we introduce a new technique for operation-based change management: \textit{Operational Differencing}\textcolor{red}{ (or Operational Version Control?)}, which we define on a \textit{rich data} model curated from the features of programming languages and databases. Our contributions are:
 
 \begin{enumerate}
 
-\item We introduce \textit{Operational Version Control}, which is based on histories of operations rather than states. We start in the setting of nested lists and records, supplied with rich operations including refactorings and schema migrations. By understanding these operations we are able to see many changes as independent when state-based approaches conflate them as conflicts. For example a rename operation only conflicts with an alternate renaming, not all changes on affected lines. We call this benefit \textit{high-fidelity} version control.
+\item We introduce \textit{Operational Differencing} by example in the familiar setting of typed nested lists and records supplied with a rich set of operations
+including refactorings. We define the primitive transformations \textit{projection} and \textit{retraction} and the rules governing them.
 
-\item Operational version control does not need a repo to record branching and merging. An artifact under version control has an append-only history of operations attached to it (or deriving it). Branching is just making a copy of the artifact with its history. Branches as copies offers the simplicity and flexibility of the ubiquitous practice of file copying but with the advantage of diffing and merging. We call this benefit \textit{low-fuss} version control.
+\item Using these primitives we reconstruct the key features of version control: \textit{diffing} and \textit{transfer} (a specialization of merging more like cherry-picking). Because our technique is operation-based we are able to do fine-grained diffing and merging despite intervening structural transformations.
 
-\item We add first-class relationships to the data model, combining features of a statically typed FP language and a (nested) relational database. The operations include database normalization and schema migration. We demonstrate version control on databases that works across schema changes, and indeed can be used to manage schema migrations.
+\item We simplify version control by eliminating the repo: artifacts under version control have an append-only history of operations attached to them. Branching is just making a copy of the artifact with its history, which can then diverge. There is no need for a repo to record a graph of branches and merges because that can be synthesized from the histories on need. By liberating branches and versions of artifacts from the repo they can be shared freely and independently, much like the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
-\item We describe the design of a direct manipuation GUI for the combined data model. Miller columns are used to drill into nested data and cross relationhips, where each column contains an indented outline or flat table. We recount our design iterations on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. [Playable demo? Video demo?]
+\item We enrich the data model to incorporate relational databases, including operations for schema change and normalization. We demonstrate version control on databases that works across schema changes, and can also be used to manage schema migrations.
 
-\item We conjecture that queries and formulas can be interpreted as timelines of operations embodied as \textit{hypothetical branches}, repurposing operational version control as a PL semantics. We explore this idea with a query language fragment (selects and joins) and demonstrate two potential benefits: (1) Programning by Demonstration where \textit{querying by schema change} in a branch can be abstracted into a formula and (2) schema change performs \textit{query rewriting}\cite{curino08} as a consequence of the version control semantics.
+\item We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations, in a form of Programming by Demonstration~\cite{cypher93-pbd}. We develop this idea on a query language fragment (select and join). We take the idea further to propose that queries are an embedded \textit{future timeline} of operations treated as a speculatively executed branch off of the present state that returns a value from its \textit{hypothetical future}.
 
-\item Altogether we develop solutions to four of the eight challenge problems of schema evolution in programming systems presented in a prior paper\cite{challenge-problems}.
+\item Operationalized queries have a perhaps surprising benefit: we get query rewriting~\cite{curino08, herrmann17} during schema change for free from the machinery of operational differencing.
+
+\item We demonstrate Baseline's direct manipuation GUI that allows both data and schema changes to be executed interactively. Miller columns~\cite{miller-columns} are used to drill into nested data and across relationhips, with each column containing an indented outline or a flat table. We discuss our design iteration on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. A demo video is available.
+
+\item Altogether we develop solutions to four of the eight challenge problems in \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
 
 \end{enumerate}
 
+The superpower of our operation-based approach to data evolution and version control is that compared to traditional state-based approaches, it captures user intentions more accurately. We also seek to make these capabilities more concrete and interactive through a direct manipulation UI, reducing as much as we can the need for ad hoc scripting. Throughout, we seek to make things easier by complexity hiding and conceptual simplification.
+In summary, the goal of Baseline is to support all the dimensions of data evolution \textit{fluently}---with ease and accuracy.
 
 
 
 
 \section{Rich Data Operations}\label{rich-data}
 
-We start with simple and familiar data structures: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}.
+We start with familiar data structures: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}.
 
 \begin{remark}
 IDs and tombstones are invisible to both the user and the program (for example, equality ignores them). They simplify the evolution management operations discussed in the next section. We believe they are not necessary and can be seen as a cache of information derived from the operation history (and in fact the current prototype does not use tombstones). We adopt them here in the interest of simplicity.
@@ -309,7 +307,6 @@ The \textsf{ListOf} operation takes any type and wraps it inside a list, and wra
 
 
 \section{Operational Differencing}
-% Op VC? Invokes text framing so wrong?
 
 Change management systems deal with what happens when two copies/replicas/branches of something diverge.
 Among these systems there is a dichotomy between \textit{state-based} and \textit{operation-based} techniques~\cite{diff3, Shapiro11, edit-lenses}.
@@ -320,7 +317,7 @@ For example a \textsf{Rename} operation makes many changes throughout the state,
 The benefit of state-based techniques is that they can observe other systems from the outside, which may explain why all existing version control systems are state-based.
 
 \begin{remark}
-We discuss source code version control systems like git as a point of reference, but we do not propose to compete with them. Git is highly adapted to the needs of intensive development in the Unix environment and the cultural norms of Unix developers. In that context version control must be state-based in order to interoperate with existing tools. We have other goals: focus first on rich data not source code, and we want to explore the potential benefits of operation-based version control.
+We discuss source code version control systems like git as a point of reference, but we do not propose to compete with them. Git is highly adapted to the needs of intensive development in the Unix environment and the cultural norms of Unix developers. In that context version control must be state-based in order to interoperate with existing tools and practices. Instead of source code we focus on rich data, where we believe operation-based version control offers important benefits.
 \end{remark}
 
 We define a \textit{timeline} to be an initial state and a sequence of operations executed in order that are each valid on their input state, producing an end state.
@@ -539,7 +536,7 @@ The two timelines are called the \textit{branches} of the diff and we call their
 \label{fig:transfer}
 \end{figure}
 
-Transfer\footnote{Transfer was called migrate in previous publications.} retracts $a_n$ backwards through all earlier operations on the $A$ timeline onto the original state $O$ and then projects that operation forwards through all the operations of the $B$ timeline. The final result is the operation $b'$ that yields a new version $B'$. The effect of the transfer is that the final operation $b'$ preserves the intention of the original operation $a_n$ given all the operations traversed while traveling backward in time to $O$ and then forward to $B$.
+Transfer\footnote{Transfer was called migrate in previous publications~\cite{edwards21, edwards22}.} retracts $a_n$ backwards through all earlier operations on the $A$ timeline onto the original state $O$ and then projects that operation forwards through all the operations of the $B$ timeline. The final result is the operation $b'$ that yields a new version $B'$. The effect of the transfer is that the final operation $b'$ preserves the intention of the original operation $a_n$ given all the operations traversed while traveling backward in time to $O$ and then forward to $B$.
 % Borrowing a metaphor from SciFi, transfer can be seen as travel across the multiverse of alternative timelines, but in which we are also transformed along the way.
 
 In this definition we transfered the last operation of the $A$ branch---an earlier operation can be transfered by using the corresponding truncation of $A$.
@@ -594,9 +591,9 @@ Diff optimization lets us synthesize an optimal diff from the histories of any t
 
 The ability to synthesize diffs for any two histories eliminates the need for the \textit{repo} that version control systems use to record the tree of branching versions. The last common ancestor in this tree is used to determine the differences applied in version control operations like merging. As we have seen that can be sub-optimal. But more importantly, understanding and maintaining the repo imposes a large burden on the users of version control systems. Git~\cite{ProGit} is infamous for causing confusion and frustration~\cite{perez13, church2014case, xkcd1597}.
 
-We present the user with a simpler conceptual model: every document has an append-only history. To branch an alternate version of a document, simply copy it. The copies can then diverge, and their histories can be compared at any time to compute their diff which can then be used to transfer differences between them.
+We present the user with a simpler conceptual model: every document has an append-only history. To branch an alternate version of a document, simply copy it. The copies can then diverge, and their histories can be compared at any time to compute their diff which can then be used to transfer differences between them. The copy event is recorded in the copies' history, as are incoming transfers, so given a set of documents we can construct a graph like that of a repo.
 
-We also offer a more flexible model: since versions and branches no longer belong to a repo they can be shared without sharing the whole repo. They are like files (and likely implemented as files): independent storage units that can participate in overlapping and shifting webs of collaboration. We regain the flexibility of the ubiquitous practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
+This approach is more flexible: since versions and branches no longer belong to a repo they can be shared without sharing the whole repo. They are like files (and likely implemented as files): independent storage units that can participate in overlapping and shifting webs of collaboration. They can be emailed. We regain the flexibility of the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
 
 \subsection{Correctness}
@@ -620,11 +617,14 @@ in other words, projecting $a$ through $b$ makes no difference. The \textbf{Roun
 
 We also need to prove that diffs are indeed optimal.
 
+% this is invalid for dupping edits like a join
+% correctness -> laws
+
 \subsection{Comparison to Operational Transformation}
 
 % defer to related work or handle here while hot?
 Operational Differencing is in a way a generalization of Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06}.
-OT ensures that multiple replicas distributed across a network will automatically converge to the same state regardless of the order in which operations propagate across the network. It does so by predetermining how conflicts will be resolved using distributed timestamps. We are concerned with a different problem: how to allow copies to diverge and then partially reconverge under human control picking what differences to transfer and which side to win conflicts. We assume that every document lives in some location serializing all operations on it. So we are addressing very different problems. But there is a formal similarity: our Project and Retract functions can be seen as generalizing the Inclusion Transformation (IT) and Exclusion Transformation (ET) of OT. Our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2 of OT. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and allowing retraction (exclusion) to fail because of dependencies.
+OT ensures that multiple replicas distributed across a network will automatically converge to the same state regardless of the order in which operations propagate across the network. It does so by predetermining how conflicts will be resolved using distributed timestamps. We are concerned with a different problem: how to allow copies to diverge and then partially reconverge under human control, picking what differences to transfer and which side to win conflicts. We assume that every document lives in some host serializing all operations on it. So we are addressing very different problems. But there is a formal similarity: our Project and Retract functions can be seen as generalizing the Inclusion Transformation (IT) and Exclusion Transformation (ET) of OT. Our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2 of OT. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and allowing retraction (exclusion) to fail because of dependencies.
 
 
 \subsection{Lenses}
@@ -667,6 +667,8 @@ OT ensures that multiple replicas distributed across a network will automaticall
 % needed for query rewriting where it is called inverse
 % https://cedanet.com.au/ceda/ot/selective-undo.php
 % maybe appendix
+
+% laws: retract to noop
 
 % Reasonable to expect inverses. Why don't I have them? Lossy operations. Undo must reconstruct loss info in a group
 % Inverses of ListFrom and ListInto? ListInto wants to use first not an ID.
@@ -807,7 +809,7 @@ Instead of primary keys exposed as user data fields we annotate list elements wi
 The first step in evolving the Acme database is to \textsf{Split} out a \textsf{Customers} table with the following operations starting from the state in Figure~\ref{fig:tables-single}:
 \[
 \begin{array}{l}
-\{ \textsf{orders}\is [ \textit{orders}\ldots]\} \exec\\
+\{ \textsf{orders}\is [ \ldots ]\} \exec\\
 \ldotp \textsf{ Append } \textsf{customers} \exec \\
 \textsf{orders}\ldotp * \ldotp \textsf{name Split customers} \exec \\
 \textsf{orders}\ldotp * \ldotp \textsf{name Rename } \quotedstring{customer}
@@ -849,7 +851,7 @@ Even with the limitations on view updates, Operational Differencing brings many 
 
 
 
-\section{Operational Queries}
+\section{Operationalized Queries}
 % \section{Queries as Branches}
 % \section{Queries as Hypothetical Timelines}
 % \section{Query by Schema Change}
@@ -863,10 +865,12 @@ The \textsf{Join} operation in Figure~\ref{fig:db-operations} is the inverse of 
 \]
 resulting in exactly the database we started with in Figure~\ref{fig:tables-single}. It is easy for the Fullfillment department to do this because the Baseline GUI surfaces operations as direct manipulation actions (\S\ref{GUI}). Now Fullfillment can operate in their preferred schema and bidirectionally sync changes with the normalized primary database in the Cutomer Relationship department. Bidirectional sync works now when it didn't before because the \textsf{Join} operation does not create any dependencies. We could make this even more convenient by automatically syncing on all changes. We have essentially built an updatable view by doing schema changes on a copy, and we did this in the GUI without programming.
 
-This example raises an interesting question: could we generalize it into a general technqiue for building queries? Instead of writing a query in an abstract language we make a copy of the database and perform schema change operations in the GUI to sculpt it into the desired form. This sculpted database acts like a query if we automatically sync changes from the primary database into it. Such forward projection is always possible. We can also update the scultped view and sync those changes back to the real database, limited to those cases where a traditional query-based view would also be updatable. ``Querying by Sculpting''~\cite{sculpin} is a new kind of \textit{Programming by Demonstration}~\cite{cypher93-pbd}. We can draw another analogy: query languages are a classic example of pure functional programming that avoids mutation. Pure functions can often be implemented by copying values, mutating them, then returning the result. That is exactly what we are
-doing: computing a query by mutating a copy of the database. We call this approach \textit{Operational Queries}.
+This example raises an interesting question: could we generalize it into a general technqiue for building queries? Instead of writing a query in an abstract language we make a copy of the database and perform schema change and data mutation operations in the GUI to \textit{sculpt}~\cite{sculpin} it into the desired form. This sculpted database acts like a query if we automatically sync changes from the primary database into it. Such forward projection is always possible. We can also update the sculpted view and sync those changes back to the real database, limited to those cases where a traditional query-based view would also be updatable.
 
-It takes more than a join operation to make a query language. We can take another step with a simple predicate. When the Fullfillment department ships an order it sets the date in the \textsf{ship\_date} field. They would like a view showing just the pending orders, which lack a ship date. We can further sculpt the view with the \textsf{deletePresent} operation in Figure~\ref{fig:query-operations}:
+We call this ide \textit{operationalized queries}. It can be seen as a form of \textit{Programming by Demonstration}~\cite{cypher93-pbd}. We can draw another analogy: query languages are a classic example of pure functional programming that avoids mutation. Pure functions can often be implemented by copying values, mutating them, then returning the result. That is exactly what we are
+doing: computing a query by mutating a copy of the database.
+
+It takes more than a join operation to make a query language. We can take another step with a simple selection predicate. When the Fullfillment department ships an order it sets the date in the \textsf{ship\_date} field. They would like a view showing just the pending orders, which lack a ship date. We can further sculpt the view with the \textsf{deletePresent} operation in Figure~\ref{fig:query-operations}:
 \[
 \textsf{orders}\ldotp * \ldotp \textsf{ship\_date deletePresent} \\
 \]
@@ -1067,6 +1071,9 @@ Forward rewriting is automatically done on all formulas within a database whenev
 % design alternatives for relational actions.
 % convergent evolution of insertions - move
 % Need a rule spec language.
+% transfer laws unclear
+% We defer scaling issues to future work, focusing at first on small-scale data.
+% query/formula editing
 
 % Does query rewriting hold up? Frankly this solution seems a bit too easy---we wonder if it will hold up as we fill out the capabilities of the query language.
 
@@ -1077,6 +1084,8 @@ Forward rewriting is automatically done on all formulas within a database whenev
 % VC for everything, all the way down and up, Lisp redux
 % full unified QL/PL with VC semantics, test, supply chain, deployment
 
+%   \item If we are allowed to speculate, could we get the benefits of version control even at runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we explore and merge alternative runtime states~\cite{warth11}?
+% DevOps~\cite{kim2022devops} would benefit from applying version control to migrating databases, or rebuilding containers, or updating software dependencies.
 
 
 \printbibliography
