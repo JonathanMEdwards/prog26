@@ -66,9 +66,6 @@
 \begin{document}
 
 \title{Baseline: Fluent Data Evolution}
-% \title{Baseline: Managing Data Evolution}
-% \title{Baseline: the Language of Data Evolution}
-% \title{Baseline: Rebasing Data}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
 \authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
@@ -102,50 +99,62 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \begin{abstract}
 
-% operation calculus is a technique of change management that generalizes conventional version control and collaborative editing systems to handle refactorings, transformations, schema evolution, and database differencing. We take the first steps of extending it into a new kind of query language. Altogether we solve four of the eight challenge problems of schema evolution identified in a prior paper.
-% The theory is presented semi-formally and a prototype implementation is discussed. A playable demo is submitted as an artifact.
+  Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new operation-based technique for managing data in terms of high-level operations including refactorings and schema changes. We use operational differencing to construct an operation-based form of version control over data structures from programming languages and relational databases.
 
-% The superpower of the operation calculus is transferring actions across alternate timelines while preserving their intention. The \textit{Many-worlds Interpretation of Programming}
-% is a research vision to extend this power into a unified PL/DB/UI, solve the impedance mismatch problem, and integrate facilities for testing, package management, and deployment.
-% Realizing that vision would in effect be a revival of the beloved Lisp/SmallTalk unified programming experience, reimagined for the modern world.
+  This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared like spreedsheet files, except with the added benefit of diffing and merging.
+
+  We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea on a query language fragment containing selects and joins.
+  Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. Operationalized queries get rewriten to accomodate schema change ``for free'' by the machinery of operational differencing.
+
+  We discuss the design of Baseline's direct manipuation GUI supporting interactive schema changes as well as diffing and merging between databases.
+  Altogether we develop solutions to four of the eight challenge problems of schema evolution identified in a recent paper.
 
 \noindent\rule{\textwidth}{1pt}
 
-% Each submission must be accompanied by a plain-language abstract of up to 500 words that presents the key points in the paper in a manner understandable by experienced practitioners and researchers in nearby disciplines. The abstract should avoid mathematical symbols whenever possible, and it must address the following:
 % Context: What is the broad context of the work? What is the importance of the general research area?
-% Context: The programming tech stack has inflated to mind-boggling proportions. We must seek ways to simplify programming, if only in certain domains.
+Context: Many technologies have been developed to manage data, yet we still lack convenient general purpose tools for schema evolution and version control of data.
 
 % Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?
-% Inquiry: Problems of change management recur in many guises throughout programming. Is this a point of attack where a general technique can leverage widespread benefits? We generalize upon prior work in version control and collaborative editing systems.
+Inquiry: Can the problems of schema evolution and data version control be solved with an operation-based technique? We build upon research on Schema Modification Operations and Operational Transformation.
 
 % Approach: What was done that unveiled new knowledge?
-% Approach: In prior work we identified eight challenge problems of schema evolution in programming systems. We developed the operation calculus initially to solve two of these. The key move was to shift the focus from states to high-level actions.
+Approach: Most tools for data management are state-based, for pragamtic reasons of interoperability. We are exploring what is possible with an operation-based approach.
 
 % Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?
-% Knowledge: We discovered a new technique of change management that works on timelines of high-level actions, not primitive state edits. It offers a much-simplified conceptual model for version control. We iteratively designed a new GUI for visualizing nesting and relationships and differencing them.
+Knowledge: Operational Differencing is able to do fine-grained version control of data even through intervening schema changes. It can be used to synthesize more precisely the information traditionally maintained in a repo, which greatly simplifies the user's conceptual model and increases flexibility. Miller columns cen be used to visualize rich data structures. Coordinated selection can be used to visualize differences across schema changes.
 
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
-% Grounding: We solve four of the eight challenge problems of schema evolution identified in prior work.
-% The operation calculus has iterated through two prior workshop papers. Demos were used for feedback on the GUI, leading to two complete redesigns.
+Grounding: In prior work with others we identified eight challenge problems of schema evolution in interactive programming systems. Those challenge problems guided this research and led to solutions for four of them.
+The GUI was iterated through three versions by feedback from demonstrations.
 
 % Importance: Why does this work matter?
-% Importance: Version control and schema evolution are sources of much complaint that deserve improved solutions. More generally we need to research cures for the Complexity Cancer afflicting programming.
+Importance: Our technique improves upon the known methods for schema evolution and version control of data. Our conjecture that queries can be operationalized could open up an unexplored space of query language designs.
 
 \end{abstract}
 
 
+\section{\textcolor{red}{Possible Titles}}
+\textcolor{red}{
+  \begin{itemize}
+  \item Baseline: Fluent Data Evolution
+  \item Baseline: Fluent Data Management
+  \item Baseline: Operation-based Data Evolution
+  \item Baseline: Schema Evolution and Version Control for Data
+  \end{itemize}
+  }
+
 
 \section{Introduction}
 
-Data changes in multiple dimensions. It changes over time, indeed often that is the whole point. It changes over space between replicas and variant copies. Data also changes in meaning: as needs and understanding evolve so must the shape and interpretation of the data. In practice we handle these different dimensions of change with different technologies embodying different abstractions. Programming languages, file systems, and databases all have distinct ways of managing data change over time. There are many different techniques for distributing, replicating, and collaborating on data, although few for version control of data. There is a plethora of tools to assist in evolving the schema of databases.
+Data changes in multiple dimensions. Data changes over time, indeed often that is the whole point. Data changes over space between replicas and variant copies. Data also changes in meaning: as needs and understanding evolve so must the shape and interpretation of the data. In practice we handle these different dimensions of change with different technologies embodying different abstractions. Programming languages, file systems, and databases all have distinct ways of managing data change over time. There are many different techniques for distributing, replicating, and collaborating on data, although surprisingly few for version control of data. There is a plethora of tools to assist in evolving the schema of databases, but in practice it often requires ad hoc programming.
 
 Baseline is a research project to develop a general purpose mechanism for data change in all these dimensions, and to provide it conveniently to both programs and humans.
 To ground this research we first surveyed one of the most problematic aspects of data change: schema evolution. In \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems} we and others formulated a suite of challenge problems across a range of contexts, including traditional database programming as well as live front-end programming, model-driven development, and collaboration in computational documents.
-% This paper reports solutions to four of those eight challenge problems.
 
-Systems that manage change split into \textit{state-based} and \textit{operation-based} approaches~\cite{diff3, Shapiro11, edit-lenses}. State-based approaches observe only the before and after of (sequences of) changes, while operation-based approaches record the execution sequence over a set of possible operations.
+Systems that manage change split into \textit{state-based} and \textit{operation-based} approaches~\cite{diff3, Shapiro11, edit-lenses}. State-based approaches observe only the before and after of changes, while operation-based approaches record the execution of a set of possible operations.
 The benefit of state-based approaches is that since they observe from the outside they more easily interoprerate with existing tools.
 The benefit of operation-based approaches is that they can capture user intentions more accurately than can be inferred from the states. For example comparing states of a table schema, a move followed by a rename is indistinguishable from a delete followed by an insert, but that makes a big difference to the data.
+% We are exploring what is possible with an operation-based approach while defering the concerns of interoperability.
 
 In this paper we introduce a new technique for operation-based change management: \textit{Operational Differencing}\textcolor{red}{ (or Operational Version Control?)}, which we define on a \textit{rich data} model curated from the features of programming languages and databases. Our contributions are:
 
@@ -156,22 +165,25 @@ including refactorings. We define the primitive transformations \textit{projecti
 
 \item Using these primitives we reconstruct the key features of version control: \textit{diffing} and \textit{transfer} (a specialization of merging more like cherry-picking). Because our technique is operation-based we are able to do fine-grained diffing and merging despite intervening structural transformations.
 
-\item We simplify version control by eliminating the repo: artifacts under version control have an append-only history of operations attached to them. Branching is just making a copy of the artifact with its history, which can then diverge. There is no need for a repo to record a graph of branches and merges because that can be synthesized from the histories on need. By liberating branches and versions of artifacts from the repo they can be shared freely and independently, much like the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
+\item We simplify version control by eliminating the repo: artifacts under version control have an append-only history of operations attached to them. Branching is just making a copy of the artifact with its history, which can then diverge. There is no need for a repo to record a graph of branches and merges because that can be synthesized from the histories on need, and can be done so optimally in a well-defined sense. By liberating branches and versions of artifacts from the repo they can be shared freely and independently, much like the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
 \item We enrich the data model to incorporate relational databases, including operations for schema change and normalization. We demonstrate version control on databases that works across schema changes, and can also be used to manage schema migrations.
 
-\item We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations, in a form of Programming by Demonstration~\cite{cypher93-pbd}. We develop this idea on a query language fragment (select and join). We take the idea further to propose that queries are an embedded \textit{future timeline} of operations treated as a speculatively executed branch off of the present state that returns a value from its \textit{hypothetical future}.
+\item We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations, in a form of Programming by Demonstration~\cite{cypher93-pbd}. We develop this idea on a query language fragment containing selects and joins. Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. This conjecture could open up an unexplored space of query language designs.
 
-\item Operationalized queries have a perhaps surprising benefit: we get query rewriting~\cite{curino08, herrmann17} during schema change for free from the machinery of operational differencing.
+\item Operationalized queries have a perhaps surprising benefit: query rewriting~\cite{curino08, herrmann17} during schema change falls out ``for free'' from the machinery of operational differencing.
 
-\item We demonstrate Baseline's direct manipuation GUI that allows both data and schema changes to be executed interactively. Miller columns~\cite{miller-columns} are used to drill into nested data and across relationhips, with each column containing an indented outline or a flat table. We discuss our design iteration on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. A demo video is available.
+\item We demonstrate Baseline's direct manipuation GUI that supports interactive data and schema changes as well as diffing and merging between databases.
+Miller columns~\cite{miller-columns} are used to drill into nested data and across relationhips, with each column containing an indented outline or a flat table. We discuss our design iteration on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. A demo video is available.
 
 \item Altogether we develop solutions to four of the eight challenge problems in \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
 
 \end{enumerate}
 
-The superpower of our operation-based approach to data evolution and version control is that compared to traditional state-based approaches, it captures user intentions more accurately. We also seek to make these capabilities more concrete and interactive through a direct manipulation UI, reducing as much as we can the need for ad hoc scripting. Throughout, we seek to make things easier by complexity hiding and conceptual simplification.
+The superpower of our operation-based approach to schema evolution and version control is that, compared to traditional state-based approaches, it captures user intentions more accurately. We also seek to make these capabilities more concrete and interactive through a direct manipulation UI, reducing as much as we can the need for ad hoc scripting. Throughout, we seek to make things easier though conceptual simplification.
 In summary, the goal of Baseline is to support all the dimensions of data evolution \textit{fluently}---with ease and accuracy.
+
+
 
 
 
@@ -1074,9 +1086,12 @@ Forward rewriting is automatically done on all formulas within a database whenev
 % transfer laws unclear
 % We defer scaling issues to future work, focusing at first on small-scale data.
 % query/formula editing
+% structure editor
+% We are exploring what is possible with an operation-based approach while defering the concerns of efficiency and interoperability.
 
 % Does query rewriting hold up? Frankly this solution seems a bit too easy---we wonder if it will hold up as we fill out the capabilities of the query language.
 
+% evalueate against existing techniques for schema evolution and version control. Or does that go in related work?
 
 \section{Commencement}
 % summary and call to operation
