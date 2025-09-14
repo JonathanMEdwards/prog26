@@ -17,6 +17,7 @@
 \usepackage{stmaryrd}
 \usepackage{quiver}
 \usepackage{hhline}
+\usepackage{circledtext}
 
 % define natbib citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
@@ -99,11 +100,11 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \begin{abstract}
 
-  Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new operation-based technique for managing data in terms of high-level operations including refactorings and schema changes. We use operational differencing to construct an operation-based form of version control over data structures from programming languages and relational databases.
+  Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes. We use operational differencing to construct an operation-based form of version control over data structures from programming languages and relational databases.
 
   This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared like spreedsheet files, except with the added benefit of diffing and merging.
 
-  We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea on a query language fragment containing selects and joins.
+  We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea into a query language fragment containing selects and joins.
   Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. Operationalized queries get rewriten to accomodate schema change ``for free'' by the machinery of operational differencing.
 
   We discuss the design of Baseline's direct manipuation GUI supporting interactive schema changes as well as diffing and merging between databases.
@@ -139,6 +140,7 @@ Importance: Our technique improves upon the known methods for schema evolution a
   \item Baseline: Fluent Data Evolution
   \item Baseline: Fluent Data Management
   \item Baseline: Operation-based Data Evolution
+  \item Baseline: Operation-based Data Management
   \item Baseline: Schema Evolution and Version Control for Data
   \end{itemize}
   }
@@ -605,7 +607,7 @@ The ability to synthesize diffs for any two histories eliminates the need for th
 
 We present the user with a simpler conceptual model: every document has an append-only history. To branch an alternate version of a document, simply copy it. The copies can then diverge, and their histories can be compared at any time to compute their diff which can then be used to transfer differences between them. The copy event is recorded in the copies' history, as are incoming transfers, so given a set of documents we can construct a graph like that of a repo.
 
-This approach is more flexible: since versions and branches no longer belong to a repo they can be shared without sharing the whole repo. They are like files (and likely implemented as files): independent storage units that can participate in overlapping and shifting webs of collaboration. They can be emailed. We regain the flexibility of the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
+This approach is more flexible: since versions and branches no longer belong to a repo they can be shared without sharing the whole repo. They are like files (and likely implemented as files): independent storage units that can participate in overlapping and shifting webs of collaboration. They can be emailed. We regain the flexibility of the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge. Large projects will still want to maintain a list of all branches, but that can be as lightweight as a directory.
 
 
 \subsection{Correctness}
@@ -984,14 +986,15 @@ For example, we can transfer the prior example query on the normalized database 
 which defines a query to filter the pending orders from the unnormalized orders table.
 
 Forward rewriting is more complicated. To transfer a formula forward through a type operation it's inverse is prepended to the formula. The intuition here is that the query was written to apply to the old schema, so to preserve its meaning in the new schema we must first convert the schema back again
-\footnote{This algorithm can clutter up the formula with irrelevant schema changes. We simplify them out by retracting the original formula back through them as much as possible, retaining only those schema changes the formula is dependent upon.}.
+\footnote{This naive algorithm would clutter up the formula with irrelevant schema changes. We simplify them out by retracting the original formula back through them as much as possible, retaining only those schema changes the formula is dependent upon.}.
 For example if we were to transfer the prior backported query forward again through the \textsf{Split} operation then the inverse operation \textsf{Join} would be prepended to the \textsf{deletePresent} operation, recnstructing the original query.
 
 Forward rewriting is automatically done on all formulas within a database whenever a type operation (i.e., schema change) is executed on it. We offer this as a solution to \textit{Challenge Problem \#3: Code Co-evolution for Extract Entity}~\cite{challenge-problems}.
 
 
-
-
+% substantiate "offer"
+% this is just a conjecture. Initial exploration warrants futher research
+% could open up an unexplored space of query language designs.
 
 
 % \subsection{Future Work}
@@ -1003,77 +1006,47 @@ Forward rewriting is automatically done on all formulas within a database whenev
 
 
 
-\section{Visualizing and Manipulating the Multiverse}\label{GUI}
+\section{Visualizing state and change}\label{GUI}
 
-\subsection{Exploring Structure}
+Useability is a primary goal of Baseline. We believe that people should have the same power as programs, entailing that all state is visualized in a GUI and that all operations are manifested as direct manipulations in it. The same goes for our version control capabilities: differences are visualized and can be transferred.
 
-\subsection{Visualizing Diffs}\label{GUI-diffs}
-% hard problem is seeing what \textit{hasn't} changed, just moved
+It is difficult to convey the experience of an interactive user interface in a written narrative, so we have published a short demo video at \textcolor{red}{xxx}. The following discussion will concentrate on the key UI design decisions we made.
 
-\subsection{Design Tradeoffs}
-% Ultorg.
-% iterations on UI
+\begin{figure}
+\includegraphics[width=\textwidth]{GUInumbered.png}
+\caption{A selection is a path through Miller columns containing indented outlines and flat tables.}
+\label{fig:GUI}
+\end{figure}
 
-\subsection{A Playable Demo}
-% beef up playable demo clain im contributions
+\begin{figure}
+\includegraphics[width=\textwidth]{DiffNumbered.png}
+\caption{A diff is displayed across a split screen with coordinated selection.}
+\label{fig:Diff}
+\end{figure}
 
+\circledtextset{resize=real, charf=\LARGE\sffamily}
+Figure~\ref{fig:GUI} displays a screen shot of the UI. \circledtext{1} The left hand column shows the history of operations on this database. History sidebars are a common technique but we were particularly inspired by Wrangler~\cite{kandel11}.
 
+The three columns to the right are Miller columns~\cite{miller-columns} that display a path drilling into and across nested data structures. Usually Miller columns display a simple list, as in the MacOS Finder column view of directories. We elaborate that convention to show in each column either an indented outline or a flat table. Nested structures are indicated with summaries that when clicked open a new column to the right. Cyan outlines show the selected path through the columns. \circledtext{2} is the top-level structure of this document. \circledtext{3} is the \textsf{orders} table within it. The user has selected a link to the \textsf{customers} table, which is opened in the column \circledtext{4}. Selection not only drills into nested structures but also follows links crossing the hierarchy, as if the target table of the link was nested inside it. This design was inspired as a reaction to Ultorg~\cite{bakke:phdthesis, ultorg} which uses nested tables to represent queries crossing a flat relational database. Ultorg provides a single view of a nested structure whereas our use of Miller columns provides only a view of the context of a path within the structure. The compensation for that restriction is that each column contains a visually simpler and context-independent layout, keeping neighbors at each level adjacent to each other rather than being splayed across lower layers.
 
+Figure~\ref{fig:Diff} displays our representation of diffs. The challege is that Operational Differencing can do fine-grained comparisons across schema changes. We split the screen in half vertically to compare two databases. Here we are displaying the differences due to database normalization between Figure~\ref{fig:tables-single} in the top half and Figure~\ref{fig:tables-dedup} in the bottom half. Differences on each side are given a green background, and the context menu on them provides a command to transfer that difference to the other side.
 
-\section{Related Work}
+However the tricky problem is not showing the differences but showing what is the same across complex structural transformations.
+We use \textit{coordinated selection}:  At \circledtext{1} the cyan outline indicates we have selected the \textsf{customers} table cell containing \textsf{Wile E Coyote}. At \circledtext{2} the corresponding cell in the other database has been outlined in white, even though it is in the \textsf{orders} table. We automatically compute the corresponding location of the selection by transfering a \textsf{noop} operation to the other side.
 
-% actually related work:
-% Alex's worlds. Roly. Ask them for comment?
-% Challenge problem paper.
-% I&S: cambria, peritext, universal version control
-% Braid time machine https://braid.org/time-machines
-
-% cite hatra/paint papers!
-
-\subsection{Version Control}\label{VC}
-
-% git, darcs, pijul
-
-% git is the most established tool for change management but is also the source of much discontent. Pull refs from schema change paper. santiago's stuff. intentional?
-
-% Understanding Version Control as Material Interaction with Quickpose
-% https://dl.acm.org/doi/10.1145/3544548.3581394
-
-\subsection{The Impedance Mismatch Problem} \label{impedance}
-
-% orthogonal persistence, ORMs, Linq, single tier (Tier, hop), naked objects, DBOS, durable computation
-
-\subsection{PL State Management}\label{PLstate}
-
-% FP: Monads, Lenses
-
-% Imperative: immutable, React state menagement
-
-% Remark: lenses and state libraries
-% Built in Mutable structure semantics?
-% Pure FP uses lenses
-% Imperative langs put it in libraries “immutable data” libraries and “reactive state management” libraries have cursors/paths (check immutable.js)
-% We just add a path to values and build it into basic semantics
-% Value + Path = context, pointed value, ?? “call-by-context”?
-% Note UI manifest selection
+We first tried conventional representations of textual diffs, both side-by-side and interleaved (AKA unified). They have the advantage of keeping corresponding locations close to each other on screen, but only when the differences are limited to inserting and deleting lines of text. They did not adapt well to complex data structures and complex structural transformations. Our split-screen approach handles these cases as well, and has the advantage that the diff view keeps the layout of the data the same as in a normal view.
 
 
-\subsection{OT}\label{OT}
-% https://en.wikipedia.org/wiki/Operational_transformation
-% inclusion/exclusion transform
-% https://cedanet.com.au/ceda/ot/ot-control/
-% forward/backward transposition %https://ieeexplore.ieee.org/document/655755
-
-\subsection{CRDT}\label{CRDT}
-
-\subsection{Schema Evolution}\label{schema-evolution}
-% copy from challenge problems paper
-
-% \citet{ambler06} propose in \textit{Refactoring Databases} the \textit{Split Table} refactoring and sketch the SQL needed. \citet(curino08) include \textit{Decompose Table} in a set of \textit{Schema Modification Operations} that automate evolutions. In our example these actions would split out the \textit{name} and \textit{address} columns into a new \textit{Customers} table and add a \textit{order} column as a \textit{foreign key} copying the \textit{primary key} of the order. But that does not solve the problem---we still have duplicate customers.
-% BiDEL is only thing that solves problem
 
 
-\section{Evaluation/Discussion}
+\section{Discussion}
+
+% VC for everything, all the way down and up, Lisp redux
+% full unified QL/PL with VC semantics, test, supply chain, deployment
+
+%   \item If we are allowed to speculate, could we get the benefits of version control even at runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we explore and merge alternative runtime states~\cite{warth11}?
+% DevOps~\cite{kim2022devops} would benefit from applying version control to migrating databases, or rebuilding containers, or updating software dependencies.
+
 % eval: challenge problems, playable demo
 % tech dims https://tomasp.net/techdims/#footer=index,navigation;left=catalogue,list;top=catalogue,index
 
@@ -1093,15 +1066,61 @@ Forward rewriting is automatically done on all formulas within a database whenev
 
 % evalueate against existing techniques for schema evolution and version control. Or does that go in related work?
 
-\section{Commencement}
-% summary and call to operation
 
-% VC for everything, all the way down and up, Lisp redux
-% full unified QL/PL with VC semantics, test, supply chain, deployment
+\section{Related Work}
 
-%   \item If we are allowed to speculate, could we get the benefits of version control even at runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we explore and merge alternative runtime states~\cite{warth11}?
-% DevOps~\cite{kim2022devops} would benefit from applying version control to migrating databases, or rebuilding containers, or updating software dependencies.
+% tribute to primary inspirations. wrangler, ultorg, lenses, refactoring DBs, SMOs, BiDel, Cambria [UVC?]
+% git as anti-inspiration
 
+% actually related work:
+% Alex's worlds. Roly. Ask them for comment?
+% Challenge problem paper.
+% I&S: cambria, peritext, universal version control
+% Braid time machine https://braid.org/time-machines
+
+% cite hatra/paint papers!
+
+% \subsection{Version Control}\label{VC}
+
+% git, darcs, pijul
+
+% git is the most established tool for change management but is also the source of much discontent. Pull refs from schema change paper. santiago's stuff. intentional?
+
+% Understanding Version Control as Material Interaction with Quickpose
+% https://dl.acm.org/doi/10.1145/3544548.3581394
+
+% \subsection{The Impedance Mismatch Problem} \label{impedance}
+
+% orthogonal persistence, ORMs, Linq, single tier (Tier, hop), naked objects, DBOS, durable computation
+
+% \subsection{PL State Management}\label{PLstate}
+
+% FP: Monads, Lenses
+
+% Imperative: immutable, React state menagement
+
+% Remark: lenses and state libraries
+% Built in Mutable structure semantics?
+% Pure FP uses lenses
+% Imperative langs put it in libraries “immutable data” libraries and “reactive state management” libraries have cursors/paths (check immutable.js)
+% We just add a path to values and build it into basic semantics
+% Value + Path = context, pointed value, ?? “call-by-context”?
+% Note UI manifest selection
+
+
+% \subsection{OT}\label{OT}
+% https://en.wikipedia.org/wiki/Operational_transformation
+% inclusion/exclusion transform
+% https://cedanet.com.au/ceda/ot/ot-control/
+% forward/backward transposition %https://ieeexplore.ieee.org/document/655755
+
+% \subsection{CRDT}\label{CRDT}
+
+% \subsection{Schema Evolution}\label{schema-evolution}
+% copy from challenge problems paper
+
+% \citet{ambler06} propose in \textit{Refactoring Databases} the \textit{Split Table} refactoring and sketch the SQL needed. \citet(curino08) include \textit{Decompose Table} in a set of \textit{Schema Modification Operations} that automate evolutions. In our example these actions would split out the \textit{name} and \textit{address} columns into a new \textit{Customers} table and add a \textit{order} column as a \textit{foreign key} copying the \textit{primary key} of the order. But that does not solve the problem---we still have duplicate customers.
+% BiDEL is only thing that solves problem
 
 \printbibliography
 
