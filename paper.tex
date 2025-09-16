@@ -1095,30 +1095,51 @@ We evaluate our progress against the challenge problems proposed in
 
 \end{enumerate}
 
-Altogether we have solved four of the eight problems. We keep the remaining four as goals for future work.
+Altogether we solved four of the eight problems. We keep the remaining four as goals for future work.
 
 
 \subsection{Playable Demo}\label{demo}
 
-% We report initial experience with a \textit{Playable Demo} as a method of evaluation.
+We are experimenting with a \textit{Playable Demo} as a means to communicate and evaluate research on programming experiences (PX) that could be more effective than written narratives and recorded demos.
+It can be accessed at \url{http://thebaseline.dev/Programming26/}.
+
+We adopt \textit{onboarding} techniques used in commercial software to teach new users. A scaffold over the UI walks the user through a demo scenario, stepping through a written narrative that prompts each user action. Users that follow the main quest are given a frustration-free experience going at their own pace. The more adventurous are free to roam at their own risk, but can always respawn where they left the path.
+
+Our initial experience is mixed.
+
+\begin{itemize}
+\item Using an open source onboarding library was a mistake. A fully integrated experience requires a fully custom implementation.
+\item To make a playable demo robust it needs to know exactly what each user step should do and validate it. Specifying that with code is laborious (so much so that we did not do it). Instead we should use the history recorded in a play-through as an oracle. That would also allow ``fast forwarding'' through the demo, a repeated user request.
+\item A well-presented demo can lull viewers into suspending disbelief, but a playable demo is brutally realistic. Lack of polish is glaring. Going off script quickly reveals holes in the prototype implementation. These effects make playable demos a risky proposition in competitive academic venues.
+\item Despite these negatives, users consistently report that when following the script they understand what is being presented.
+
+\end{itemize}
 
 
-
-% \subsection{Technical Dimensions Evaluation}
+\subsection{Technical Dimensions}
 % https://tomasp.net/techdims/#footer=index,navigation;left=catalogue,list;top=catalogue,index
-% We can heuristically evaluate Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
-% % but we designed the system with these goals in mind
+We can heuristically evaluate Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+% but we designed the system with these goals in mind
 
-% \paragraph{Interaction} Strictly speaking Baseline has two \textbf{modes of interaction}: user and developer, however user mode is a strict subset of developer mode (no type operations) so it is fair to say there is really only one mode of interaction.
-% Operationalized queries minimize \textbf{abstraction construction} since they correspond exactly to interactive actions in the UI, suporting Programming by Demonstration.
-% % An intriguing question is how well we can hew to this principle as we add general programming language capabilities following the path previously explored in Subtext~\cite{reifying-programming, direct-programming}.
-% Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evaluation is reduced because all operations are concrete direct manipulations; The Gulf of Interpretation is reduced by visualizing changes in terms of concrete difference operations. Version control of data enables collaborative feedback loops that are not practical with conventional techniques.
+\paragraph{Interaction} Strictly speaking Baseline has two \textbf{modes of interaction}: user and developer, however user mode is a strict subset of developer mode (no type operations) so it is fair to say there is really only one mode of interaction.
+Operationalized queries minimize \textbf{abstraction construction} since they correspond exactly to interactive actions in the UI, suporting Programming by Demonstration.
+% An intriguing question is how well we can hew to this principle as we add general programming language capabilities following the path previously explored in Subtext~\cite{reifying-programming, direct-programming}.
+Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evaluation is reduced because all operations are concrete direct manipulations; The Gulf of Interpretation is reduced by visualizing changes in terms of concrete difference operations. Version control of data enables collaborative feedback loops that are not practical with conventional techniques.
 
-% \paragraph{Notation} Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably Baseline utilizes a rich set of operations that do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}. In future work we want to investigate whether there is a normal form for sequences of operations.
+\paragraph{Notation} Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably Baseline utilizes a rich set of operations that do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}. In future work we want to investigate whether there is a normal form for sequences of operations.
 
-% \paragraph{Conceptual structure} Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
+\paragraph{Conceptual structure} Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
 
-% \paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transfered later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not see that as a goal.
+\paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transfered later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not see that as a goal.
+
+\paragraph{Complexity}
+
+\paragraph{Errors}
+
+\paragraph{Adoptability}
+
+
+\paragraph{\textcolor{red}{Not sure this is useful. Drop it? Move to Appendix?}}
 
 
 \subsection{Discussion}
