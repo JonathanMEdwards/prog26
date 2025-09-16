@@ -18,6 +18,10 @@
 \usepackage{quiver}
 \usepackage{hhline}
 \usepackage{circledtext}
+\usepackage{fontawesome5}
+
+\newcommand{\redCross}{\textcolor{red}{\ \faTimes\ }}
+\newcommand{\greenCheck}{\textcolor{ForestGreen}{\ \faCheck\ }}
 
 % define natbib citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
@@ -125,8 +129,8 @@ Approach: Most tools for data management are state-based, for pragamtic reasons 
 Knowledge: Operational Differencing is able to do fine-grained version control of data even through intervening schema changes. It can be used to synthesize more precisely the information traditionally maintained in a repo, which greatly simplifies the user's conceptual model and increases flexibility. Miller columns cen be used to visualize rich data structures. Coordinated selection can be used to visualize differences across schema changes.
 
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
-Grounding: In prior work with others we identified eight challenge problems of schema evolution in interactive programming systems. Those challenge problems guided this research and led to solutions for four of them.
-The GUI was iterated through three versions by feedback from demonstrations. A \textit{Playable Demo} is available.
+Grounding: In prior work with others we identified eight challenge problems of schema evolution in interactive programming systems. We solve four of them.
+The GUI was iterated through three versions by feedback from demonstrations. We report initial experience with a \textit{Playable Demo} as a method of evaluation.
 
 % Importance: Why does this work matter?
 Importance: Our technique improves upon the known methods for schema evolution and version control of data. Our conjecture that queries can be operationalized could open up an unexplored space of query language designs.
@@ -167,7 +171,7 @@ Importance: Our technique improves upon the known methods for schema evolution a
 Data changes in multiple dimensions. Data changes over time, indeed often that is the whole point. Data changes over space between replicas and variant copies. Data also changes in meaning: as needs and understanding evolve so must the shape and interpretation of the data. In practice we handle these different dimensions of change with different technologies embodying different abstractions. Programming languages, file systems, and databases all have distinct ways of managing data change over time. There are many different techniques for distributing, replicating, and collaborating on data, although surprisingly few for version control of data. There is a plethora of tools to assist in evolving the schema of databases, but in practice it often requires ad hoc programming.
 
 Baseline is a research project to develop a general purpose mechanism for data change in all these dimensions, and to provide it conveniently to both programs and humans.
-To ground this research we first surveyed one of the most problematic aspects of data change: schema evolution. In \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems} we and others formulated a suite of challenge problems across a range of contexts, including traditional database programming as well as live front-end programming, model-driven development, and collaboration in computational documents.
+To ground this research we first surveyed one of the most problematic aspects of data change: schema evolution. In \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems} we and others formulated a suite of challenge problems across a range of contexts, including traditional database programming as well as live front-end programming, model-driven development, and collaboration in computational documents. These problems have guided our work and are used as examples in the rest of the paper.
 
 Systems that manage change split into \textit{state-based} and \textit{operation-based} approaches~\cite{diff3, Shapiro11, edit-lenses}. State-based approaches observe only the before and after of changes, while operation-based approaches record the execution of a set of possible operations.
 The benefit of state-based approaches is that since they observe from the outside they more easily interoprerate with existing tools.
@@ -194,7 +198,7 @@ including refactorings. We define the primitive transformations \textit{projecti
 \item We demonstrate Baseline's direct manipuation GUI that supports interactive data and schema changes as well as diffing and merging between databases.
 Miller columns~\cite{miller-columns} are used to drill into nested data and across relationhips, with each column containing an indented outline or a flat table. We discuss our design iteration on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. A \textit{Playable Demo} is available.
 
-\item Altogether we develop solutions to four of the eight challenge problems in \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
+\item Altogether we develop solutions to four out of eight challenge problems of schema evolution~\cite{challenge-problems}.
 
 \end{enumerate}
 
@@ -333,7 +337,6 @@ S_2 &= S_1 \exec *\ldotp \mathit{who} \textsf{ ListOf } \\
 
 For example a common design evolution is when a single value needs to become a list of multiple values. We capture this in the \textsf{ListOf} operation, shown on a TODO table in Figure~\ref{fig:TODO-refactor}.
 The \textsf{ListOf} operation takes any type and wraps it inside a list, and wraps all corresponding values into single-element lists using the element ID $\mathbb{1}$. We will return to this example in the next section.
-
 
 
 \section{Operational Differencing}
@@ -529,7 +532,7 @@ Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in 
 Retraction is defined with rules like those for projection so we skip over them in the interest of brevity.
 
 
-\subsection{Across the Multiverse}
+\subsection{Across the Multiverse}\label{transfer}
 
 A \textit{diff} between two states $A$ and $B$ is a pair of timelines that branch off some shared state $O$ to yield $A$ and $B$, diagrammed like this:
 \[\begin{tikzcd}
@@ -604,7 +607,9 @@ If we transfer $a_1$ into $B$ the change from Jack to Jill gets applied to the l
 
 % diagram one of these examples?
 
-This example demonstrates how transference can propagate changes bidirectionally through structural changes. Standard state-based version control techniques would see only a big conflict and require a human to pick out and propagate finer-grained changes correctly. We offer this example as a solution to challenge problem \#7~\cite{challenge-problems} which arises when we want different versions of code to interoperate even though they have different schema. The problem is that techniques like lenses~\cite{Foster2007} generate counter-intuitive behavior, for example losing the connection between Jacque and Jill. Our diagnosis is that such state-based techniques are limited because they are blind to the intentions expressed in operations. We can provide more intuitive behavior in this case because operation histories let us track how locations shift through time, which cannot be inferred just by observing states.
+This example demonstrates how transference can propagate changes bidirectionally through structural changes. Standard state-based version control techniques would see only a big conflict and require a human to pick out and propagate finer-grained changes correctly.
+% We offer this example as a solution to challenge problem \#7~\cite{challenge-problems} which arises when we want different versions of code to interoperate even though they have different schema.
+Techniques like lenses~\cite{Foster2007} have the counter-intuitive behavior of losing the correlation between Jacque and Jill. We can provide more intuitive behavior in this case because operation histories let us track how locations shift through time, which cannot be inferred just by observing states.
 
 Version control systems like git provide a variety of operations like \textit{merge}, \textit{rebase}, and \textit{cherry-pick} with subtly different semantics. Our approach is to provide the transfer function as the sole primitive and then build coarser-grained operations out of sets of transfers. For example all the changes in one branch can be transferred to the other. Just the type changes or just the data changes can be transferred. Dependency transfer batches transitive dependencies. To synchronize two branches all changes are transferred from one to the other and then all changes remaining in the other branch are transferred back. Note that synchronization has a direction: syncing $A$ into $B$ resolves all conflicts in favor of $A$.
 
@@ -709,7 +714,7 @@ Although we are addressing a different problem there is a formal similarity with
 
 
 
-\section{Database Evolution}
+\section{Database Evolution}\label{db-evolution}
 % \section{Relationships}
 % \section{Relational Databases}
 
@@ -827,8 +832,10 @@ Although we are addressing a different problem there is a formal similarity with
 \end{figure}
 
 In this section we apply Operational Differencing to the problem of \textit{schema evolution} in relational databases. We do this by adding relational database features into our data types and operations.
-We use as a running example \textit{Challenge Problem \#2: Extract Entity}~\cite{challenge-problems}. Figure~\ref{fig:tables-single} shows a table of orders for the Acme Corporation. A database professional will immediately see a problem: the customer name and address is duplicated across all orders by the same customer, so any changes to that information would need to be duplicated.
-Database textbooks teach to avoid this sort of problem by properly \textit{normalizing} the schema before adding any data. However in practice the need for schema changes often arises after there is data, which must then be \textit{migrated} into the changed schema. There is a plethora of tools and DSLs and research projects to assist in schema migration (see \S\ref{schema-evolution}) but in practice it typically comes down to writing custom SQL code.
+% We use as a running example \textit{Extract Entity} from~\citet{challenge-problems}.
+For example Figure~\ref{fig:tables-single} shows a table of orders for the Acme Corporation. A database professional will immediately see a problem: the customer name and address is duplicated across all orders by the same customer, so any changes to that information would need to be duplicated.
+Database textbooks teach to avoid this sort of problem by properly \textit{normalizing} the schema before adding any data. However in practice the need for schema changes often arises after there is data, which must then be \textit{migrated} into the changed schema. There is a plethora of tools and DSLs and research projects to assist in schema migration (\S\ref{schema-evolution})
+but in practice it typically comes down to writing custom SQL code.
 
 One approach a SQL migration program could take is to populate a new \textsf{customers} table from a query projecting out the \textsf{name} and \textsf{address} columns and excluding duplicates. Then it would need to generate primary keys for the deduped customers (the name cannot be the primary key because it is mutable). A new column \textsf{customer} would be added to \textsf{orders} declared as a foreign key containing the customer's primary key. Finally the \textsf{name} and \textsf{address} columns in the \textsf{orders} table would be dropped.
 
@@ -851,7 +858,7 @@ The original \textsf{name} column in \textsf{orders} is replaced with links to t
 (3) The \textsf{Rename} operation renames the links column to be \textsf{customer}\footnote{Abusing notation by conflating the name and ID}.
 The result is shown in Figure~\ref{fig:tables-split}.
 
-The last step of this database evolution is to de-duplicate the customers, for which we use the \textsf{move} operation from Figure~\ref{fig-operations}. Thus:
+The last step of this database evolution is to de-duplicate the customers, for which we use the \textsf{move} operation from Figure~\ref{fig:operations}. Thus:
 \[
 \textsf{customers}\ldotp e_3 \textsf{ move } \textsf{customers}\ldotp e_1
 \]
@@ -871,12 +878,13 @@ The \textsf{move} operation merges $e_3$ into $e_1$, resulting in the state show
 \end{remark}
 
 
-\subsection{Database Version Control}
+\subsection{Database Version Control}\label{db-vc}
 
 Schema evolution is typically implemented as a one-time one-way event, which becomes problematic when there are multiple replicas of the database in production. Operational Differencing is more flexible because it can transfer changes forward through the schema evolution and backwards as long as they aren't dependent on the schema evolution itself. This could allow distributed migrations to happen asynchronously.
 The scheme evolution operations themselves can be transfered between copies of a database, so migrating a database instance can be done by pulling in the type changes from the dev branch instead of an elaborate DevOps procedure.
 
-For example say that the Order Fullfillment department at Acme Corporation is happy with the old version of the database because they don't have to do a query to find the customer name and address. So they don't want to deploy the schema changes made by the Customer Relationship department. They could instead continue to use the old database and transfer updates to new database. Likewise when a new order is entered in the new database it can be transferred to Fulfillment in its unnormalized form. But new orders to new customers can't be transferred backwards because customer creation is dependent on the \textsf{Split} operation creating the customers table. In those cases the new order will transfer back with blank name and address fields. This problem is an instance of the classic \textit{View Update Problem}\cite{Bancilhon81, Foster2007}. With that caveat we offer this as a solution to \textit{Challenge Problem \#6: Divergence Control for Extract Entity}~\cite{challenge-problems}.
+For example say that the Order Fullfillment department at Acme Corporation is happy with the old version of the database because they don't have to do a query to find the customer name and address. So they don't want to deploy the schema changes made by the Customer Relationship department. They could instead continue to use the old database and transfer updates to new database. Likewise when a new order is entered in the new database it can be transferred to Fulfillment in its unnormalized form. But new orders to new customers can't be transferred backwards because customer creation is dependent on the \textsf{Split} operation creating the customers table. In those cases the new order will transfer back with blank name and address fields. This problem is an instance of the classic \textit{View Update Problem}\cite{Bancilhon81, Foster2007}.
+% With that caveat we offer this as a solution to \textit{Challenge Problem \#6: Divergence Control for Extract Entity}~\cite{challenge-problems}.
 
 Even with the limitations on view updates, Operational Differencing brings many of the advantages of version control to the domain of databases. It is possible to calculate the precise differences between two database instances despite intervening schema changes. It is always possible to transfer all the differences from one to the other, and often possible to transfer individual differences.
 
@@ -892,7 +900,8 @@ Even with the limitations on view updates, Operational Differencing brings many 
 
 We saw in the last section that although the Fullfillment department preferred the unnormalized view of orders it would be forced to migrate to the normalized database to stay fully in sync with all changes. Relational databases offer a better solution: \textit{queries}. In this section we discuss how Operational Differencing can build queries and updatable views. But the simplest solution doesn't even require a query. We can just make a copy of the database and denormalize it.
 
-The \textsf{Join} operation in Figure~\ref{fig:db-operations} is the inverse of \textsf{Split}. It replaces a link column with all the columns of the linked table, copying their contents to match the link values\footnote{With the set-valued links discussed earlier it becomes a relational join operation.}. Specifically:
+The \textsf{Join} operation in Figure~% \ref{fig:db-operations}
+is the inverse of \textsf{Split}. It replaces a link column with all the columns of the linked table, copying their contents to match the link values\footnote{With the set-valued links discussed earlier it becomes a relational join operation.}. Specifically:
 \[
 \textsf{orders}\ldotp * \ldotp \textsf{customer Join} \\
 \]
@@ -985,7 +994,7 @@ Henceforth the \textit{new-formula} field's value will be the result of a query 
 
 
 
-\subsection{Query Rewriting}
+\subsection{Query Rewriting}\label{query-rewriting}
 
 There is another benefit to treating queries as timelines of operations: operation transfer gives us \textit{query rewriting}~\cite{curino08, herrmann17} for free. When a database schema changes, some of the queries written for it may need to change too. This scenario is called forward rewriting---backward rewriting is backporting a query on a new schema to an older one.
 In practice query rewriting is done manually by SQL programmers. The just-cited research adapts query optimization techniques to build specialized rewriting algorithms.
@@ -1004,14 +1013,14 @@ For example, we can transfer the prior example query on the normalized database 
 \]
 which defines a query to filter the pending orders from the unnormalized orders table.
 
-Forward rewriting is more complicated. To transfer a formula forward through a type operation it's inverse is prepended to the formula. The intuition here is that the query was written to apply to the old schema, so to preserve its meaning in the new schema we must first convert the schema back again
+Forward rewriting is more complicated. It occurs when a formula definition is transfered into a branch containing type differences (i.e., schema changes). Forward rewriting is also done on all formulas within a database whenever a type operation is executed. To transfer a formula forward through a type operation it's inverse is prepended to the formula. The intuition here is that the query was written to apply to the old schema, so to preserve its meaning in the new schema we must first convert the schema back again
 \footnote{This naive algorithm would clutter up the formula with irrelevant schema changes. We simplify them out by retracting the original formula back through them as much as possible, retaining only those schema changes the formula is dependent upon.}.
-For example if we were to transfer the prior backported query forward again through the \textsf{Split} operation then the inverse operation \textsf{Join} would be prepended to the \textsf{deletePresent} operation, recnstructing the original query.
-
-Forward rewriting is automatically done on all formulas within a database whenever a type operation (i.e., schema change) is executed on it. We offer this as a solution to \textit{Challenge Problem \#3: Code Co-evolution for Extract Entity}~\cite{challenge-problems}.
+For example if we were to transfer the prior backported query forward again through the \textsf{Split} operation then the inverse operation \textsf{Join} would be prepended to the \textsf{deletePresent} operation, correctly reconstructing the original query.
 
 
-% substantiate "offer"
+% We offer this as a solution to \textit{Challenge Problem \#3: Code Co-evolution for Extract Entity}~\cite{challenge-problems}.
+
+
 % this is just a conjecture. Initial exploration warrants futher research
 % could open up an unexplored space of query language designs.
 
@@ -1062,11 +1071,37 @@ We first tried conventional representations of textual diffs, both side-by-side 
 
 \section{Evaluation \& Discussion}
 
-% eval: challenge problems, playable demo
+% \subsection{Challenge Problems}
+We evaluate our progress against the challenge problems proposed in
+\textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
+
+\begin{enumerate}
+
+  \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the schema of an Elm/React application preserving its state and avoiding restarting it. Baseline can perform the requested schema evolutions but there is not yet enough programming capabilities to meet the requirements of the problem.
+
+  \item \textbf{Extract Entity}\greenCheck We took this common problem of database refactoring and normalization as the running example in \S\ref{db-evolution}, solving it there.
+
+  \item \textbf{Code Co-evolution for Extract Entity}\greenCheck The problem is that schema evolution should apply not just to data but also to the code accessing it. We solved this problem with query rewriting in \S\ref{query-rewriting}, as far as our fragementary query language goes.
+
+  \item \textbf{Structured Document Edits}\redCross The problem is to parse string data into tabular information and merge that change with other edits. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
+
+  \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problems adds code rewriting onto the previous one. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
+
+  \item \textbf{Divergence Control for Extract Entity}\greenCheck This problem is to transfer changes bidirectionally through the schema evolution of problem 2. We solved it in \S\ref{db-vc}.
+
+  \item \textbf{Multiplicity Change in Schema}\greenCheck This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We solved this problem in \S\ref{transfer}.
+
+  \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but by restricting to DSLs like a state-machine language there may be hope.
+
+\end{enumerate}
+
+Altogether we have solved four of the eight problems. We keep the remaining four as goals for future work.
+
 
 \subsection{Playable Demo}\label{demo}
 
-\subsection{Challenge Problems}
+% We report initial experience with a \textit{Playable Demo} as a method of evaluation.
+
 
 
 % \subsection{Technical Dimensions Evaluation}
@@ -1110,6 +1145,10 @@ We first tried conventional representations of textual diffs, both side-by-side 
 % Does query rewriting hold up? Frankly this solution seems a bit too easy---we wonder if it will hold up as we fill out the capabilities of the query language.
 
 % evalueate against existing techniques for schema evolution and version control. Or does that go in related work?
+
+% this is just a conjecture. Initial exploration warrants futher research
+% This conjecture could open up an unexplored space of query language designs.
+
 
 
 \section{Related Work}
