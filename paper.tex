@@ -66,7 +66,7 @@
 
 \begin{document}
 
-\title{Baseline: Fluent Data Evolution}
+\title{Baseline: Operation-Based Evolution and Versioning of Data}
 
 \author[a]{Jonathan Edwards}[0000-0003-1958-7967]
 \authorinfo{is an independent researcher interested in simplifying and democratising programming by collapsing the tech stack. He is known
@@ -104,7 +104,7 @@ he can be reached at \email{tomas@tomasp.net}.}
 
   This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared like spreedsheet files, except with the added benefit of diffing and merging.
 
-  We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea into a query language fragment containing selects and joins.
+  We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea on a query language fragment containing selects and joins.
   Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. Operationalized queries get rewriten to accomodate schema change ``for free'' by the machinery of operational differencing.
 
   We discuss the design of Baseline's direct manipuation GUI supporting interactive schema changes as well as diffing and merging between databases.
@@ -126,7 +126,7 @@ Knowledge: Operational Differencing is able to do fine-grained version control o
 
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
 Grounding: In prior work with others we identified eight challenge problems of schema evolution in interactive programming systems. Those challenge problems guided this research and led to solutions for four of them.
-The GUI was iterated through three versions by feedback from demonstrations.
+The GUI was iterated through three versions by feedback from demonstrations. A \textit{Playable Demo} is available.
 
 % Importance: Why does this work matter?
 Importance: Our technique improves upon the known methods for schema evolution and version control of data. Our conjecture that queries can be operationalized could open up an unexplored space of query language designs.
@@ -134,16 +134,32 @@ Importance: Our technique improves upon the known methods for schema evolution a
 \end{abstract}
 
 
-\section{\textcolor{red}{Possible Titles}}
-\textcolor{red}{
-  \begin{itemize}
-  \item Baseline: Fluent Data Evolution
-  \item Baseline: Fluent Data Management
-  \item Baseline: Operation-based Data Evolution
-  \item Baseline: Operation-based Data Management
-  \item Baseline: Schema Evolution and Version Control for Data
-  \end{itemize}
-  }
+% \section{\textcolor{red}{Possible Titles}}
+% \textcolor{red}{
+%   \begin{itemize}
+%   % \item Baseline: Fluent Data Evolution
+%   % \item Baseline: Fluent Data Management
+%   \item Baseline: Operation-based Data Evolution
+%   \item Baseline: Operation-based Data Management
+%   \item Baseline: Data Evolution and Versioning
+%   \item Baseline: Operation-Based Data Evolution and Versioning
+%   \item Baseline: Integrating data change across time, space, and meaning
+%   \item Baseline: Differentiating data across time, space, and meaning
+%   \item Baseline: Operational Differencing for Data Evolution and Versioning
+%   \item Baseline: Operation-Based Evolution and Versioning of Data
+%   \end{itemize}
+%   }
+
+%   Method-focused:
+% Operational Differencing: An Operation-Based Approach to Data Evolution and Version Control
+% Beyond State: Operational Differencing for Schema Evolution and Rich Data Change Management
+% System/Project-focused:
+% Baseline: Fluently Managing Data Evolution with Operational Differencing
+% Baseline: A General-Purpose Framework for Schema Evolution and Operation-Based Version Control
+% Vision-focused:
+% Fluent Data Evolution Across Time, Space, and Meaning with Operational Differencing
+% Toward Unified Mechanisms for Data Change: Schema Evolution and Version Control in Baseline
+
 
 
 \section{Introduction}
@@ -158,7 +174,7 @@ The benefit of state-based approaches is that since they observe from the outsid
 The benefit of operation-based approaches is that they can capture user intentions more accurately than can be inferred from the states. For example comparing states of a table schema, a move followed by a rename is indistinguishable from a delete followed by an insert, but that makes a big difference to the data.
 % We are exploring what is possible with an operation-based approach while defering the concerns of interoperability.
 
-In this paper we introduce a new technique for operation-based change management: \textit{Operational Differencing}\textcolor{red}{ (or Operational Version Control?)}, which we define on a \textit{rich data} model curated from the features of programming languages and databases. Our contributions are:
+In this paper we introduce a new technique for operation-based change management: \textit{Operational Differencing}, which we define on a \textit{rich data} model curated from the features of programming languages and databases. Our contributions are:
 
 \begin{enumerate}
 
@@ -176,14 +192,14 @@ including refactorings. We define the primitive transformations \textit{projecti
 \item Operationalized queries have a perhaps surprising benefit: query rewriting~\cite{curino08, herrmann17} during schema change falls out ``for free'' from the machinery of operational differencing.
 
 \item We demonstrate Baseline's direct manipuation GUI that supports interactive data and schema changes as well as diffing and merging between databases.
-Miller columns~\cite{miller-columns} are used to drill into nested data and across relationhips, with each column containing an indented outline or a flat table. We discuss our design iteration on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. A demo video is available.
+Miller columns~\cite{miller-columns} are used to drill into nested data and across relationhips, with each column containing an indented outline or a flat table. We discuss our design iteration on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. A \textit{Playable Demo} is available.
 
 \item Altogether we develop solutions to four of the eight challenge problems in \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
 
 \end{enumerate}
 
-The superpower of our operation-based approach to schema evolution and version control is that, compared to traditional state-based approaches, it captures user intentions more accurately. We also seek to make these capabilities more concrete and interactive through a direct manipulation UI, reducing as much as we can the need for ad hoc scripting. Throughout, we seek to make things easier though conceptual simplification.
-In summary, the goal of Baseline is to support all the dimensions of data evolution \textit{fluently}---with ease and accuracy.
+% The superpower of our operation-based approach to schema evolution and version control is that, compared to traditional state-based approaches, it captures user intentions more accurately. We also seek to make these capabilities more concrete and interactive through a direct manipulation UI, reducing as much as we can the need for ad hoc scripting. Throughout, we seek to make things easier though conceptual simplification.
+% In summary, the goal of Baseline is to support all the dimensions of data evolution \textit{fluently}---with ease and accuracy.
 
 
 
@@ -638,7 +654,9 @@ We also need to prove that diffs are indeed optimal.
 
 % defer to related work or handle here while hot?
 Operational Differencing is in a way a generalization of Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06}.
-OT ensures that multiple replicas distributed across a network will automatically converge to the same state regardless of the order in which operations propagate across the network. It does so by predetermining how conflicts will be resolved using distributed timestamps. We are concerned with a different problem: how to allow copies to diverge and then partially reconverge under human control, picking what differences to transfer and which side to win conflicts. We assume that every document lives in some host serializing all operations on it. So we are addressing very different problems. But there is a formal similarity: our Project and Retract functions can be seen as generalizing the Inclusion Transformation (IT) and Exclusion Transformation (ET) of OT. Our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2 of OT. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and allowing retraction (exclusion) to fail because of dependencies.
+OT ensures that multiple replicas distributed across a network will automatically converge to the same state regardless of the order in which operations propagate across the network. CRDTs~\cite{Shapiro11} are an increasingly popular alternative technique. They both predetermine how conflicts will be resolved using distributed timestamps. We are concerned with a different problem: how to allow copies to diverge and then partially reconverge under human control, picking what differences to transfer and which side to win conflicts. As a special case we can automatically sync replicas, but only if one of them is a \textit{master} serializing all transfers.
+
+Although we are addressing a different problem there is a formal similarity with OT: our Project and Retract functions can be seen as generalizing its Inclusion Transformation (IT) and Exclusion Transformation (ET). Our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2 of OT. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and allowing retraction (exclusion) to fail because of dependencies.
 
 
 \subsection{Lenses}
@@ -842,12 +860,13 @@ The \textsf{move} operation merges $e_3$ into $e_1$, resulting in the state show
 \begin{remark}
   The \textit{Impedance Mismatch Problem}~\cite{Chen1996} is the fact that PLs and DBs use very different data models, requiring a lot of ad hoc code to translate between them. In our experience it is a large source of inessential complexity in application software. The Baseline project wants to avoid this problem by developing a data model coherently unifying the needs of both PLs and DBs. However that goal is tangential to the subject of this paper so we have included the bare minimum. We believe a fuller unified model should additionally include:
   \begin{itemize}
-    \item Sum types and type aliases.
+    \item Sum types and type references.
     \item Set-valued links and multiplicity/integrity constraints on them.
     \item Virtual inverse links.
-    \item Declarative deduplication op instead of explicit \textsf{move} ops.
+    \item Declarative deduplication instead of explicit \textsf{move} ops.
     \item Nested tables and deep links into them.
     \item Generalizing Split/Join into a complete set of nested table ops.
+    \item Cross-document transclusions and variants.
   \end{itemize}
 \end{remark}
 
@@ -943,7 +962,7 @@ General purpose queries require a general language of predicates. We could embed
 
 We have seen how an auto-synced branch of a database can serve as a query on it, and how we can build that query by sculpting the datanase in the GUI. But that leaves us having to hop around different branches to view queries. It is more convenient to embed multiple queries into the database itself as \textit{formulas}. A field defined as a formula has its value computed by evaluating the formula, like a formula in a spreadsheet cell. Matching the form of operational queries, we define a formula as a type in Figure~\ref{fig:query-syntax} consisting of a timeline of operations ending with a \textit{return path}. A formula is evaluated by executing the timeline of operations starting with the current state of the database and then returning the final value of the return path. In this sense a formula is a \textit{future timeline}---it is a speculatively executed branch off of the present that returns a value from that hypothetical future.
 
-Formulas as future timelines makes it easy to program them by demonstration. In the previous example we created a query by making a copy of the database and ``sculpting'' it into the result we wanted with \textsf{Join} and \textsf{deletePresent} operations. The GUI lets us view the differences between the original and sculpted databases (\S\ref{GUI-diffs}). The GUI provides a command \textit{Transfer into Formula} that takes the timeline of differences on one branch of the diff and injects them as a formula into the other side. The return path of the formula is set from the location currently selected in the GUI. Applied to the previous example after selecting the denormalized \textsf{orders} table it will append a formula to the normalized database with the operations:
+Formulas as future timelines makes it easy to program them by demonstration. In the previous example we created a query by making a copy of the database and ``sculpting'' it into the result we wanted with \textsf{Join} and \textsf{deletePresent} operations. The GUI lets us view the differences between the original and sculpted databases (\S\ref{GUI}). The GUI provides a command \textit{Transfer into Formula} that takes the timeline of differences on one branch of the diff and injects them as a formula into the other side. The return path of the formula is set from the location currently selected in the GUI. Applied to the previous example after selecting the denormalized \textsf{orders} table it will append a formula to the normalized database with the operations:
 \[
 \begin{array}{l}
   \ldotp \textsf{ Append } \textit{new-formula} \exec\\
@@ -1006,11 +1025,11 @@ Forward rewriting is automatically done on all formulas within a database whenev
 
 
 
-\section{Visualizing state and change}\label{GUI}
+\section{Visualizing Structure and Change}\label{GUI}
 
-Useability is a primary goal of Baseline. We believe that people should have the same power as programs, entailing that all state is visualized in a GUI and that all operations are manifested as direct manipulations in it. The same goes for our version control capabilities: differences are visualized and can be transferred.
+A primary goal of Baseline is useability. We believe that people should have the same power as programs, entailing that all state is visualized in a GUI and that all operations are manifested as direct manipulations in it. The same goes for our version control capabilities: differences are visualized and can be transferred.
 
-It is difficult to convey the experience of an interactive user interface in a written narrative, so we have published a short demo video at \textcolor{red}{xxx}. The following discussion will concentrate on the key UI design decisions we made.
+It is difficult to convey the experience of an interactive user interface in a written narrative, so we have published a \textit{playable demo} (\S\ref{demo}). The following discussion will concentrate on the key UI design decisions we made.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{GUInumbered.png}
@@ -1031,15 +1050,43 @@ The three columns to the right are Miller columns~\cite{miller-columns} that dis
 
 Figure~\ref{fig:Diff} displays our representation of diffs. The challege is that Operational Differencing can do fine-grained comparisons across schema changes. We split the screen in half vertically to compare two databases. Here we are displaying the differences due to database normalization between Figure~\ref{fig:tables-single} in the top half and Figure~\ref{fig:tables-dedup} in the bottom half. Differences on each side are given a green background, and the context menu on them provides a command to transfer that difference to the other side.
 
-However the tricky problem is not showing the differences but showing what is the same across complex structural transformations.
+The hard problem is not showing what has \textit{changed} but showing what is the \textit{same} across complex structural transformations.
 We use \textit{coordinated selection}:  At \circledtext{1} the cyan outline indicates we have selected the \textsf{customers} table cell containing \textsf{Wile E Coyote}. At \circledtext{2} the corresponding cell in the other database has been outlined in white, even though it is in the \textsf{orders} table. We automatically compute the corresponding location of the selection by transfering a \textsf{noop} operation to the other side.
 
-We first tried conventional representations of textual diffs, both side-by-side and interleaved (AKA unified). They have the advantage of keeping corresponding locations close to each other on screen, but only when the differences are limited to inserting and deleting lines of text. They did not adapt well to complex data structures and complex structural transformations. Our split-screen approach handles these cases as well, and has the advantage that the diff view keeps the layout of the data the same as in a normal view.
+We first tried conventional representations of textual diffs, both side-by-side and interleaved (AKA unified). They have the advantage of keeping corresponding locations close to each other on screen, but only when the differences are limited to inserting and deleting text. They did not adapt well to complex data structures and complex structural transformations. Our split-screen approach handles these cases as well, and has the advantage that the diff view keeps the layout of the data the same as in a normal view.
+% However only observation of actual usage will tell how successful this design really is.
+% To increase the saliency of coordinated selection we would like to add hover effects and side-by-side ``minimaps'' that use color coding to give a global view of the mapping.
 
 
 
 
-\section{Discussion}
+\section{Evaluation \& Discussion}
+
+% eval: challenge problems, playable demo
+
+\subsection{Playable Demo}\label{demo}
+
+\subsection{Challenge Problems}
+
+
+% \subsection{Technical Dimensions Evaluation}
+% https://tomasp.net/techdims/#footer=index,navigation;left=catalogue,list;top=catalogue,index
+% We can heuristically evaluate Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+% % but we designed the system with these goals in mind
+
+% \paragraph{Interaction} Strictly speaking Baseline has two \textbf{modes of interaction}: user and developer, however user mode is a strict subset of developer mode (no type operations) so it is fair to say there is really only one mode of interaction.
+% Operationalized queries minimize \textbf{abstraction construction} since they correspond exactly to interactive actions in the UI, suporting Programming by Demonstration.
+% % An intriguing question is how well we can hew to this principle as we add general programming language capabilities following the path previously explored in Subtext~\cite{reifying-programming, direct-programming}.
+% Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evaluation is reduced because all operations are concrete direct manipulations; The Gulf of Interpretation is reduced by visualizing changes in terms of concrete difference operations. Version control of data enables collaborative feedback loops that are not practical with conventional techniques.
+
+% \paragraph{Notation} Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably Baseline utilizes a rich set of operations that do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}. In future work we want to investigate whether there is a normal form for sequences of operations.
+
+% \paragraph{Conceptual structure} Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
+
+% \paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transfered later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not see that as a goal.
+
+
+\subsection{Discussion}
 
 % VC for everything, all the way down and up, Lisp redux
 % full unified QL/PL with VC semantics, test, supply chain, deployment
@@ -1047,8 +1094,6 @@ We first tried conventional representations of textual diffs, both side-by-side 
 %   \item If we are allowed to speculate, could we get the benefits of version control even at runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we explore and merge alternative runtime states~\cite{warth11}?
 % DevOps~\cite{kim2022devops} would benefit from applying version control to migrating databases, or rebuilding containers, or updating software dependencies.
 
-% eval: challenge problems, playable demo
-% tech dims https://tomasp.net/techdims/#footer=index,navigation;left=catalogue,list;top=catalogue,index
 
 % pros and cons
 % con: need structural editor for code, or infer structure changes using known technique
