@@ -111,7 +111,7 @@ he can be reached at \email{tomas@tomasp.net}.}
   We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea on a query language fragment containing selects and joins.
   Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. Operationalized queries get rewriten to accomodate schema change ``for free'' by the machinery of operational differencing.
 
-  We discuss the design of Baseline's direct manipuation GUI supporting interactive schema changes as well as diffing and merging between databases.
+  We discuss the design of Baseline's direct manipuation GUI supporting interactive schema changes as well as diffing and merging between databases. A playable demo is available.
   Altogether we develop solutions to four of the eight challenge problems of schema evolution identified in a recent paper.
 
 \noindent\rule{\textwidth}{1pt}
@@ -1038,7 +1038,7 @@ For example if we were to transfer the prior backported query forward again thro
 
 A primary goal of Baseline is useability. We believe that people should have the same power as programs, entailing that all state is visualized in a GUI and that all operations are manifested as direct manipulations in it. The same goes for our version control capabilities: differences are visualized and can be transferred.
 
-It is difficult to convey the experience of an interactive user interface in a written narrative, so we have published a \textit{playable demo} (\S\ref{demo}). The following discussion will concentrate on the key UI design decisions we made.
+It is difficult to convey the experience of an interactive user interface in a written narrative, so we have developed a \textit{Playable Demo}. We adopt \textit{onboarding} techniques that commercial software uses to teach new users. A scaffold over the UI walks the user through a demo scenario, stepping through a written narrative that prompts each user action. Users that follow the main quest are given a frustration-free experience going at their own pace. The more adventurous are free to roam at their own risk, but can always respawn where they left the path. The demo can be accessed at \url{http://thebaseline.dev/Programming26/} and we encourage reviewers to share their experience in the survey at the end.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{GUInumbered.png}
@@ -1053,6 +1053,8 @@ It is difficult to convey the experience of an interactive user interface in a w
 \end{figure}
 
 \circledtextset{resize=real, charf=\LARGE\sffamily}
+
+The following discussion concentrates on the rationale behind the key UI design decisions.
 Figure~\ref{fig:GUI} displays a screen shot of the UI. \circledtext{1} The left hand column shows the history of operations on this database. History sidebars are a common technique but we were particularly inspired by Wrangler~\cite{kandel11}.
 
 The three columns to the right are Miller columns~\cite{miller-columns} that display a path drilling into and across nested data structures. Usually Miller columns display a simple list, as in the MacOS Finder column view of directories. We elaborate that convention to show in each column either an indented outline or a flat table. Nested structures are indicated with summaries that when clicked open a new column to the right. Cyan outlines show the selected path through the columns. \circledtext{2} is the top-level structure of this document. \circledtext{3} is the \textsf{orders} table within it. The user has selected a link to the \textsf{customers} table, which is opened in the column \circledtext{4}. Selection not only drills into nested structures but also follows links crossing the hierarchy, as if the target table of the link was nested inside it. This design was inspired as a reaction to Ultorg~\cite{bakke:phdthesis, ultorg} which uses nested tables to represent queries crossing a flat relational database. Ultorg provides a single view of a nested structure whereas our use of Miller columns provides only a view of the context of a path within the structure. The compensation for that restriction is that each column contains a visually simpler and context-independent layout, keeping neighbors at each level adjacent to each other rather than being splayed across lower layers.
@@ -1098,19 +1100,14 @@ We evaluate our progress against the challenge problems proposed in
 Altogether we solved four of the eight problems. We keep the remaining four as goals for future work.
 
 
-\subsection{Playable Demo}\label{demo}
+\subsection{The Playable Demo}\label{demo}
 
-We are experimenting with a \textit{Playable Demo} as a means to communicate and evaluate research on programming experiences (PX) that could be more effective than written narratives and recorded demos.
-It can be accessed at \url{http://thebaseline.dev/Programming26/}.
-
-We adopt \textit{onboarding} techniques used in commercial software to teach new users. A scaffold over the UI walks the user through a demo scenario, stepping through a written narrative that prompts each user action. Users that follow the main quest are given a frustration-free experience going at their own pace. The more adventurous are free to roam at their own risk, but can always respawn where they left the path.
-
-Our initial experience is mixed.
+The playable demo is an experiment in scholarly communication: is it more effective on some measures in conveying early-stage Programming Experience (PX) research results than written narratives and recorded demos? Our early results are mixed.
 
 \begin{itemize}
 \item Using an open source onboarding library was a mistake. A fully integrated experience requires a fully custom implementation.
 \item To make a playable demo robust it needs to know exactly what each user step should do and validate it. Specifying that with code is laborious (so much so that we did not do it). Instead we should use the history recorded in a play-through as an oracle. That would also allow ``fast forwarding'' through the demo, a repeated user request.
-\item A well-presented demo can lull viewers into suspending disbelief, but a playable demo is brutally realistic. Lack of polish is glaring. Going off script quickly reveals holes in the prototype implementation. These effects make playable demos a risky proposition in competitive academic venues.
+\item A well-presented demo can lull viewers into suspending disbelief. A playable demo is brutally realistic. Lack of polish is glaringly obvious. Going off script quickly reveals holes in the prototype implementation. These effects make playable demos a risky proposition in competitive academic venues.
 \item Despite these negatives, users consistently report that when following the script they understand what is being presented.
 
 \end{itemize}
@@ -1139,43 +1136,56 @@ Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evalua
 \paragraph{Adoptability}
 
 
-\paragraph{\textcolor{red}{Not sure this is useful. Drop it? Move to Appendix?}}
+\paragraph{\textcolor{red}{Not sure tech dims are useful here. Drop it? Move to Appendix?}}
 
 
 \subsection{Discussion}
 
+There is an abundance of research problems for future work:
+
+% collapse into prose to save space?
+\begin{itemize}
+
+  \item We currently use \textsf{move} operations to dedup, because that was the simplest thing that could possibly work, but it turns out it doesn't. The data model needs to directly support deduped set-like tables.
+
+  \item It has been surprisingly difficult to design a complete set of primitive operations supporting relationships across nested tables. This needs to be settled.
+
+\item We have been avoiding operations that duplicate information in an attempt to see how far we can get without them. They are a known problem for view updates and lenses. The solution may complicate diffing and weaken the transfer law.
+
+\item We need operations for editing formulas/timelines and they need to be surfaced conveniently in the GUI.
+
+\item We need an executeable specification language for transfer rules.
+
+\item Interoperability is a practical necessity. We need incremental import/export to standard data file formats and APIs.
+
+\item Two branches might evolve in parallel to the same state, but assign different IDs in insert operations. This is one situation were state-based approaches have an advantage. Diffing should detect such situations and allow the divergence to be collapsed (with \textsf{move} operations).
+
+\item Should batch transfers support some form of transactional consistency?
+
+\item The next major phase of this research is to explore the conjecture that queries can be operationalized. Can that be extended all the way into a full programming language? If so it would open up an unexplored space of language designs.
+
+\end{itemize}
+
+\noindent\rule{\textwidth}{1pt}
+To summarize,
+Operational Differencing provides a new kind of version control on data with capabilities beyond known techniques. It would be fair to say that the current state of this research raises more questions than it answers, but we hope that is taken as a positive sign of progress and potential.
+
+% vision
 % VC for everything, all the way down and up, Lisp redux
 % full unified QL/PL with VC semantics, test, supply chain, deployment
 
-%   \item If we are allowed to speculate, could we get the benefits of version control even at runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we explore and merge alternative runtime states~\cite{warth11}?
+%  If we are allowed to speculate, could we get the benefits of version control even at runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we explore and merge alternative runtime states~\cite{warth11}?
 % DevOps~\cite{kim2022devops} would benefit from applying version control to migrating databases, or rebuilding containers, or updating software dependencies.
 
-
-% pros and cons
-% con: need structural editor for code, or infer structure changes using known technique
-% con: realtionship refactorings have been difficult, prob not right. family collapse not right
-% design alternatives for relational actions.
-% convergent evolution of insertions - move
-% Need a rule spec language.
-% transfer laws unclear
-% We defer scaling issues to future work, focusing at first on small-scale data.
-% query/formula editing
-% structure editor
-% We are exploring what is possible with an operation-based approach while defering the concerns of efficiency and interoperability.
-
-% Does query rewriting hold up? Frankly this solution seems a bit too easy---we wonder if it will hold up as we fill out the capabilities of the query language.
-
-% evalueate against existing techniques for schema evolution and version control. Or does that go in related work?
-
-% this is just a conjecture. Initial exploration warrants futher research
-% This conjecture could open up an unexplored space of query language designs.
-
+% vision: subtrate like Lisp/Smalltalk reengineered for the modern world.
 
 
 \section{Related Work}
 
 % tribute to primary inspirations. wrangler, ultorg, lenses, refactoring DBs, SMOs, BiDel, Cambria [UVC?]
 % git as anti-inspiration
+
+% compare against existing techniques for schema evolution and version control.
 
 % actually related work:
 % Alex's worlds. Roly. Ask them for comment?
