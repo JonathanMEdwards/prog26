@@ -104,14 +104,15 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \begin{abstract}
 
-  Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes. We use operational differencing to construct an operation-based form of version control over data structures from programming languages and relational databases.
+  Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes. We use operational differencing to construct an operation-based form of version control over data structures used in programming languages and relational databases.
 
   This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared like spreedsheet files, except with the added benefit of diffing and merging.
 
   We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea on a query language fragment containing selects and joins.
   Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. Operationalized queries get rewriten to accomodate schema change ``for free'' by the machinery of operational differencing.
 
-  We discuss the design of Baseline's direct manipuation GUI supporting interactive schema changes as well as diffing and merging between databases. A playable demo is available.
+  We discuss the design of Baseline's direct manipuation GUI supporting interactive schema changes as well as diffing and merging between databases.
+  A playable demo is available.
   Altogether we develop solutions to four of the eight challenge problems of schema evolution identified in a recent paper.
 
 \noindent\rule{\textwidth}{1pt}
@@ -133,7 +134,7 @@ Grounding: In prior work with others we identified eight challenge problems of s
 The GUI was iterated through three versions by feedback from demonstrations. We report initial experience with a \textit{Playable Demo} as a method of evaluation.
 
 % Importance: Why does this work matter?
-Importance: Our technique improves upon the known methods for schema evolution and version control of data. Our conjecture that queries can be operationalized could open up an unexplored space of query language designs.
+Importance: Our technique improves upon the known methods for schema evolution and version control of data. Our conjecture that queries can be operationalized could open up a new space of language designs.
 
 \end{abstract}
 
@@ -212,7 +213,7 @@ Miller columns~\cite{miller-columns} are used to drill into nested data and acro
 
 \section{Rich Data Operations}\label{rich-data}
 
-We start with familiar data structures: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone}.
+We start with familiar data structures: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone} (see \S\ref{deletion}).
 
 \begin{remark}
 IDs and tombstones are invisible to both the user and the program (for example, equality ignores them). They simplify the evolution management operations discussed in the next section. We believe they are not necessary and can be seen as a cache of information derived from the operation history (and in fact the current prototype does not use tombstones). We adopt them here in the interest of simplicity.
@@ -670,7 +671,7 @@ Although we are addressing a different problem there is a formal similarity with
 % can't transform transforms
 % transform is static and outside the data
 
-\subsection{Deletion}
+\subsection{Deletion}\label{deletion}
 
 % handle cambria problem?
 % Use delete flag instead of tombstone: simplifies projection rules
@@ -864,18 +865,18 @@ The last step of this database evolution is to de-duplicate the customers, for w
 \]
 The \textsf{move} operation merges $e_3$ into $e_1$, resulting in the state shown in  Figure~\ref{fig:tables-dedup}. Note that the order for Bird Seed has had its link to $e_3$ forwarded to $e_1$. This completes the schema evolution.
 
-\begin{remark}
-  The \textit{Impedance Mismatch Problem}~\cite{Chen1996} is the fact that PLs and DBs use very different data models, requiring a lot of ad hoc code to translate between them. In our experience it is a large source of inessential complexity in application software. The Baseline project wants to avoid this problem by developing a data model coherently unifying the needs of both PLs and DBs. However that goal is tangential to the subject of this paper so we have included the bare minimum. We believe a fuller unified model should additionally include:
-  \begin{itemize}
-    \item Sum types and type references.
-    \item Set-valued links and multiplicity/integrity constraints on them.
-    \item Virtual inverse links.
-    \item Declarative deduplication instead of explicit \textsf{move} ops.
-    \item Nested tables and deep links into them.
-    \item Generalizing Split/Join into a complete set of nested table ops.
-    \item Cross-document transclusions and variants.
-  \end{itemize}
-\end{remark}
+% \begin{remark}
+%   The \textit{Impedance Mismatch Problem}~\cite{Chen1996} is the fact that PLs and DBs use very different data models, requiring a lot of ad hoc code to translate between them. In our experience it is a large source of inessential complexity in application software. The Baseline project wants to avoid this problem by developing a data model coherently unifying the needs of both PLs and DBs. However that goal is tangential to the subject of this paper so we have included the bare minimum. We believe a fuller unified model should additionally include:
+%   \begin{itemize}
+%     \item Sum types and type references.
+%     \item Set-valued links and multiplicity/integrity constraints on them.
+%     \item Virtual inverse links.
+%     \item Declarative deduplication instead of explicit \textsf{move} ops.
+%     \item Nested tables and deep links into them.
+%     \item Generalizing Split/Join into a complete set of nested table ops.
+%     \item Cross-document transclusions and variants.
+%   \end{itemize}
+% \end{remark}
 
 
 \subsection{Database Version Control}\label{db-vc}
@@ -1102,7 +1103,7 @@ Altogether we solved four of the eight problems. We keep the remaining four as g
 
 \subsection{The Playable Demo}\label{demo}
 
-The playable demo is an experiment in scholarly communication: is it more effective on some measures in conveying early-stage Programming Experience (PX) research results than written narratives and recorded demos? Our early results are mixed.
+The playable demo is an experimental method of evaluating early-stage research in programming experiences. The question is whether it is more effective on some measures than written narratives and recorded demos? Our early results are mixed.
 
 \begin{itemize}
 \item Using an open source onboarding library was a mistake. A fully integrated experience requires a fully custom implementation.
@@ -1123,20 +1124,18 @@ Operationalized queries minimize \textbf{abstraction construction} since they co
 % An intriguing question is how well we can hew to this principle as we add general programming language capabilities following the path previously explored in Subtext~\cite{reifying-programming, direct-programming}.
 Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evaluation is reduced because all operations are concrete direct manipulations; The Gulf of Interpretation is reduced by visualizing changes in terms of concrete difference operations. Version control of data enables collaborative feedback loops that are not practical with conventional techniques.
 
-\paragraph{Notation} Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably Baseline utilizes a rich set of operations that do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}. In future work we want to investigate whether there is a normal form for sequences of operations.
+\paragraph{Notation} Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably because Baseline involves a rich set of operations they do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}.
+% In future work we want to investigate whether there is a normal form for sequences of operations.
 
 \paragraph{Conceptual structure} Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
 
-\paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transfered later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not see that as a goal.
+\paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transfered later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not hold that as a goal. Our ID-annotated tree structures provide some level of \textbf{addressing and externalizability}.
 
-\paragraph{Complexity}
-
-\paragraph{Errors}
-
-\paragraph{Adoptability}
-
+\paragraph{Complexity, Errors, and Adoptability} Baseline is still very immature in these dimensions.
 
 \paragraph{\textcolor{red}{Not sure tech dims are useful here. Drop it? Move to Appendix?}}
+
+
 
 
 \subsection{Discussion}
@@ -1146,41 +1145,53 @@ There is an abundance of research problems for future work:
 % collapse into prose to save space?
 \begin{itemize}
 
-  \item We currently use \textsf{move} operations to dedup, because that was the simplest thing that could possibly work, but it turns out it doesn't. The data model needs to directly support deduped set-like tables.
+  \item The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references, and set-valued deep links with multiplicity/integrity constraints.
 
-  \item It has been surprisingly difficult to design a complete set of primitive operations supporting relationships across nested tables. This needs to be settled.
+  \item We currently use \textsf{move} operations to dedup because that was the simplest thing that could possibly work, but it turns out it doesn't. The data model needs to directly support deduped set-like tables.
 
-\item We have been avoiding operations that duplicate information in an attempt to see how far we can get without them. They are a known problem for view updates and lenses. The solution may complicate diffing and weaken the transfer law.
+  \item It has been surprisingly difficult to design a complete set of primitive operations supporting relationships across nested tables. Does this point to a broken symmetry?
+
+\item We have been avoiding operations that duplicate information in an attempt to see how far we can get without them. They are a well-known problem for view updates and lenses. The solution may complicate diffing and weaken the transfer roundtrip law.
+
+% \item Type mismatch errors should be encapsulated into \textit{exceptional values} that do not contaminate their environment but are still visible and repairable in the GUI.
 
 \item We need operations for editing formulas/timelines and they need to be surfaced conveniently in the GUI.
 
-\item We need an executeable specification language for transfer rules.
+\item We need an executeable specification language for project/retract rules.
 
-\item Interoperability is a practical necessity. We need incremental import/export to standard data file formats and APIs.
+\item Interoperability is a practical necessity: we need incremental import/export with standard data file formats and APIs.
 
 \item Two branches might evolve in parallel to the same state, but assign different IDs in insert operations. This is one situation were state-based approaches have an advantage. Diffing should detect such situations and allow the divergence to be collapsed (with \textsf{move} operations).
 
 \item Should batch transfers support some form of transactional consistency?
 
-\item The next major phase of this research is to explore the conjecture that queries can be operationalized. Can that be extended all the way into a full programming language? If so it would open up an unexplored space of language designs.
+\item Can our query language fragment be extended into a full-featured operationalized query language as we conjecture? Can that be extended further into a general purpose functional programming language?
+
+\item Could we apply version control to the software supply chain? Could updating dependencies be a pull? Could deployment be a push?
+
+\item Could we apply data version control in a PL runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we fork and merge alternative runtime states~\cite{warth11}? Could testing be done in a branch pulling code changes and diffing with an ``expected'' branch?
+
+% vision: Lisp/Smalltalk fully unified programming system reengineered for the modern world. VC solves killer problems of image-base programming.
 
 \end{itemize}
 
-\noindent\rule{\textwidth}{1pt}
-To summarize,
-Operational Differencing provides a new kind of version control on data with capabilities beyond known techniques. It would be fair to say that the current state of this research raises more questions than it answers, but we hope that is taken as a positive sign of progress and potential.
 
-% vision
-% VC for everything, all the way down and up, Lisp redux
-% full unified QL/PL with VC semantics, test, supply chain, deployment
 
-%  If we are allowed to speculate, could we get the benefits of version control even at runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we explore and merge alternative runtime states~\cite{warth11}?
-% DevOps~\cite{kim2022devops} would benefit from applying version control to migrating databases, or rebuilding containers, or updating software dependencies.
+\subsection{Conclusion}
 
-% vision: subtrate like Lisp/Smalltalk reengineered for the modern world.
+Integrating type/schema operations into a data model allows schema evolution to be handled properly as a first-class concern,
+solving four of the eight challenge problems identified in prior work.
+Operational Differencing enables a new kind of version control on data with capabilities beyond known techniques. It also simplifies the user's conceptual model.
+Preliminary work on an operationalized query language is encouraging. We have developed  new UI visualizations and are experimenting with a playable demo as an evaluation method.
+Overall it would be fair to say that this paper raises more questions than it answers, which we hope is seen as a positive sign of progress and promise.
+
+
+
 
 
 \section{Related Work}
+
+
 
 % tribute to primary inspirations. wrangler, ultorg, lenses, refactoring DBs, SMOs, BiDel, Cambria [UVC?]
 % git as anti-inspiration
