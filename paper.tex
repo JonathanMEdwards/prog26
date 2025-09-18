@@ -111,8 +111,8 @@ he can be reached at \email{tomas@tomasp.net}.}
   We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea on a query language fragment containing selects and joins.
   Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. Operationalized queries get rewriten to accomodate schema change ``for free'' by the machinery of operational differencing.
 
-  We discuss the design of Baseline's direct manipuation GUI supporting interactive schema changes as well as diffing and merging between databases.
-  A playable demo is available.
+  % We discuss the design of Baseline's direct manipuation UI supporting interactive schema changes as well as diffing and merging between databases.
+  % A playable demo is available.
   Altogether we develop solutions to four of the eight challenge problems of schema evolution identified in a recent paper.
 
 \noindent\rule{\textwidth}{1pt}
@@ -127,11 +127,12 @@ Inquiry: Can the problems of schema evolution and data version control be solved
 Approach: Most tools for data management are state-based, for pragamtic reasons of interoperability. We are exploring what is possible with an operation-based approach.
 
 % Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?
-Knowledge: Operational Differencing is able to do fine-grained version control of data even through intervening schema changes. It can be used to synthesize more precisely the information traditionally maintained in a repo, which greatly simplifies the user's conceptual model and increases flexibility. Miller columns cen be used to visualize rich data structures. Coordinated selection can be used to visualize differences across schema changes.
+Knowledge: Operational Differencing is able to do fine-grained version control of data even through intervening schema changes. It can be used to synthesize more precisely the information traditionally maintained in a repo, which greatly simplifies the user's conceptual model and increases flexibility.
+% Miller columns cen be used to visualize rich data structures. Coordinated selection can be used to visualize differences across schema changes.
 
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
-Grounding: In prior work with others we identified eight challenge problems of schema evolution in interactive programming systems. We solve four of them.
-The GUI was iterated through three versions by feedback from demonstrations. We report initial experience with a \textit{Playable Demo} as a method of evaluation.
+Grounding: In prior work with others we identified eight challenge problems of schema evolution in interactive programming systems; We solve four of them.
+% The UI was iterated through three versions by feedback from demonstrations. We report initial experience with a \textit{Playable Demo} as a method of evaluation.
 
 % Importance: Why does this work matter?
 Importance: Our technique improves upon the known methods for schema evolution and version control of data. Our conjecture that queries can be operationalized could open up a new space of language designs.
@@ -179,7 +180,17 @@ The benefit of state-based approaches is that since they observe from the outsid
 The benefit of operation-based approaches is that they can capture user intentions more accurately than can be inferred from the states. For example comparing states of a table schema, a move followed by a rename is indistinguishable from a delete followed by an insert, but that makes a big difference to the data.
 % We are exploring what is possible with an operation-based approach while defering the concerns of interoperability.
 
-In this paper we introduce a new technique for operation-based change management: \textit{Operational Differencing}, which we define on a \textit{rich data} model curated from the features of programming languages and databases. Our contributions are:
+In this paper we introduce a new technique for operation-based change management: \textit{Operational Differencing}, which we define on a \textit{rich data} model curated from the features of programming languages and databases.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{GUI.png}
+\caption{The Baseline UI}
+\label{fig:UI-plain}
+\end{figure}
+
+Baseline manifests all operations in a direction manipulation UI (Figure~\ref{fig:UI-plain}) that gives users the same power as programs. It is difficult to convey the experience of an interactive interface in a written narrative, so we offer the reader a playable demo at \url{http://thebaseline.dev/Programming26/}. The UI and playable demo are discussed in Appendices \ref{UI} and \ref{demo}.
+
+The contributions of this paper are:
 
 \begin{enumerate}
 
@@ -196,8 +207,8 @@ including refactorings. We define the primitive transformations \textit{projecti
 
 \item Operationalized queries have a perhaps surprising benefit: query rewriting~\cite{curino08, herrmann17} during schema change falls out ``for free'' from the machinery of operational differencing.
 
-\item We demonstrate Baseline's direct manipuation GUI that supports interactive data and schema changes as well as diffing and merging between databases.
-Miller columns~\cite{miller-columns} are used to drill into nested data and across relationhips, with each column containing an indented outline or a flat table. We discuss our design iteration on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. A \textit{Playable Demo} is available.
+% \item We demonstrate Baseline's direct manipuation UI that supports interactive data and schema changes as well as diffing and merging between databases.
+% Miller columns~\cite{miller-columns} are used to drill into nested data and across relationhips, with each column containing an indented outline or a flat table. We discuss our design iteration on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. A \textit{Playable Demo} is available.
 
 \item Altogether we develop solutions to four out of eight challenge problems of schema evolution~\cite{challenge-problems}.
 
@@ -318,7 +329,7 @@ The \textsf{append} and \textsf{write} operationss are \textit{value operations}
 In this presentation we adopt the standard approach of defining values and types as distinct objects. However Baseline only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped version of our approach~\cite{denicek}.
 \end{remark}
 
-Many of the type operations exist in order to do schema migration on values: they would not be needed just to define a type prior to populating it with data. We think of these operations as \textit{type refactorings}, capturing high-level design changes. They are manifested in the GUI as direct manipulations so that schema evolution can be done interactively. Schema evolution is also needed in \textit{live programming}~\cite{challenge-problems}.
+Many of the type operations exist in order to do schema migration on values: they would not be needed just to define a type prior to populating it with data. We think of these operations as \textit{type refactorings}, capturing high-level design changes. They are manifested in the UI as direct manipulations so that schema evolution can be done interactively. Schema evolution is also needed in \textit{live programming}~\cite{challenge-problems}.
 \begin{figure}[h]
 \begin{align*}
   S_1 &= [
@@ -356,7 +367,7 @@ We discuss source code version control systems like git as a point of reference,
 
 We define a \textit{timeline} to be an initial state and a sequence of operations executed in order that are each valid on their input state, producing an end state.
 A \textit{history} is a timeline starting from the initial empty state of a document, which by convention is the unit value.
-Baseline records histories by observing the operations executed in the API and in a GUI that manifests operations as direct manipulations. Operational differencing is built upon two primitive functions on operations: \textsf{Project} and \textsf{Retract}.
+Baseline records histories by observing the operations executed in the API and in a UI that manifests operations as direct manipulations. Operational differencing is built upon two primitive functions on operations: \textsf{Project} and \textsf{Retract}.
 
 \subsection{Projection}
 
@@ -906,9 +917,11 @@ is the inverse of \textsf{Split}. It replaces a link column with all the columns
 \[
 \textsf{orders}\ldotp * \ldotp \textsf{customer Join} \\
 \]
-resulting in exactly the database we started with in Figure~\ref{fig:tables-single}. It is easy for the Fullfillment department to do this because the Baseline GUI surfaces operations as direct manipulation actions (\S\ref{GUI}). Now Fullfillment can operate in their preferred schema and bidirectionally sync changes with the normalized primary database in the Cutomer Relationship department. Bidirectional sync works now when it didn't before because the \textsf{Join} operation does not create any dependencies. We could make this even more convenient by automatically syncing on all changes. We have essentially built an updatable view by doing schema changes on a copy, and we did this in the GUI without programming.
+resulting in exactly the database we started with in Figure~\ref{fig:tables-single}.
+The Fullfillment department can perform this operations directly in the UI, allowing them
+to operate in their preferred schema and bidirectionally sync changes with the normalized primary database in the Cutomer Relationship department. Bidirectional sync works now when it didn't before because the \textsf{Join} operation does not create any dependencies. We could make this even more convenient by automatically syncing on all changes. We have essentially built an updatable view by doing schema changes on a copy, and we did this in the UI without programming.
 
-This example raises an interesting question: could we generalize it into a general technqiue for building queries? Instead of writing a query in an abstract language we make a copy of the database and perform schema change and data mutation operations in the GUI to \textit{sculpt}~\cite{sculpin} it into the desired form. This sculpted database acts like a query if we automatically sync changes from the primary database into it. Such forward projection is always possible. We can also update the sculpted view and sync those changes back to the real database, limited to those cases where a traditional query-based view would also be updatable.
+This example raises an interesting question: could we generalize it into a general technqiue for building queries? Instead of writing a query in an abstract language we make a copy of the database and perform schema change and data mutation operations in the UI to \textit{sculpt}~\cite{sculpin} it into the desired form. This sculpted database acts like a query if we automatically sync changes from the primary database into it. Such forward projection is always possible. We can also update the sculpted view and sync those changes back to the real database, limited to those cases where a traditional query-based view would also be updatable.
 
 We call this ide \textit{operationalized queries}. It can be seen as a form of \textit{Programming by Demonstration}~\cite{cypher93-pbd}. We can draw another analogy: query languages are a classic example of pure functional programming that avoids mutation. Pure functions can often be implemented by copying values, mutating them, then returning the result. That is exactly what we are
 doing: computing a query by mutating a copy of the database.
@@ -970,9 +983,9 @@ General purpose queries require a general language of predicates. We could embed
 
 \subsection{Formulas as Future Timelines}
 
-We have seen how an auto-synced branch of a database can serve as a query on it, and how we can build that query by sculpting the datanase in the GUI. But that leaves us having to hop around different branches to view queries. It is more convenient to embed multiple queries into the database itself as \textit{formulas}. A field defined as a formula has its value computed by evaluating the formula, like a formula in a spreadsheet cell. Matching the form of operational queries, we define a formula as a type in Figure~\ref{fig:query-syntax} consisting of a timeline of operations ending with a \textit{return path}. A formula is evaluated by executing the timeline of operations starting with the current state of the database and then returning the final value of the return path. In this sense a formula is a \textit{future timeline}---it is a speculatively executed branch off of the present that returns a value from that hypothetical future.
+We have seen how an auto-synced branch of a database can serve as a query on it, and how we can build that query by sculpting the datanase in the UI. But that leaves us having to hop around different branches to view queries. It is more convenient to embed multiple queries into the database itself as \textit{formulas}. A field defined as a formula has its value computed by evaluating the formula, like a formula in a spreadsheet cell. Matching the form of operational queries, we define a formula as a type in Figure~\ref{fig:query-syntax} consisting of a timeline of operations ending with a \textit{return path}. A formula is evaluated by executing the timeline of operations starting with the current state of the database and then returning the final value of the return path. In this sense a formula is a \textit{future timeline}---it is a speculatively executed branch off of the present that returns a value from that hypothetical future.
 
-Formulas as future timelines makes it easy to program them by demonstration. In the previous example we created a query by making a copy of the database and ``sculpting'' it into the result we wanted with \textsf{Join} and \textsf{deletePresent} operations. The GUI lets us view the differences between the original and sculpted databases (\S\ref{GUI}). The GUI provides a command \textit{Transfer into Formula} that takes the timeline of differences on one branch of the diff and injects them as a formula into the other side. The return path of the formula is set from the location currently selected in the GUI. Applied to the previous example after selecting the denormalized \textsf{orders} table it will append a formula to the normalized database with the operations:
+Formulas as future timelines makes it easy to program them by demonstration. In the previous example we created a query by making a copy of the database and ``sculpting'' it into the result we wanted with \textsf{Join} and \textsf{deletePresent} operations. The UI lets us view the differences between the original and sculpted databases (Appendix \ref{UI}) and provides a command \textit{Transfer into Formula} that takes the timeline of differences on one branch of the diff and injects them as a formula into the other side. The return path of the formula is set from the location currently selected in the UI. Applied to the previous example after selecting the denormalized \textsf{orders} table it will append a formula to the normalized database with the operations:
 \[
 \begin{array}{l}
   \ldotp \textsf{ Append } \textit{new-formula} \exec\\
@@ -988,7 +1001,7 @@ Henceforth the \textit{new-formula} field's value will be the result of a query 
 
 % The \textit{Transfer into Formula} command essentially converts a branch into a future. Instead of autosyncing that branch from the primary database to evaluate a query, the same operations are lazily executed as a speculative branch off of the current state of the primary database whenever the value of the formula is requested.
 
-% The similarity between diff branches and formulas is exploited by the GUI to display the content of a formula: it is displayed like a diff.
+% The similarity between diff branches and formulas is exploited by the UI to display the content of a formula: it is displayed like a diff.
 
 % formula as computed column to be path-mapped into instance - * replaced
 % but examples are all global - skip?
@@ -1035,41 +1048,6 @@ For example if we were to transfer the prior backported query forward again thro
 
 
 
-\section{Visualizing Structure and Change}\label{GUI}
-
-A primary goal of Baseline is useability. We believe that people should have the same power as programs, entailing that all state is visualized in a GUI and that all operations are manifested as direct manipulations in it. The same goes for our version control capabilities: differences are visualized and can be transferred.
-
-It is difficult to convey the experience of an interactive user interface in a written narrative, so we have developed a \textit{Playable Demo}. We adopt \textit{onboarding} techniques that commercial software uses to teach new users. A scaffold over the UI walks the user through a demo scenario, stepping through a written narrative that prompts each user action. Users that follow the main quest are given a frustration-free experience going at their own pace. The more adventurous are free to roam at their own risk, but can always respawn where they left the path. The demo can be accessed at \url{http://thebaseline.dev/Programming26/} and we encourage reviewers to share their experience in the survey at the end.
-
-\begin{figure}
-\includegraphics[width=\textwidth]{GUInumbered.png}
-\caption{A selection is a path through Miller columns containing indented outlines and flat tables.}
-\label{fig:GUI}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\textwidth]{DiffNumbered.png}
-\caption{A diff is displayed across a split screen with coordinated selection.}
-\label{fig:Diff}
-\end{figure}
-
-\circledtextset{resize=real, charf=\LARGE\sffamily}
-
-The following discussion concentrates on the rationale behind the key UI design decisions.
-Figure~\ref{fig:GUI} displays a screen shot of the UI. \circledtext{1} The left hand column shows the history of operations on this database. History sidebars are a common technique but we were particularly inspired by Wrangler~\cite{kandel11}.
-
-The three columns to the right are Miller columns~\cite{miller-columns} that display a path drilling into and across nested data structures. Usually Miller columns display a simple list, as in the MacOS Finder column view of directories. We elaborate that convention to show in each column either an indented outline or a flat table. Nested structures are indicated with summaries that when clicked open a new column to the right. Cyan outlines show the selected path through the columns. \circledtext{2} is the top-level structure of this document. \circledtext{3} is the \textsf{orders} table within it. The user has selected a link to the \textsf{customers} table, which is opened in the column \circledtext{4}. Selection not only drills into nested structures but also follows links crossing the hierarchy, as if the target table of the link was nested inside it. This design was inspired as a reaction to Ultorg~\cite{bakke:phdthesis, ultorg} which uses nested tables to represent queries crossing a flat relational database. Ultorg provides a single view of a nested structure whereas our use of Miller columns provides only a view of the context of a path within the structure. The compensation for that restriction is that each column contains a visually simpler and context-independent layout, keeping neighbors at each level adjacent to each other rather than being splayed across lower layers.
-
-Figure~\ref{fig:Diff} displays our representation of diffs. The challege is that Operational Differencing can do fine-grained comparisons across schema changes. We split the screen in half vertically to compare two databases. Here we are displaying the differences due to database normalization between Figure~\ref{fig:tables-single} in the top half and Figure~\ref{fig:tables-dedup} in the bottom half. Differences on each side are given a green background, and the context menu on them provides a command to transfer that difference to the other side.
-
-The hard problem is not showing what has \textit{changed} but showing what is the \textit{same} across complex structural transformations.
-We use \textit{coordinated selection}:  At \circledtext{1} the cyan outline indicates we have selected the \textsf{customers} table cell containing \textsf{Wile E Coyote}. At \circledtext{2} the corresponding cell in the other database has been outlined in white, even though it is in the \textsf{orders} table. We automatically compute the corresponding location of the selection by transfering a \textsf{noop} operation to the other side.
-
-We first tried conventional representations of textual diffs, both side-by-side and interleaved (AKA unified). They have the advantage of keeping corresponding locations close to each other on screen, but only when the differences are limited to inserting and deleting text. They did not adapt well to complex data structures and complex structural transformations. Our split-screen approach handles these cases as well, and has the advantage that the diff view keeps the layout of the data the same as in a normal view.
-% However only observation of actual usage will tell how successful this design really is.
-% To increase the saliency of coordinated selection we would like to add hover effects and side-by-side ``minimaps'' that use color coding to give a global view of the mapping.
-
-
 
 
 \section{Evaluation \& Discussion}
@@ -1100,18 +1078,6 @@ We evaluate our progress against the challenge problems proposed in
 
 Altogether we solved four of the eight problems. We keep the remaining four as goals for future work.
 
-
-\subsection{The Playable Demo}\label{demo}
-
-The playable demo is an experimental method of evaluating early-stage research in programming experiences. The question is whether it is more effective on some measures than written narratives and recorded demos? Our early results are mixed.
-
-\begin{itemize}
-\item Using an open source onboarding library was a mistake. A fully integrated experience requires a fully custom implementation.
-\item To make a playable demo robust it needs to know exactly what each user step should do and validate it. Specifying that with code is laborious (so much so that we did not do it). Instead we should use the history recorded in a play-through as an oracle. That would also allow ``fast forwarding'' through the demo, a repeated user request.
-\item A well-presented demo can lull viewers into suspending disbelief. A playable demo is brutally realistic. Lack of polish is glaringly obvious. Going off script quickly reveals holes in the prototype implementation. These effects make playable demos a risky proposition in competitive academic venues.
-\item Despite these negatives, users consistently report that when following the script they understand what is being presented.
-
-\end{itemize}
 
 
 \subsection{Technical Dimensions}
@@ -1153,9 +1119,9 @@ There is an abundance of research problems for future work:
 
 \item We have been avoiding operations that duplicate information in an attempt to see how far we can get without them. They are a well-known problem for view updates and lenses. The solution may complicate diffing and weaken the transfer roundtrip law.
 
-% \item Type mismatch errors should be encapsulated into \textit{exceptional values} that do not contaminate their environment but are still visible and repairable in the GUI.
+% \item Type mismatch errors should be encapsulated into \textit{exceptional values} that do not contaminate their environment but are still visible and repairable in the UI.
 
-\item We need operations for editing formulas/timelines and they need to be surfaced conveniently in the GUI.
+\item We need operations for editing formulas/timelines and they need to be surfaced conveniently in the UI.
 
 \item We need an executeable specification language for project/retract rules.
 
@@ -1182,7 +1148,8 @@ There is an abundance of research problems for future work:
 Integrating type/schema operations into a data model allows schema evolution to be handled properly as a first-class concern,
 solving four of the eight challenge problems identified in prior work.
 Operational Differencing enables a new kind of version control on data with capabilities beyond known techniques. It also simplifies the user's conceptual model.
-Preliminary work on an operationalized query language is encouraging. We have developed  new UI visualizations and are experimenting with a playable demo as an evaluation method.
+Preliminary work on an operationalized query language is encouraging.
+% We have developed  new UI visualizations and are experimenting with a playable demo as an evaluation method.
 Overall it would be fair to say that this paper raises more questions than it answers, which we hope is seen as a positive sign of progress and promise.
 
 
@@ -1247,6 +1214,64 @@ Overall it would be fair to say that this paper raises more questions than it an
 
 % \citet{ambler06} propose in \textit{Refactoring Databases} the \textit{Split Table} refactoring and sketch the SQL needed. \citet(curino08) include \textit{Decompose Table} in a set of \textit{Schema Modification Operations} that automate evolutions. In our example these actions would split out the \textit{name} and \textit{address} columns into a new \textit{Customers} table and add a \textit{order} column as a \textit{foreign key} copying the \textit{primary key} of the order. But that does not solve the problem---we still have duplicate customers.
 % BiDEL is only thing that solves problem
+
+
+
+\appendix
+
+
+\section{Visualizing Structure and Change}\label{UI}
+
+A primary goal of Baseline is useability. We believe that people should have the same power as programs, entailing that all state is visualized in a UI and that all operations are manifested as direct manipulations in it. The same goes for our version control capabilities: differences are visualized and can be transferred.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{GUInumbered.png}
+\caption{A selection is a path through Miller columns containing indented outlines and flat tables.}
+\label{fig:UI}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{DiffNumbered.png}
+\caption{A diff is displayed across a split screen with coordinated selection.}
+\label{fig:Diff}
+\end{figure}
+
+\circledtextset{resize=real, charf=\LARGE\sffamily}
+
+The following discussion concentrates on the rationale behind the key UI design decisions.
+Figure~\ref{fig:UI} displays a screen shot. \circledtext{1} The left hand column shows the history of operations on this database. History sidebars are a common technique but we were particularly inspired by Wrangler~\cite{kandel11}.
+
+The three columns to the right are Miller columns~\cite{miller-columns} that display a path drilling into and across nested data structures. Usually Miller columns display a simple list, as in the MacOS Finder column view of directories. We elaborate that convention to show in each column either an indented outline or a flat table. Nested structures are indicated with summaries that when clicked open a new column to the right. Cyan outlines show the selected path through the columns. \circledtext{2} is the top-level structure of this document. \circledtext{3} is the \textsf{orders} table within it. The user has selected a link to the \textsf{customers} table, which is opened in the column \circledtext{4}. Selection not only drills into nested structures but also follows links crossing the hierarchy, as if the target table of the link was nested inside it. This design was inspired as a reaction to Ultorg~\cite{bakke:phdthesis, ultorg} which uses nested tables to represent queries crossing a flat relational database. Ultorg provides a single view of a nested structure whereas our use of Miller columns provides only a view of the context of a path within the structure. The compensation for that restriction is that each column contains a visually simpler and context-independent layout, keeping neighbors at each level adjacent to each other rather than being splayed across lower layers.
+
+Figure~\ref{fig:Diff} displays our representation of diffs. The challege is that Operational Differencing can do fine-grained comparisons across schema changes. We split the screen in half vertically to compare two databases. Here we are displaying the differences due to database normalization between Figure~\ref{fig:tables-single} in the top half and Figure~\ref{fig:tables-dedup} in the bottom half. Differences on each side are given a green background, and the context menu on them provides a command to transfer that difference to the other side.
+
+The hard problem is not showing what has \textit{changed} but showing what is the \textit{same} across complex structural transformations.
+We use \textit{coordinated selection}:  At \circledtext{1} the cyan outline indicates we have selected the \textsf{customers} table cell containing \textsf{Wile E Coyote}. At \circledtext{2} the corresponding cell in the other database has been outlined in white, even though it is in the \textsf{orders} table. We automatically compute the corresponding location of the selection by transfering a \textsf{noop} operation to the other side.
+
+We first tried conventional representations of textual diffs, both side-by-side and interleaved (AKA unified). They have the advantage of keeping corresponding locations close to each other on screen, but only when the differences are limited to inserting and deleting text. They did not adapt well to complex data structures and complex structural transformations. Our split-screen approach handles these cases as well, and has the advantage that the diff view keeps the layout of the data the same as in a normal view.
+% However only observation of actual usage will tell how successful this design really is.
+% To increase the saliency of coordinated selection we would like to add hover effects and side-by-side ``minimaps'' that use color coding to give a global view of the mapping.
+
+
+
+\section{The Playable Demo}\label{demo}
+
+It is difficult to convey the experience of an interactive user interface in a written narrative, so we have developed a \textit{Playable Demo}. We adopt \textit{onboarding} techniques that commercial software uses to teach new users. A scaffold over the UI walks the user through a demo scenario, stepping through a written narrative that prompts each user action. Users that follow the main quest are given a frustration-free experience going at their own pace. The more adventurous are free to roam at their own risk, but can always respawn where they left the path. The demo can be accessed at \url{http://thebaseline.dev/Programming26/} and we encourage viewers to share their experience in the survey at the end.
+
+Can a playable demo do a better job explaining new user interface ideas than
+written narratives and recorded demos? Our early results are mixed.
+
+\begin{itemize}
+\item Using an open source onboarding library was a mistake. A fully integrated experience requires a fully custom implementation.
+\item To make a playable demo robust it needs to know exactly what each user step should do and validate it. Specifying that with code is laborious (so much so that we did not do it). Instead we should use the history recorded in a play-through as an oracle. That would also allow ``fast forwarding'' through the demo, a repeated user request.
+\item A well-presented demo can lull viewers into suspending disbelief. A playable demo is brutally realistic. Lack of polish is glaringly obvious. Going off script quickly reveals holes in the prototype implementation. These effects make playable demos a risky proposition in competitive academic venues.
+\item Despite these negatives, users consistently report that when following the script they feel they understand what is being presented.
+
+\end{itemize}
+
+
+
+
 
 \printbibliography
 
