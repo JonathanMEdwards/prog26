@@ -855,6 +855,11 @@ The last step of this database evolution is to de-duplicate the customers, for w
 \]
 The \textsf{move} operation merges $e_3$ into $e_1$, resulting in the state shown in  Figure~\ref{fig:tables-dedup}. Note that the order for Bird Seed has had its link to $e_3$ forwarded to $e_1$. This completes the schema evolution.
 
+\begin{note}
+The preceding discussion does not reflect the full complexity of our data model. Lists and tables can be nested. Links are set-valued, and can drill into nested tables. We believe this complexity is justified to cleanly unify PL and DB data models. The \textsf{Split} and \textsf{Join} operations are composed from a set of primitive operations on nested tables and links. However there are several alternative sets of primitives that could be used, with subtle tradeoffs on transfer semantics (e.g. how does appending a column get projected through the split operation?). We need further work to settle this choice.
+\end{note}
+
+
 % \begin{remark}
 %   The \textit{Impedance Mismatch Problem}~\cite{Chen1996} is the fact that PLs and DBs use very different data models, requiring a lot of ad hoc code to translate between them. In our experience it is a large source of inessential complexity in application software. The Baseline project wants to avoid this problem by developing a data model coherently unifying the needs of both PLs and DBs. However that goal is tangential to the subject of this paper so we have included the bare minimum. We believe a fuller unified model should additionally include:
 %   \begin{itemize}
@@ -1075,6 +1080,8 @@ Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evalua
 There is an abundance of research problems for future work:
 
 As noted previously, implementing projection and retraction rules in code has proven impractical. We plan to build a DSL for specifying rules succinctly by exploiting their inherent symmetries.
+
+We need further work to settle on the best set of operations for schema evolution in nested relations, which appears to be a blind spot in prior research.
 
 
 \begin{itemize}
