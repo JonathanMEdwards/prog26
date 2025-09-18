@@ -10,7 +10,7 @@
 \usepackage{amsthm}
 \theoremstyle{definition}
 \newtheorem*{remark}{Remark}
-\newtheorem*{summary}{Summary}
+\newtheorem*{note}{Note}
 
 \usepackage{mathtools}
 \usepackage{csquotes}
@@ -106,7 +106,7 @@ he can be reached at \email{tomas@tomasp.net}.}
 
   Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes. We use operational differencing to construct an operation-based form of version control over data structures used in programming languages and relational databases.
 
-  This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared like spreedsheet files, except with the added benefit of diffing and merging.
+  This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared like document files, except with the added benefit of diffing and merging.
 
   We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea on a query language fragment containing selects and joins.
   Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. Operationalized queries get rewriten to accomodate schema change ``for free'' by the machinery of operational differencing.
@@ -138,33 +138,6 @@ Grounding: In prior work with others we identified eight challenge problems of s
 Importance: Our technique improves upon the known methods for schema evolution and version control of data. Our conjecture that queries can be operationalized could open up a new space of language designs.
 
 \end{abstract}
-
-
-% \section{\textcolor{red}{Possible Titles}}
-% \textcolor{red}{
-%   \begin{itemize}
-%   % \item Baseline: Fluent Data Evolution
-%   % \item Baseline: Fluent Data Management
-%   \item Baseline: Operation-based Data Evolution
-%   \item Baseline: Operation-based Data Management
-%   \item Baseline: Data Evolution and Versioning
-%   \item Baseline: Operation-Based Data Evolution and Versioning
-%   \item Baseline: Integrating data change across time, space, and meaning
-%   \item Baseline: Differentiating data across time, space, and meaning
-%   \item Baseline: Operational Differencing for Data Evolution and Versioning
-%   \item Baseline: Operation-Based Evolution and Versioning of Data
-%   \end{itemize}
-%   }
-
-%   Method-focused:
-% Operational Differencing: An Operation-Based Approach to Data Evolution and Version Control
-% Beyond State: Operational Differencing for Schema Evolution and Rich Data Change Management
-% System/Project-focused:
-% Baseline: Fluently Managing Data Evolution with Operational Differencing
-% Baseline: A General-Purpose Framework for Schema Evolution and Operation-Based Version Control
-% Vision-focused:
-% Fluent Data Evolution Across Time, Space, and Meaning with Operational Differencing
-% Toward Unified Mechanisms for Data Change: Schema Evolution and Version Control in Baseline
 
 
 
@@ -460,29 +433,29 @@ This last example shows that projection is asymmetric: flipping the diagram on i
 \\[4pt]
 (b)
 \end{minipage}
-\quad
-\begin{minipage}[b][][b]{1.6in}
-\center
-\begin{tikzcd}[column sep=large]
-	\bullet & \bullet \\
-	\bullet & \bullet
-	\arrow["{{p \ A}}", from=1-1, to=1-2]
-	\arrow["{{p \ A}}"'{pos=0.4}, from=1-1, to=2-1]
-	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
-	\arrow["{{p \textsf{ noop}}}"{pos=0.4}, dashed, from=1-2, to=2-2]
-	\arrow["{{p \textsf{ noop}}}"', dashed, from=2-1, to=2-2]
-\end{tikzcd}
-\\[4pt]
-(c)
-\end{minipage}
+% \quad
+% \begin{minipage}[b][][b]{1.6in}
+% \center
+% \begin{tikzcd}[column sep=large]
+% 	\bullet & \bullet \\
+% 	\bullet & \bullet
+% 	\arrow["{{p \ A}}", from=1-1, to=1-2]
+% 	\arrow["{{p \ A}}"'{pos=0.4}, from=1-1, to=2-1]
+% 	\arrow["{{\textsf{P}\Rightarrow}}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
+% 	\arrow["{{p \textsf{ noop}}}"{pos=0.4}, dashed, from=1-2, to=2-2]
+% 	\arrow["{{p \textsf{ noop}}}"', dashed, from=2-1, to=2-2]
+% \end{tikzcd}
+% \\[4pt]
+% (c)
+% \end{minipage}
 \caption{Projection rules}
 \label{fig:projection-rules}
 \end{figure}
 
-We define projection with a set of rules. Figure~\ref{fig:projection-rules}(a) is a rule covering the \textsf{ListOf} example. The target path of the \textsf{ListOf} is abstracted to $p$, and the \textsf{write} operation is abstracted into any operation $A$ targeting $p$ or deeper, which is indicated with the path concatenation operator in $p \ldotp\ldotp q$. Operation $A$ is projected down into the \textsf{ListOf} with the path $p \ldotp \mathbb{1} \ldotp\ldotp q$.
+Projection is defined with rules that can be diagrammed similarly. Figure~\ref{fig:projection-rules}(a) is a rule covering the \textsf{ListOf} example. The target path of the \textsf{ListOf} is abstracted to $p$, and the \textsf{write} operation is abstracted into any operation $A$ targeting $p$ or deeper, which is indicated with the path concatenation operator in $p \ldotp\ldotp q$. Operation $A$ is projected down into the \textsf{ListOf} with the path $p \ldotp \mathbb{1} \ldotp\ldotp q$.
 
 Figure~\ref{fig:projection-rules}(b) is the rule for conflicting writes.
-Figure~\ref{fig:projection-rules}(c) is a generic rule that identical operations cancel out in projection, which overrides all the other rules (overriding is discussed in ***).
+% Figure~\ref{fig:projection-rules}(c) is a generic rule that identical operations cancel out in projection, which overrides all the other rules. HoW?
 
 
 \subsection{Retraction}
@@ -542,6 +515,9 @@ The \textsf{Retract} function goes in the opposite direction of \textsf{Project}
 Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in Figure~\ref{fig:projection}(a). Often retraction is the inverse of projection as in this case, but not always, and sometimes retraction is not possible at all. In Figure~\ref{fig:retraction}(c) the list has a new element appended to it. There is no way to do the same thing before the list was created. Projection failures indicates a \textit{dependency} between operations. The \textsf{append} operation depends on the prior \textsf{ListOf} operation having created the list and cannot be retracted through it.
 
 Retraction is defined with rules like those for projection so we skip over them in the interest of brevity.
+\begin{note}
+  We have implemented projection and retraction rules largely with nested if and switch statements, which has become impractical as the number of operations has grown, so much so that our implementation is still incomplete. We plan to build a DSL that exploits the inherent symmetries in the rules: projection is often symmetric in the two input operations; projection and retraction are often inverses.
+\end{note}
 
 
 \subsection{Across the Multiverse}\label{transfer}
@@ -646,6 +622,9 @@ This approach is more flexible: since versions and branches no longer belong to 
 \subsection{Correctness}
 
 How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. They may turn out to be more or less in agreement with intuition. We have learned that these rules are closely coupled to the semantics of the operations and offer many alternative design choices.
+
+% note have dropped the override rule because it is awkward to explain
+% note duplication in a join probably breaks this principle! But that only comes later
 
 Nevertheless there are some principles we can expect any system of transfer rules to follow. One of them is that projection and retraction should be inverses---that transferring an operation to a different branch and then back again should return it unchanged. After all ``doing the same thing'' semms like a symmetric relation. Unfortunately we have aleady seen examples where an operation gets wiped out during transfer into a \textsf{noop}, which will always return as a \textsf{noop}. Therefore we weaken the principle to say that roundtripping an operation must return an operation that does the same thing or less than the original. To make that precise we define an ordering on branches \mathbox{\leq}:
 \[
@@ -1035,22 +1014,9 @@ For example if we were to transfer the prior backported query forward again thro
 % We offer this as a solution to \textit{Challenge Problem \#3: Code Co-evolution for Extract Entity}~\cite{challenge-problems}.
 
 
-% this is just a conjecture. Initial exploration warrants futher research
-% could open up an unexplored space of query language designs.
 
 
-% \subsection{Future Work}
-% This example is a far cry from a fully fledged query language, much less a general programming language. We hope however that it is an argues that the idea of formulas as futures is promising enough to deserves further work.
-% full query and formula language
-% query editing
-% bidirectional execution with limits
-% branches as branches
-
-
-
-
-
-\section{Evaluation \& Discussion}
+\section{Evaluation}
 
 % \subsection{Challenge Problems}
 We evaluate our progress against the challenge problems proposed in
@@ -1104,11 +1070,13 @@ Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evalua
 
 
 
-\subsection{Discussion}
+\section{Discussion}
 
 There is an abundance of research problems for future work:
 
-% collapse into prose to save space?
+As noted previously, implementing projection and retraction rules in code has proven impractical. We plan to build a DSL for specifying rules succinctly by exploiting their inherent symmetries.
+
+
 \begin{itemize}
 
   \item The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references, and set-valued deep links with multiplicity/integrity constraints.
@@ -1215,7 +1183,8 @@ Overall it would be fair to say that this paper raises more questions than it an
 % \citet{ambler06} propose in \textit{Refactoring Databases} the \textit{Split Table} refactoring and sketch the SQL needed. \citet(curino08) include \textit{Decompose Table} in a set of \textit{Schema Modification Operations} that automate evolutions. In our example these actions would split out the \textit{name} and \textit{address} columns into a new \textit{Customers} table and add a \textit{order} column as a \textit{foreign key} copying the \textit{primary key} of the order. But that does not solve the problem---we still have duplicate customers.
 % BiDEL is only thing that solves problem
 
-
+\acks
+% We would like to thank Joshua Horowitz, Devamardeep Hayatpur, and the anonymous reviewers for their helpful comments.
 
 \appendix
 
