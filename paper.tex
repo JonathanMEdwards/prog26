@@ -516,7 +516,7 @@ Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in 
 
 Retraction is defined with rules like those for projection so we skip over them in the interest of brevity.
 \begin{note}
-  We have implemented projection and retraction rules largely with nested if and switch statements, which has become impractical as the number of operations has grown, so much so that our implementation is still incomplete. We plan to build a DSL that exploits the inherent symmetries in the rules: projection is often symmetric in the two input operations; projection and retraction are often inverses.
+  We have implemented projection and retraction rules largely with nested if and switch statements, which has become impractical as the number of operations has grown, so much so that our implementation is still incomplete. We plan to build a more succinct DSL that exploits the inherent symmetries in the rules: projection is often symmetric in the two input operations; projection and retraction are often inverses.
 \end{note}
 
 
@@ -884,8 +884,10 @@ For example say that the Order Fullfillment department at Acme Corporation is ha
 
 Even with the limitations on view updates, Operational Differencing brings many of the advantages of version control to the domain of databases. It is possible to calculate the precise differences between two database instances despite intervening schema changes. It is always possible to transfer all the differences from one to the other, and often possible to transfer individual differences.
 
-
-
+\begin{note}
+Above we used a \textsf{move} operation to deduplicate the two coyotes $e_1$ and $e_3$. That was the simplest thing that could possibly work, but arguably it doesn't. Say that $e_1$ changed its address in the old database and we transfer that change forward into the deduped table. Our current implementation drops the change, because $e_3$ overwrites $e_1$. We believe a more intuitive result would be to ``de-deduplicate''
+leaving two coyotes with the same name but different addresses. The moral of this story is that it is suprisingly hard to get the transfer semantics of operations right.
+\end{note}
 
 
 \section{Operationalized Queries}
@@ -1079,9 +1081,9 @@ Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evalua
 
 There is an abundance of research problems for future work:
 
-As noted previously, implementing projection and retraction rules in code has proven impractical. We plan to build a DSL for specifying rules succinctly by exploiting their inherent symmetries.
+As noted previously, implementing projection and retraction rules with if statements has proven impractical. We plan to build a DSL for specifying rules more succinctly, exploiting their inherent symmetries.
 
-We need further work to settle on the best set of operations for schema evolution in nested relations, which appears to be a blind spot in prior research.
+We need further work to settle on the best set of operations for schema evolution in nested relations. Because of the deduping anomalies mentioned earlier we want to implement a set datatype that automatically collapses duplicates into equivalence classes.
 
 
 \begin{itemize}
