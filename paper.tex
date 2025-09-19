@@ -519,6 +519,29 @@ Retraction is defined with rules like those for projection so we skip over them 
   We have implemented projection and retraction rules largely with nested if and switch statements, which has become impractical as the number of operations has grown, so much so that our implementation is still incomplete. We plan to build a more succinct DSL that exploits the inherent symmetries in the rules: projection is often symmetric in the two input operations; projection and retraction are often inverses.
 \end{note}
 
+\begin{remark}
+How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. Well-designed rules will agree with intuition and avoid surprises. We have learned that these rules can hinge on subtle details in the semantics of operations so they must be designed together.
+
+% % note have dropped the override rule because it is awkward to explain
+% % note duplication in a join probably breaks this principle! But that only comes later
+% % correctness -> laws
+% Nevertheless there are some principles we can expect any system of transfer rules to follow. One of them is that projection and retraction should be inverses---that transferring an operation to a different branch and then back again should return it unchanged. After all ``doing the same thing'' semms like a symmetric relation. Unfortunately we have aleady seen examples where an operation gets wiped out during transfer into a \textsf{noop}, which will always return as a \textsf{noop}. Therefore we weaken the principle to say that roundtripping an operation must return an operation that does the same thing or less than the original. To make that precise we define an ordering on branches \mathbox{\leq}:
+% \[
+% O; a \leq O; b \quad\textrm{iff} \quad
+% \begin{tikzcd}
+% 	O & B \\
+% 	A & B
+% 	\arrow["{b}", from=1-1, to=1-2]
+% 	\arrow["{a}"'{pos=0.4}, from=1-1, to=2-1]
+% 	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
+% 	\arrow[dashed, from=1-2, to=2-2]
+% 	\arrow[dashed, from=2-1, to=2-2]
+% \end{tikzcd}
+% \]
+% in other words, projecting $a$ through $b$ makes no difference. The \textbf{Roundtrip Monotonicity} principle asserts that (a) \mathbox{\leq} is a partial order, and (b) roundtripping a timeline through a projection and retraction or the reverse will result in a timeline $\leq$ the original.
+
+% We also need to prove that diffs are indeed optimal.
+\end{remark}
 
 \subsection{Across the Multiverse}\label{transfer}
 
@@ -583,7 +606,7 @@ As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor} i
     ] \\
   \end{align*}
   \vspace{-30pt}\\
-We can transfer these operations inidividually from one side to the other.
+We can transfer these operations individually from one side to the other.
 If we transfer $b_2$ into $A$ the change from Jack to Jacque gets applied to the \textsf{who} field (showing the change in bold):\\
 \mathbox{A' =
 [e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \textbf{\quotedstring{Jacque}} \}]}.
@@ -618,33 +641,6 @@ We present the user with a simpler conceptual model: every document has an appen
 
 This approach is more flexible: since versions and branches no longer belong to a repo they can be shared without sharing the whole repo. They are like files (and likely implemented as files): independent storage units that can participate in overlapping and shifting webs of collaboration. They can be emailed. We regain the flexibility of the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge. Large projects will still want to maintain a list of all branches, but that can be as lightweight as a directory.
 
-
-\subsection{Correctness}
-
-How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. They may turn out to be more or less in agreement with intuition. We have learned that these rules are closely coupled to the semantics of the operations and offer many alternative design choices.
-
-% note have dropped the override rule because it is awkward to explain
-% note duplication in a join probably breaks this principle! But that only comes later
-
-Nevertheless there are some principles we can expect any system of transfer rules to follow. One of them is that projection and retraction should be inverses---that transferring an operation to a different branch and then back again should return it unchanged. After all ``doing the same thing'' semms like a symmetric relation. Unfortunately we have aleady seen examples where an operation gets wiped out during transfer into a \textsf{noop}, which will always return as a \textsf{noop}. Therefore we weaken the principle to say that roundtripping an operation must return an operation that does the same thing or less than the original. To make that precise we define an ordering on branches \mathbox{\leq}:
-\[
-O; a \leq O; b \quad\textrm{iff} \quad
-\begin{tikzcd}
-	O & B \\
-	A & B
-	\arrow["{b}", from=1-1, to=1-2]
-	\arrow["{a}"'{pos=0.4}, from=1-1, to=2-1]
-	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.2}, draw=none, from=1-1, to=2-2]
-	\arrow[dashed, from=1-2, to=2-2]
-	\arrow[dashed, from=2-1, to=2-2]
-\end{tikzcd}
-\]
-in other words, projecting $a$ through $b$ makes no difference. The \textbf{Roundtrip Monotonicity} principle asserts that (a) \mathbox{\leq} is a partial order, and (b) roundtripping a timeline through a projection and retraction or the reverse will result in a timeline $\leq$ the original.
-
-We also need to prove that diffs are indeed optimal.
-
-% this is invalid for dupping edits like a join
-% correctness -> laws
 
 \subsection{Comparison to Operational Transformation}
 
@@ -856,7 +852,7 @@ The last step of this database evolution is to de-duplicate the customers, for w
 The \textsf{move} operation merges $e_3$ into $e_1$, resulting in the state shown in  Figure~\ref{fig:tables-dedup}. Note that the order for Bird Seed has had its link to $e_3$ forwarded to $e_1$. This completes the schema evolution.
 
 \begin{note}
-The preceding discussion does not reflect the full complexity of our data model. Lists and tables can be nested. Links are set-valued, and can drill into nested tables. We believe this complexity is justified to cleanly unify PL and DB data models. The \textsf{Split} and \textsf{Join} operations are composed from a set of primitive operations on nested tables and links. However there are several alternative sets of primitives that could be used, with subtle tradeoffs on transfer semantics (e.g. how does appending a column get projected through the split operation?). We need further work to settle this choice.
+The preceding discussion does not reflect the full complexity of our data model. Lists and tables can be nested. Links are set-valued, and can drill into nested tables. We believe this complexity is justified to cleanly unify PL and DB data models. The \textsf{Split} and \textsf{Join} operations are composed from a set of primitive operations on nested tables and links. We have experimented with several alternative sets of primitives, with subtle tradeoffs on transfer semantics (e.g. how does appending a column get projected through the split operation?). We need further work to settle this decision.
 \end{note}
 
 
@@ -1083,28 +1079,23 @@ There is an abundance of research problems for future work:
 
 As noted previously, implementing projection and retraction rules with if statements has proven impractical. We plan to build a DSL for specifying rules more succinctly, exploiting their inherent symmetries.
 
-We need further work to settle on the best set of operations for schema evolution in nested relations. Because of the deduping anomalies mentioned earlier we want to implement a set datatype that automatically collapses duplicates into equivalence classes.
+We need further work to settle on the best set of operations for schema evolution in nested relations. Because of the deduping anomalies mentioned earlier we want to implement a proper set datatype that automatically collapses duplicates into equivalence classes.
 
+% move into remark somewhere
+Two branches might evolve in parallel to the same state, but assign different IDs in insert operations. This is one situation were state-based approaches have an advantage. Diffing should detect such situations and allow the divergence to be collapsed (with \textsf{move} operations).
 
 \begin{itemize}
 
   \item The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references, and set-valued deep links with multiplicity/integrity constraints.
 
-  \item We currently use \textsf{move} operations to dedup because that was the simplest thing that could possibly work, but it turns out it doesn't. The data model needs to directly support deduped set-like tables.
 
-  \item It has been surprisingly difficult to design a complete set of primitive operations supporting relationships across nested tables. Does this point to a broken symmetry?
 
-\item We have been avoiding operations that duplicate information in an attempt to see how far we can get without them. They are a well-known problem for view updates and lenses. The solution may complicate diffing and weaken the transfer roundtrip law.
 
-% \item Type mismatch errors should be encapsulated into \textit{exceptional values} that do not contaminate their environment but are still visible and repairable in the UI.
 
 \item We need operations for editing formulas/timelines and they need to be surfaced conveniently in the UI.
 
-\item We need an executeable specification language for project/retract rules.
 
-\item Interoperability is a practical necessity: we need incremental import/export with standard data file formats and APIs.
 
-\item Two branches might evolve in parallel to the same state, but assign different IDs in insert operations. This is one situation were state-based approaches have an advantage. Diffing should detect such situations and allow the divergence to be collapsed (with \textsf{move} operations).
 
 \item Should batch transfers support some form of transactional consistency?
 
