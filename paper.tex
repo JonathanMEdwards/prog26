@@ -106,7 +106,7 @@ he can be reached at \email{tomas@tomasp.net}.}
 
   Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes. We use operational differencing to construct an operation-based form of version control over data structures used in programming languages and relational databases.
 
-  This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared like document files, except with the added benefit of diffing and merging.
+  This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control for ad hoc usage: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared as is commonly done with document files, except with the added benefit of diffing and merging.
 
   We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea on a query language fragment containing selects and joins.
   Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. Operationalized queries get rewriten to accomodate schema change ``for free'' by the machinery of operational differencing.
@@ -127,7 +127,7 @@ Inquiry: Can the problems of schema evolution and data version control be solved
 Approach: Most tools for data management are state-based, for pragamtic reasons of interoperability. We are exploring what is possible with an operation-based approach.
 
 % Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?
-Knowledge: Operational Differencing is able to do fine-grained version control of data even through intervening schema changes. It can be used to synthesize more precisely the information traditionally maintained in a repo, which greatly simplifies the user's conceptual model and increases flexibility.
+Knowledge: Operational Differencing is able to do fine-grained version control of data even through intervening schema changes. It can be used to synthesize more precisely the information traditionally maintained in a repo. Version control without a repo is simpler and more flexible for ad hoc usage.
 % Miller columns cen be used to visualize rich data structures. Coordinated selection can be used to visualize differences across schema changes.
 
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
@@ -172,7 +172,7 @@ including refactorings. We define the primitive transformations \textit{projecti
 
 \item Using these primitives we reconstruct the key features of version control: \textit{diffing} and \textit{transfer} (a specialization of merging more like cherry-picking). Because our technique is operation-based we are able to do fine-grained diffing and merging despite intervening structural transformations.
 
-\item We simplify version control by eliminating the repo: artifacts under version control have an append-only history of operations attached to them. Branching is just making a copy of the artifact with its history, which can then diverge. There is no need for a repo to record a graph of branches and merges because that can be synthesized from the histories on need, and can be done so optimally in a well-defined sense. By liberating branches and versions of artifacts from the repo they can be shared freely and independently, much like the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
+\item We develop a simplified form of version control without a repo: artifacts under version control have an append-only history of operations attached to them. Branching is just making a copy of the artifact with its history, which can then diverge. There is no need for a repo to record a graph of branches and merges because that can be synthesized from the histories on need, and can be done so optimally in a well-defined sense. By liberating branches and versions of artifacts from the repo they can be shared freely and independently, much like the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
 \item We enrich the data model to incorporate relational databases, including operations for schema change and normalization. We demonstrate version control on databases that works across schema changes, and can also be used to manage schema migrations.
 
@@ -556,7 +556,7 @@ A \textit{diff} between two states $A$ and $B$ is a pair of timelines that branc
 	\arrow["{b_m}", from=1-6, to=1-7]
 \end{tikzcd}\]
 
-The two timelines are called the \textit{branches} of the diff and we call their operations the \textit{differences}. Many version control systems use something like a diff by looking for the \textit{last common ancestor} in a tree of branching versions, which is then used for \textit{3-way diffing}~\cite{diff3}. We do not do that---we will discuss how to calculate a diff in \S\ref{diff-synth} but for the moment let us take them as given. The key operation on a diff is to
+The two timelines are called the \textit{branches} of the diff and we call their operations the \textit{differences}. Many version control systems use something like a diff by looking for the \textit{last common ancestor} in a tree of branching versions, which is then used for \textit{three-way diffing}~\cite{diff3}. We do not do that---we will discuss how to calculate a diff in \S\ref{diff-synth} but for the moment let us take them as given. The key operation on a diff is to
 \textit{transfer} an operation from one side to another, which we define digrammatically in Figure~\ref{fig:transfer} (where we lift projection and retraction from operations to timelines in the obvious way).
 \vspace{-16pt}
 \begin{figure}[h]
@@ -635,12 +635,15 @@ Diff optimization lets us synthesize an optimal diff from the histories of any t
 
 \subsection{Low-fuss Version Control}
 
-The ability to synthesize diffs for any two histories eliminates the need for the \textit{repo} that version control systems use to record the tree of branching versions. The last common ancestor in this tree is used to determine the differences applied in version control operations like merging. As we have seen that can be sub-optimal. But more importantly, understanding and maintaining the repo imposes a large burden on the users of version control systems. Git~\cite{ProGit} is infamous for causing confusion and frustration~\cite{perez13, church2014case, xkcd1597}.
+The ability to synthesize diffs for any two histories avoids the need for a \textit{repo} to determine the last common ancestor for operations like merging. As we have seen that can be sub-optimal as a basis for three-way diffing. But more importantly, understanding and maintaining the repo imposes a large mental burden on the users of version control systems. Git~\cite{ProGit} is infamous for causing confusion and frustration~\cite{perez13, church2014case, xkcd1597}.
 
-We present the user with a simpler conceptual model: every document has an append-only history. To branch an alternate version of a document, simply copy it. The copies can then diverge, and their histories can be compared at any time to compute their diff which can then be used to transfer differences between them. The copy event is recorded in the copies' history, as are incoming transfers, so given a set of documents we can construct a graph like that of a repo.
+We present the user with a simpler conceptual model: every document has an append-only history. To branch an alternate version of a document, simply copy it. The copies can then diverge, and their histories can be compared at any time to compute their diff which can then be used to transfer differences between them. The copy event is recorded in the copies' history, as are incoming transfers, so given a set of documents (perhaps in a directory) we can reconstruct a graph like that of a repo.
 
-This approach is more flexible: since versions and branches no longer belong to a repo they can be shared without sharing the whole repo. They are like files (and likely implemented as files): independent storage units that can participate in overlapping and shifting webs of collaboration. They can be emailed. We regain the flexibility of the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge. Large projects will still want to maintain a list of all branches, but that can be as lightweight as a directory.
+This approach is more flexible: since versions and branches no longer belong to a repo they can be shared without sharing the whole repo. They are like files (and likely implemented as files): independent storage units that can participate in overlapping and shifting webs of collaboration. They can be emailed. We regain the flexibility of the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
+\begin{remark}
+  Large projects will still want to maintain a list of all branches, but that could be as lightweight as a file directory. Large projects will also want to compress storage and compute cryptographic hashs. We believe all these capabilities could be added on top of our approach with far less user-facing complexity than git. But that is not an immediate goal: we want to optimize for small-scale ad hoc usage by non-experts.
+\end{remark}
 
 \subsection{Comparison to Operational Transformation}
 
@@ -1077,9 +1080,9 @@ Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evalua
 
 There is an abundance of research problems for future work:
 
-As noted previously, implementing projection and retraction rules with if statements has proven impractical. We plan to build a DSL for specifying rules more succinctly, exploiting their inherent symmetries.
+As noted previously, implementing projection and retraction rules with if statements has proven impractical. We want to build a DSL for specifying rules more succinctly, exploiting their inherent symmetries.
 
-We need further work to settle on the best set of operations for schema evolution in nested relations. Because of the deduping anomalies mentioned earlier we want to implement a proper set datatype that automatically collapses duplicates into equivalence classes.
+Because of the deduping anomalies mentioned earlier we want to implement a proper set datatype that automatically collapses duplicates into equivalence classes. We need further work to settle on the best set of operations for schema evolution in nested relations.
 
 % move into remark somewhere
 Two branches might evolve in parallel to the same state, but assign different IDs in insert operations. This is one situation were state-based approaches have an advantage. Diffing should detect such situations and allow the divergence to be collapsed (with \textsf{move} operations).
@@ -1101,9 +1104,9 @@ Two branches might evolve in parallel to the same state, but assign different ID
 
 \item Can our query language fragment be extended into a full-featured operationalized query language as we conjecture? Can that be extended further into a general purpose functional programming language?
 
-\item Could we apply version control to the software supply chain? Could updating dependencies be a pull? Could deployment be a push?
+% \item Could we apply version control to the software supply chain? Could updating dependencies be a pull? Could deployment be a push?
 
-\item Could we apply data version control in a PL runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we fork and merge alternative runtime states~\cite{warth11}? Could testing be done in a branch pulling code changes and diffing with an ``expected'' branch?
+% \item Could we apply data version control in a PL runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we fork and merge alternative runtime states~\cite{warth11}? Could testing be done in a branch pulling code changes and diffing with an ``expected'' branch?
 
 % vision: Lisp/Smalltalk fully unified programming system reengineered for the modern world. VC solves killer problems of image-base programming.
 
