@@ -197,16 +197,17 @@ including refactorings. We define the primitive transformations \textit{projecti
 
 \section{Rich Data Operations}\label{rich-data}
 
-We start with familiar data structures: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied in the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide in them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone} (see \S\ref{deletion}).
+We start with familiar data structures: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied from the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone} (see Appendix~\ref{deletion}).
 
 \begin{remark}
-IDs and tombstones are invisible to both the user and the program (for example, equality ignores them). They simplify the evolution management operations discussed in the next section. We believe they are not necessary and can be seen as a cache of information derived from the operation history (and in fact the current prototype does not use tombstones). We adopt them here in the interest of simplicity.
-% IDs are replaced with numerical offsets. Much more path adjustment has to happen.
+  IDs and tombstones are not essential. We have prototyped an implementation without IDs and our current implementation doesn't use tombstones. They are bookeeping information stored in the state that greatly simplifies the description of the system, which is why we adopt them here. IDs also improve performance.
 \end{remark}
 
-The data model is homogeneously typed similarly to statically typed Functional Programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (excepting tombstones). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list and the fields of a record must have different IDs.
+The data model is typed similarly to statically typed Functional Programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (tombstones are a bottom type). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list and the fields of a record must have different IDs.
 %Record fields are named with a string which need not be unique.
-The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \textit{initial value}. We define a syntax for this model:
+The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \textit{initial value}.
+We leave out sum types and type aliases because they are not needed in this paper.
+We define a syntax for this model:
 
 % simple syntax table
 \tcbox{
@@ -249,8 +250,7 @@ We define operations with an infix syntax, placing the target path first, then t
 
   p \textsf{ delete } E & \textrm{Delete element ID $E$ in list at $p$}\\
 
-  p \textsf{ move } p' & \textrm{List element at $p$ is copied to $p'$ in the same list}\\
-  & \textrm{or cousin in nested lists, and then $p$ is deleted}\\
+  p \textsf{ move } p' & \textrm{List element $p$ is copied to $p'$ in same list then $p$ is deleted}\\
   \hline
 
   \textrm{Type operations} & \rule[0pt]{0pt}{16pt}\\
@@ -1089,7 +1089,7 @@ Two branches might evolve in parallel to the same state, but assign different ID
 
 \begin{itemize}
 
-  \item The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references, and set-valued deep links with multiplicity/integrity constraints.
+  \item The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
 
 
 
