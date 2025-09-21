@@ -199,9 +199,9 @@ including refactorings. We define the primitive transformations \textit{projecti
 
 We start with familiar data structures: nested lists and records. The atomic values are strings, supplied in the set \mathbox{S}, and numbers, supplied in \mathbox{N}, including \mathbox{\textsf{NaN}}. What is unusual about this data model is that we assign permanent unique identifiers (IDs) to every record field and list element. These IDs are supplied from the disjoint sets \mathbox{F} for record fields and \mathbox{E} for list elements. Because record fields have unique IDs their names are only for human readability and we elide them in most examples. Another unusual feature is that deletion of a record field or list element leaves behind a \textit{tombstone} (see Appendix~\ref{deletion}).
 
-\begin{remark}
-  IDs and tombstones are not essential. We have prototyped an implementation without IDs and our current implementation doesn't use tombstones. They are bookeeping information stored in the state that greatly simplifies the description of the system, which is why we adopt them here. IDs also improve performance.
-\end{remark}
+% \begin{remark}
+%   IDs and tombstones are not essential. They are invisible in the UI and do not affect value equality. We have prototyped an implementation without IDs and our current implementation doesn't use tombstones. They are bookeeping information stored in the state that greatly simplifies the description of the system, which is why we adopt them here. IDs also improve performance.
+% \end{remark}
 
 The data model is typed similarly to statically typed Functional Programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (tombstones are a bottom type). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list and the fields of a record must have different IDs.
 %Record fields are named with a string which need not be unique.
@@ -1006,7 +1006,7 @@ For example, we can transfer the prior example query on the normalized database 
   \ldotp \textit{new-formula} \textsf{ Define } \\
   \quad \langle
 \ \ldotp \textsf{orders}\ldotp * \ldotp \textsf{ship\_date deletePresent} \exec
-\!\!\uparrow \ \ldotp \textsf{orders}\ 
+\!\!\uparrow \ \ldotp \textsf{orders}\
   \rangle\\
 \end{array}
 \]
