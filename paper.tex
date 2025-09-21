@@ -206,7 +206,7 @@ We start with familiar data structures: nested lists and records. The atomic val
 The data model is typed similarly to statically typed Functional Programming (FP) language such as ML, as follows. List elements all have the same type as defined in the type of the list (tombstones are a bottom type). Record values have the same sequence of fields with the same ID and type of value as in the type of the record. The elements of a list and the fields of a record must have different IDs.
 %Record fields are named with a string which need not be unique.
 The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \textit{initial value}.
-We leave out sum types and type aliases because they are not needed in this paper.
+We omit sum types and type aliases because they are not needed in this paper.
 We define a syntax for this model:
 
 % simple syntax table
@@ -516,7 +516,7 @@ Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in 
 
 Retraction is defined with rules like those for projection so we skip over them in the interest of brevity.
 \begin{note}
-  We have implemented projection and retraction rules largely with nested if and switch statements, which has become impractical as the number of operations has grown, so much so that our implementation is still incomplete. We plan to build a more succinct DSL that exploits the inherent symmetries in the rules: projection is often symmetric in the two input operations; projection and retraction are often inverses.
+  We have implemented projection and retraction rules with if and switch statements, which has become impractical as the number of operations has grown, so much so that our implementation is still incomplete. We plan to build a more succinct DSL that exploits the inherent symmetries in the rules: projection is often symmetric in the two input operations; projection and retraction are often inverses.
 \end{note}
 
 \begin{remark}
@@ -580,8 +580,7 @@ The two timelines are called the \textit{branches} of the diff and we call their
 \label{fig:transfer}
 \end{figure}
 
-Transfer\footnote{Transfer was called migrate in previous publications~\cite{edwards21, edwards22}.} retracts $a_n$ backwards through all earlier operations on the $A$ timeline onto the original state $O$ and then projects that operation forwards through all the operations of the $B$ timeline. The final result is the operation $b'$ that yields a new version $B'$. The effect of the transfer is that the final operation $b'$ preserves the intention of the original operation $a_n$ given all the operations traversed while traveling backward in time to $O$ and then forward to $B$.
-% Borrowing a metaphor from SciFi, transfer can be seen as travel across the multiverse of alternative timelines, but in which we are also transformed along the way.
+Transfer\footnote{Transfer was called migrate in previous publications~\cite{edwards21, edwards22}.} retracts $a_n$ backwards through all earlier operations on the $A$ timeline onto the original state $O$ and then projects that operation forwards through all the operations of the $B$ timeline. The final result is the operation $b'$ that yields a new version $B'$. The effect of the transfer is that the final operation $b'$ preserves the intention of the original operation $a_n$ given all the operations traversed while traveling backward in time to $O$ and then forward to $B$. Transfer also computes a new diff between $A_n$ and $B'$: the transfered operation is now shared between them in $O'$ with branching timelines $\mathit{adjust}_a$ and $\mathit{adjust}_b$. This updated diff is used later for diff optimization (\S\ref{diff-synth}).
 
 In this definition we transfered the last operation of the $A$ branch---an earlier operation can be transfered by using the corresponding truncation of $A$.
 Since transfer uses retraction it may fail because of a dependency on an earlier operation in the $A$ branch. However it is always possible to transfer any operation by first transfering all of its dependencies earlier in the branch. A \textit{sync} action that transfers all operations in the branch will always succeed. We also provide a finer-grained \textit{dependency transfer} function that transfers just the transitive dependencies and so always succeeds.
@@ -619,17 +618,16 @@ If we transfer $a_1$ into $B$ the change from Jack to Jill gets applied to the l
 % diagram one of these examples?
 
 This example demonstrates how transference can propagate changes bidirectionally through structural changes. Standard state-based version control techniques would see only a big conflict and require a human to pick out and propagate finer-grained changes correctly.
-% We offer this example as a solution to challenge problem \#7~\cite{challenge-problems} which arises when we want different versions of code to interoperate even though they have different schema.
-Techniques like lenses~\cite{Foster2007} have the counter-intuitive behavior of losing the correlation between Jacque and Jill. We can provide more intuitive behavior in this case because operation histories let us track how locations shift through time, which cannot be inferred just by observing states.
+Operational differencing does this more precisely because it tracks how locations shift through time.
 
 Version control systems like git provide a variety of actions like \textit{merge}, \textit{rebase}, and \textit{cherry-pick} with subtly different semantics. We provide transferance as the sole primitive and then build coarser-grained actions out of sets of transfers. For example all the changes in one branch can be transferred to the other. Just the type changes or just the data changes can be transferred. The dependency transfer action mentioned earlier transfers all transitive dependencies. To \textit{synchronize} two branches all changes are transferred from one to the other and then all changes remaining in the other branch are transferred back. Note that synchronization has a direction: syncing from $A$ into $B$ resolves all conflicts in favor of $A$.
 
 
 \subsection{Diff Optimization and Synthesis}\label{diff-synth}
 
-We have been discussing transference assuming we are given a diff that specifies a shared state and timelines branching off of it. The intuition is that the shared state should contain everything the two final states have in common, and the branches should represent the differences. Not all branching timelines will satisfy that intuition. There might be redundant operations duplicated in both branches, either by coincidence or by explicit transfers. There could also be redundant changes within a branch that override earlier ones. All of these sorts of redundancies are undesireable because they add noise to a visualization of differences, and in some cases can cause transfer to produce surprising results\footnote{Cherry-picking in git can cause such anomalies, which is why some recommend avoiding it~\cite{philomatics-git}}. There is a simple algorithm that can be used to produce optimal diffs using transference itself.
+We have been discussing transference assuming we are given a diff that specifies a shared state and timelines branching off of it. The intuition is that the shared state should contain everything the two final states have in common, and the branches should represent the differences. Not all branching timelines will satisfy that intuition. There might be redundant operations duplicated in both branches, either by coincidence or by explicit transfers. There could also be redundant changes within a branch that override earlier ones. All of these sorts of redundancies are undesireable because they add noise to a visualization of differences, and in some cases can cause transfer to produce surprising results. There is a simple algorithm that can be used to produce optimal diffs using transference itself.
 
-Note that in Figure~\ref{fig:transfer} the bottom of the diagram has two new timelines $\mathit{adjust}_a$ and $\mathit{adjust}_b$ branching from a new shared state $O'$. These \textit{adjusted} timelines eliminate the redundancy of the original operation and its transferred image. Clearly after executing a transfer we should drop the original diff and use the adjusted timelines instead. In the same way we can use transfers to remove redundancies in diffs as follows. Given a pair of branching timelines we iterate over all the actions on both sides in time order. For each operation we try to transfer it to the other branch. If the transfer succeeds and its result is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the transferred operation makes no to the other side then it isn't really a difference, so we append it to the history of the shared state. After we have tried every transfer from both sides the result will be optimal in the sensse that the history of the shared state is maximal while the timelines branching off of it are minimal, without redundancies. Note however that this maximal shared state may not have ever actually occured in either history---it is the \textit{hypothetical} ideal last common ancestor if history had happened in a fortuitously non redundant order.
+Note that in Figure~\ref{fig:transfer} the bottom of the diagram produces a new diff: two new timelines $\mathit{adjust}_a$ and $\mathit{adjust}_b$ branching from a new shared state $O'$. These \textit{adjusted} timelines eliminate the redundancy of the original operation and its transferred image. Clearly after executing a transfer we should drop the original diff and use the adjusted diff instead. In the same way we can use transfers to remove redundancies in diffs as follows. Given a pair of branching timelines we iterate over all the actions on both sides in order\footnote{Currently it does not matter how the two branches are interleaved by this algorithm, but future plans may require a causal ordering on transfered operations.}. For each operation we try to transfer it to the other branch. If the transfer succeeds and its result is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the transferred operation makes no difference to the other side then it isn't really a difference, so we append it to the history of the shared state. After we have tried every transfer from both sides the result will be optimal in the sense that the history of the shared state is maximal while the timelines branching off of it are minimal, without redundancies. Note however that this maximal shared state may not have ever actually occured in either history---it is the \textit{hypothetical} ideal last common ancestor if history had happened in a fortuitously non redundant order. This ideal common ancestor avoids the problems that can be caused by cherry-picking in git~\cite{philomatics-git}.
 
 Diff optimization lets us synthesize an optimal diff from the histories of any two states. A history always starts from the unit value as its initial state. So all histories are branches from the initial state and we just optimize that primordial diff.
 
@@ -637,21 +635,23 @@ Diff optimization lets us synthesize an optimal diff from the histories of any t
 
 The ability to synthesize diffs for any two histories avoids the need for a \textit{repo} to determine the last common ancestor for operations like merging. As we have seen that can be sub-optimal as a basis for three-way diffing. But more importantly, understanding and maintaining the repo imposes a large mental burden on the users of version control systems. Git~\cite{ProGit} is infamous for causing confusion and frustration~\cite{perez13, church2014case, xkcd1597}.
 
-We present the user with a simpler conceptual model: every document has an append-only history. To branch an alternate version of a document, simply copy it. The copies can then diverge, and their histories can be compared at any time to compute their diff which can then be used to transfer differences between them. The copy event is recorded in the copies' history, as are incoming transfers, so given a set of documents (perhaps in a directory) we can reconstruct a graph like that of a repo.
+We present the user with a simpler conceptual model: every document has an append-only history. To branch an alternate version of a document, simply copy it. The copies can then diverge, and their histories can be compared at any time to compute their diff, which can then be used to transfer differences between them. We can record copy and transfer events as comments in histories in order to reconstruct a version graph like that maintained in a repo.
 
 This approach is more flexible: since versions and branches no longer belong to a repo they can be shared without sharing the whole repo. They are like files (and likely implemented as files): independent storage units that can participate in overlapping and shifting webs of collaboration. They can be emailed. We regain the flexibility of the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
 \begin{remark}
-  Large projects will still want to maintain a list of all branches, but that could be as lightweight as a file directory. Large projects will also want to compress storage and compute cryptographic hashs. We believe all these capabilities could be added on top of our approach with far less user-facing complexity than git. But that is not an immediate goal: we want to optimize for small-scale ad hoc usage by non-experts.
+  Large projects will still need to maintain a list of all branches, but that could be as lightweight as a file directory. Large projects will also want to compress storage and compute cryptographic hashs. We believe all these capabilities could be added on top of our approach with far less user-facing complexity than git. But that is not an immediate goal: we want to first optimize for small-scale ad hoc usage.
 \end{remark}
 
-\subsection{Comparison to Operational Transformation}
+\subsection{Comparison to OT and CRDTs}
 
 % defer to related work or handle here while hot?
-Operational Differencing is in a way a generalization of Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06}.
-OT ensures that multiple replicas distributed across a network will automatically converge to the same state regardless of the order in which operations propagate across the network. CRDTs~\cite{Shapiro11} are an increasingly popular alternative technique. They both predetermine how conflicts will be resolved using distributed timestamps. We are concerned with a different problem: how to allow copies to diverge and then partially reconverge under human control, picking what differences to transfer and which side to win conflicts. As a special case we can automatically sync replicas, but only if one of them is a \textit{master} serializing all transfers.
+Operational Differencing has similarities to
+Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
+They ensures that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. They predetermine how conflicts will be resolved using distributed timestamps. However that is non-deterministic: the same user operations can yield different results depending on timing and network behavior, albeit all replicas will converge to the same non-determinsitically chosen result. Version control needs to not only be deterministic, but to let humans make the determination of how conflicts will be resolved. On the other hand, most OT and all CRDT techniques are decentralized, which is not a requirement for version control.
+We can automatically synchronize replicas, but only if one of them is a \textit{primary} serializing all transfers.
 
-Although we are addressing a different problem there is a formal similarity with OT: our Project and Retract functions can be seen as generalizing its Inclusion Transformation (IT) and Exclusion Transformation (ET). Our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2 of OT. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and allowing retraction (exclusion) to fail because of dependencies.
+Although we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and was in fact inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
 
 
 \subsection{Lenses}
@@ -780,7 +780,7 @@ Although we are addressing a different problem there is a formal similarity with
   \hline
 
   & \rightarrow\! p & & \rightarrow\! E & & \rightarrow\! *
-  & \textrm{link into list } p \\
+  & \textrm{link to element $E$ of list $p$ ($*$ is null link)}  \\
 
   % multi-link
   % & \rightarrow\! p & & \rightarrow\! [ E \  \dots ] & & \rightarrow\! []
@@ -833,19 +833,28 @@ To perform the migration in Baseline we first need to add support for relational
 We already support tables: they are lists of records, where the elements of the list are the rows and the fields of the record are the columns, which are homogeneously typed as in a relational database.
 Throughout the rest of the paper we will refer to any Baseline document containing tables as a \textit{database}.
 What is missing so far is \textit{relationships} between tables, which relational databases model through primary and foreign keys. We take a more PL-oriented approach.
-Instead of primary keys exposed as user data fields we annotate list elements with IDs that are unique, permanent, and opaque. Instead of foreign keys we add the \textit{link} data type in Figure~\ref{fig:db-syntax}: the type of a link defines the table (or list) it ranges over; the value of a link is an element ID in that range, or $*$ for a null link. We also add the operations defined in Figure~\ref{fig:db-operations}.
+Instead of primary keys exposed as user data fields we annotate list elements with IDs that are unique, permanent, and opaque. Instead of foreign keys we add the \textit{link} data type in Figure~\ref{fig:db-syntax}: the type of a link defines the table (or list) it ranges over; the value of a link is an element ID in that range, or $*$ for a null link. We also add the operations defined in Figure~\ref{fig:db-operations}. All operations that move a list must also adjust the path in the type of all links into that list.
 
-The first step in evolving the Acme database is to \textsf{Split} out a \textsf{Customers} table with the following operations starting from the state in Figure~\ref{fig:tables-single}:
+The first step in evolving the Acme database is to \textsf{Split} out a \textsf{Customers} table with the following operations:
 \[
-\begin{array}{l}
-\{ \textsf{orders}\is [ \ldots ]\} \exec\\
-\ldotp \textsf{ Append } \textsf{customers} \exec \\
-\ldotp \textsf{orders}\ldotp * \ldotp \textsf{name Split customers} \exec \\
-\ldotp \textsf{orders}\ldotp * \ldotp \textsf{name Rename } \quotedstring{customer}
+\begin{array}{ll}
+\{ \textsf{orders}\is [ \ldots ]\} \exec & \textrm{(1)}\\
+\ldotp \textsf{ Append } \textsf{customers} \exec  & \textrm{(2)}\\
+\ldotp \textsf{orders}\ldotp * \ldotp \textsf{name Split customers} \exec & \textrm{(3)}\\
+\ldotp \textsf{orders}\ldotp * \ldotp \textsf{name Rename } \quotedstring{customer} & \textrm{(4)}\\
 \end{array}\]
-(1) The \textsf{Append} operation adds a \textsf{customers} field to hold the new table. (2) The \textsf{Split} operation then splits the \textsf{orders} tables in two starting at the \textsf{name} column, copying those columns into the \textsf{customers} table, the rows of which are given the same IDs as in the \textsf{orders} table.
+
+% \begin{lstlisting}[mathescape]
+% $  \{ \textsf{orders}\is [ \ldots ]\} \exec$
+% $\ldotp \textsf{ Append } \textsf{customers} \exec$
+% $\ldotp \textsf{orders}\ldotp * \ldotp \textsf{name Split customers} \exec$
+% $\ldotp \textsf{orders}\ldotp * \ldotp \textsf{name Rename } \quotedstring{customer}$
+% \end{lstlisting}
+
+(1) Starting from the state in Figure~\ref{fig:tables-single};
+(2) The \textsf{Append} operation adds a \textsf{customers} field to hold the new table. (3) The \textsf{Split} operation then splits the \textsf{orders} tables in two starting at the \textsf{name} column, copying those columns into the \textsf{customers} table, the rows of which are given the same IDs as in the \textsf{orders} table.
 The original \textsf{name} column in \textsf{orders} is replaced with links to the corresponding \textsf{customers} rows.
-(3) The \textsf{Rename} operation renames the links column to be \textsf{customer}\footnote{Abusing notation by conflating the name and ID}.
+(4) The \textsf{Rename} operation renames the links column to be \textsf{customer}\footnote{Abusing notation by conflating the name and ID}.
 The result is shown in Figure~\ref{fig:tables-split}.
 
 The last step of this database evolution is to de-duplicate the customers, for which we use the \textsf{move} operation from Figure~\ref{fig:operations}. Thus:
@@ -878,14 +887,18 @@ The preceding discussion does not reflect the full complexity of our data model.
 Schema evolution is typically implemented as a one-time one-way event, which becomes problematic when there are multiple replicas of the database in production. Operational Differencing is more flexible because it can transfer changes forward through the schema evolution and backwards as long as they aren't dependent on the schema evolution itself. This could allow distributed migrations to happen asynchronously.
 The scheme evolution operations themselves can be transfered between copies of a database, so migrating a database instance can be done by transferring in the type changes from the dev branch instead of an elaborate DevOps procedure.
 
-For example say that the Order Fullfillment department at Acme Corporation is happy with the old version of the database because they don't have to do a query to find the customer name and address. So they don't want to deploy the schema changes made by the Customer Relationship department. They could instead continue to use the old database and transfer updates to new database. Likewise when a new order is entered in the new database it can be transferred to Fulfillment in its unnormalized form. But new orders to new customers can't be transferred backwards because customer creation is dependent on the \textsf{Split} operation creating the customers table. In those cases the new order will transfer back with blank name and address fields. This problem is an instance of the classic \textit{View Update Problem}\cite{Bancilhon81, Foster2007}.
-% With that caveat we offer this as a solution to \textit{Challenge Problem \#6: Divergence Control for Extract Entity}~\cite{challenge-problems}.
+For example say that the Order Fullfillment department at Acme Corporation is happy with the old version of the database because they don't have to do a query to find the customer name and address. So they don't want to deploy the schema changes made by the Customer Relationship department. They could instead continue to use the old database and transfer updates to the new database. Likewise when a new order is entered in the new database it can be transferred to Fulfillment in its unnormalized form. But new orders to new customers can't be transferred backwards because customer creation is dependent on the \textsf{Split} operation creating the customers table. In those cases the new order will transfer back with blank name and address fields. This problem is an instance of the classic \textit{View Update Problem}\cite{Bancilhon81, Foster2007}.
+
+% unrealistic scenario? Using for challenge problem 6.
+% \citet{Burnett14} documented related scenarios on spreadsheets corresponding to the need for version control on schema changes.
 
 Even with the limitations on view updates, Operational Differencing brings many of the advantages of version control to the domain of databases. It is possible to calculate the precise differences between two database instances despite intervening schema changes. It is always possible to transfer all the differences from one to the other, and often possible to transfer individual differences.
 
 \begin{note}
 Above we used a \textsf{move} operation to deduplicate the two coyotes $e_1$ and $e_3$. That was the simplest thing that could possibly work, but arguably it doesn't. Say that $e_1$ changed its address in the old database and we transfer that change forward into the deduped table. Our current implementation drops the change, because $e_3$ overwrites $e_1$. We believe a more intuitive result would be to ``de-deduplicate''
-leaving two coyotes with the same name but different addresses. The moral of this story is that it is suprisingly hard to get the transfer semantics of operations right.
+leaving two coyotes with the same name but different addresses.
+In \S\ref{discussion} we propose a set-like datatype to solve this problem.
+The moral of this story is that it is suprisingly hard to get the transfer semantics of operations right.
 \end{note}
 
 
@@ -906,16 +919,16 @@ resulting in exactly the database we started with in Figure~\ref{fig:tables-sing
 The Fullfillment department can perform this operations directly in the UI, allowing them
 to operate in their preferred schema and bidirectionally sync changes with the normalized primary database in the Cutomer Relationship department. Bidirectional sync works now when it didn't before because the \textsf{Join} operation does not create any dependencies. We could make this even more convenient by automatically syncing on all changes. We have essentially built an updatable view by doing schema changes on a copy, and we did this in the UI without programming.
 
-This example raises an interesting question: could we generalize it into a general technqiue for building queries? Instead of writing a query in an abstract language we make a copy of the database and perform schema change and data mutation operations in the UI to \textit{sculpt}~\cite{sculpin} it into the desired form. This sculpted database acts like a query if we automatically sync changes from the primary database into it. Such forward projection is always possible. We can also update the sculpted view and sync those changes back to the real database, limited to those cases where a traditional query-based view would also be updatable.
+This example raises an interesting question: could we generalize it into a general technique for building queries? Instead of writing a query in an abstract language we make a copy of the database and perform schema change and data mutation operations in the UI to \textit{sculpt}~\cite{sculpin} it into the desired form. This sculpted database acts like a query if we automatically sync changes from the primary database into it. Such forward projection is always possible. We can also update the sculpted view and sync those changes back to the real database, limited to those cases where a traditional query-based view would also be updatable.
 
-We call this ide \textit{operationalized queries}. It can be seen as a form of \textit{Programming by Demonstration}~\cite{cypher93-pbd}. We can draw another analogy: query languages are a classic example of pure functional programming that avoids mutation. Pure functions can often be implemented by copying values, mutating them, then returning the result. That is exactly what we are
+We call this idea \textit{operationalized queries}. It can be seen as a form of \textit{Programming by Demonstration}~\cite{cypher93-pbd}. We can draw another analogy: query languages are a classic example of pure functional programming that avoids mutation. Pure functions can often be implemented by copying values, mutating them, then returning the result. That is exactly what we are
 doing: computing a query by mutating a copy of the database.
 
 It takes more than a join operation to make a query language. We can take another step with a simple selection predicate. When the Fullfillment department ships an order it sets the date in the \textsf{ship\_date} field. They would like a view showing just the pending orders, which lack a ship date. We can further sculpt the view with the \textsf{deletePresent} operation in Figure~\ref{fig:query-operations}:
 \[
 \ldotp \textsf{orders}\ldotp * \ldotp \textsf{ship\_date deletePresent} \\
 \]
-that deletes all orders with a ship date, producing the desired view. When a ship date is entered into this view the change will transfer back into the primary database, which has the effect of dropping that order from the recalculated view.
+The target path is the type of the \textsf{ship\_date} column---all orders with a non-blank value in that column are deleted, producing the desired view. When a ship date is entered into this view the change will transfer back into the primary database, which has the effect of dropping that order from the recalculated view.
 %\footnote{Operation transfer computes the changes in both directions incrementally which is called \textit{incremental view maintenance}\cite{gupta93}. However performance is not a design goal at this time.}
 General purpose queries require a general language of predicates. We could embed a predicate as a Boolean-valued computed column and then use the \textsf{removePresent/removeAbsent} operations. That would be consistent with the philosophy of ``querying by sculpting'' but we plan to also explore adding predicates into the language of operations.
 
@@ -968,7 +981,7 @@ General purpose queries require a general language of predicates. We could embed
 
 \subsection{Formulas as Future Timelines}
 
-We have seen how an auto-synced branch of a database can serve as a query on it, and how we can build that query by sculpting the datanase in the UI. But that leaves us having to hop around different branches to view queries. It is more convenient to embed multiple queries into the database itself as \textit{formulas}. A field defined as a formula has its value computed by evaluating the formula, like a formula in a spreadsheet cell. Matching the form of operational queries, we define a formula as a type in Figure~\ref{fig:query-syntax} consisting of a timeline of operations ending with a \textit{return path}. A formula is evaluated by executing the timeline of operations starting with the current state of the database and then returning the final value of the return path. In this sense a formula is a \textit{future timeline}---it is a speculatively executed branch off of the present that returns a value from that hypothetical future.
+We have seen how an auto-synced branch of a database can serve as a query on it, and how we can build that query by sculpting the database in the UI. But that leaves us having to hop around different branches to view queries. It is more convenient to embed multiple queries into the database itself as \textit{formulas}. A field defined as a formula has its value computed by evaluating the formula, like a formula in a spreadsheet cell. Matching the form of operational queries, we define a formula as a type in Figure~\ref{fig:query-syntax} consisting of a timeline of operations ending with a \textit{return path}. A formula is evaluated by executing the timeline of operations starting with the current state of the database and then returning the final value of the return path. In this sense a formula is a \textit{future timeline}---it is a speculatively executed branch off of the present that returns a value from that hypothetical future.
 
 Formulas as future timelines makes it easy to program them by demonstration. In the previous example we created a query by making a copy of the database and ``sculpting'' it into the result we wanted with \textsf{Join} and \textsf{deletePresent} operations. The UI lets us view the differences between the original and sculpted databases (Appendix \ref{UI}) and provides a command \textit{Transfer into Formula} that takes the timeline of differences on one branch of the diff and injects them as a formula into the other side. The return path of the formula is set from the location currently selected in the UI. Applied to the previous example after selecting the denormalized \textsf{orders} table it will append a formula to the normalized database with the operations:
 \[
@@ -1043,6 +1056,10 @@ We evaluate our progress against the challenge problems proposed in
   \item \textbf{Divergence Control for Extract Entity}\greenCheck This problem is to transfer changes bidirectionally through the schema evolution of problem 2. We solved it in \S\ref{db-vc}.
 
   \item \textbf{Multiplicity Change in Schema}\greenCheck This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We solved this problem in \S\ref{transfer}.
+% We offer this example as a solution to challenge problem \#7~\cite{challenge-problems} which arises when we want different versions of code to interoperate even though they have different schema.
+% Techniques like lenses~\cite{Foster2007} have the counter-intuitive behavior of losing the correlation between Jacque and Jill.
+
+
 
   \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but by restricting to DSLs like a state-machine language there may be hope.
 
@@ -1076,13 +1093,14 @@ Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evalua
 
 
 
-\section{Discussion}
+\section{Discussion}\label{discussion}
 
 There is an abundance of research problems for future work:
 
 As noted previously, implementing projection and retraction rules with if statements has proven impractical. We want to build a DSL for specifying rules more succinctly, exploiting their inherent symmetries.
 
 Because of the deduping anomalies mentioned earlier we want to implement a proper set datatype that automatically collapses duplicates into equivalence classes. We need further work to settle on the best set of operations for schema evolution in nested relations.
+% proper sets should help
 
 % move into remark somewhere
 Two branches might evolve in parallel to the same state, but assign different IDs in insert operations. This is one situation were state-based approaches have an advantage. Diffing should detect such situations and allow the divergence to be collapsed (with \textsf{move} operations).
