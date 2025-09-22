@@ -864,7 +864,7 @@ The last step of this database evolution is to de-duplicate the customers, for w
 The \textsf{move} operation merges $e_3$ into $e_1$, resulting in the state shown in  Figure~\ref{fig:tables-dedup}. Note that the order for Bird Seed has had its link to $e_3$ forwarded to $e_1$. This completes the schema evolution.
 
 \begin{note}
-The preceding discussion does not reflect the full complexity of our data model. Lists and tables can be nested. Links are set-valued, and can drill into nested tables. We believe this complexity is justified to cleanly unify PL and DB data models. The \textsf{Split} and \textsf{Join} operations are composed from a set of primitive operations on nested tables and links. We have experimented with several alternative sets of primitives, with subtle tradeoffs on transfer semantics (e.g. how does appending a column get projected through the split operation?). We need further work to settle this decision.
+The preceding discussion does not reflect the full complexity of our data model. Lists and tables can be nested. Links are set-valued, and can drill into nested tables. We believe this complexity is justified to cleanly unify PL and DB data models. The \textsf{Split} and \textsf{Join} operations are composed from a set of primitive operations on nested tables and links. We have experimented with several alternative sets of primitives, with subtle tradeoffs on transfer semantics (e.g. how does appending a column get projected through the split operation?). We need further work to settle this design.
 \end{note}
 
 
@@ -887,15 +887,12 @@ The preceding discussion does not reflect the full complexity of our data model.
 Schema evolution is typically implemented as a one-time one-way event, which becomes problematic when there are multiple replicas of the database in production. Operational Differencing is more flexible because it can transfer changes forward through the schema evolution and backwards as long as they aren't dependent on the schema evolution itself. This could allow distributed migrations to happen asynchronously.
 The scheme evolution operations themselves can be transfered between copies of a database, so migrating a database instance can be done by transferring in the type changes from the dev branch instead of an elaborate DevOps procedure.
 
-For example say that the Order Fullfillment department at Acme Corporation is happy with the old version of the database because they don't have to do a query to find the customer name and address. So they don't want to deploy the schema changes made by the Customer Relationship department. They could instead continue to use the old database and transfer updates to the new database. Likewise when a new order is entered in the new database it can be transferred to Fulfillment in its unnormalized form. But new orders to new customers can't be transferred backwards because customer creation is dependent on the \textsf{Split} operation creating the customers table. In those cases the new order will transfer back with blank name and address fields. This problem is an instance of the classic \textit{View Update Problem}\cite{Bancilhon81, Foster2007}.
-
-% unrealistic scenario? Using for challenge problem 6.
-% \citet{Burnett14} documented related scenarios on spreadsheets corresponding to the need for version control on schema changes.
+For example say that the Order Fullfillment department at Acme Corporation is happy with the old version of the database because they don't have to do a query to find the customer name and address. So they don't want to deploy the schema changes made by the Customer Relationship department. They could instead continue to use the old database and transfer updates to the new database. Likewise when a new order is entered in the new database it can be transferred to Fulfillment in its unnormalized form. But new orders to new customers can't be transferred backwards because customer creation is dependent on the \textsf{Split} operation creating the customers table. In those cases the new order will transfer back with blank name and address fields. This problem is an instance of the classic \textit{View Update Problem}\cite{Bancilhon81, Foster2007}. A better solution for this example uses queries as discussed in \S\ref{formulas}.
 
 Even with the limitations on view updates, Operational Differencing brings many of the advantages of version control to the domain of databases. It is possible to calculate the precise differences between two database instances despite intervening schema changes. It is always possible to transfer all the differences from one to the other, and often possible to transfer individual differences.
 
 \begin{note}
-Above we used a \textsf{move} operation to deduplicate the two coyotes $e_1$ and $e_3$. That was the simplest thing that could possibly work, but arguably it doesn't. Say that $e_1$ changed its address in the old database and we transfer that change forward into the deduped table. Our current implementation drops the change, because $e_3$ overwrites $e_1$. We believe a more intuitive result would be to ``de-deduplicate''
+Above we used a \textsf{move} operation to deduplicate the two coyotes $e_1$ and $e_3$. We took that approach because it was the simplest thing that could possibly work, but arguably it doesn't. Say that $e_1$ changed its address in the old database and we transfer that change forward into the deduped table. Our current implementation drops the change, because $e_3$ overwrites $e_1$. We believe a more intuitive result would be to ``de-deduplicate''
 leaving two coyotes with the same name but different addresses.
 In \S\ref{discussion} we propose a set-like datatype to solve this problem.
 The moral of this story is that it is suprisingly hard to get the transfer semantics of operations right.
@@ -903,10 +900,6 @@ The moral of this story is that it is suprisingly hard to get the transfer seman
 
 
 \section{Operationalized Queries}
-% \section{Queries as Branches}
-% \section{Queries as Hypothetical Timelines}
-% \section{Query by Schema Change}
-% \section{Query by Sculpting}
 
 We saw in the last section that although the Fullfillment department preferred the unnormalized view of orders it would be forced to migrate to the normalized database to stay fully in sync with all changes. Relational databases offer a better solution: \textit{queries}. In this section we discuss how Operational Differencing can build queries and updatable views. But the simplest solution doesn't even require a query. We can just make a copy of the database and denormalize it.
 
@@ -979,7 +972,7 @@ General purpose queries require a general language of predicates. We could embed
 \end{figure}
 
 
-\subsection{Formulas as Future Timelines}
+\subsection{Formulas as Future Timelines}\label{formulas}
 
 We have seen how an auto-synced branch of a database can serve as a query on it, and how we can build that query by sculpting the database in the UI. But that leaves us having to hop around different branches to view queries. It is more convenient to embed multiple queries into the database itself as \textit{formulas}. A field defined as a formula has its value computed by evaluating the formula, like a formula in a spreadsheet cell. Matching the form of operational queries, we define a formula as a type in Figure~\ref{fig:query-syntax} consisting of a timeline of operations ending with a \textit{return path}. A formula is evaluated by executing the timeline of operations starting with the current state of the database and then returning the final value of the return path. In this sense a formula is a \textit{future timeline}---it is a speculatively executed branch off of the present that returns a value from that hypothetical future.
 
@@ -1037,31 +1030,27 @@ For example if we were to transfer the prior backported query forward again thro
 
 \section{Evaluation}
 
-% \subsection{Challenge Problems}
-We evaluate our progress against the challenge problems proposed in
+We evaluate Baseline against the challenge problems proposed in
 \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
 
 \begin{enumerate}
 
-  \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the schema of an Elm/React application preserving its state and avoiding restarting it. Baseline can perform the requested schema evolutions but there is not yet enough programming capabilities to meet the requirements of the problem.
+  \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the state of an Elm application so that it needn't be restarted.
+  The example given is to evolve a field of a TODO item from \textsf{completed: bool} to \textsf{completed: Maybe<DateTime>}. This example raises the question of how Baseline handles optional types, but it is moot. Baseline does not yet have enough programming capabilities to implement the TODO application.
 
-  \item \textbf{Extract Entity}\greenCheck We took this common problem of database refactoring and normalization as the running example in \S\ref{db-evolution}, solving it there.
+  \item \textbf{Extract Entity}\greenCheck We adopted this problem as the example  shown in Figure~\ref{fig:tables} and solved it in \S\ref{db-evolution} with the \textsf{Split} and \textsf{move} operations.
 
-  \item \textbf{Code Co-evolution for Extract Entity}\greenCheck The problem is that schema evolution should apply not just to data but also to the code accessing it. We solved this problem with query rewriting in \S\ref{query-rewriting}, as far as our fragementary query language goes.
+  \item \textbf{Code Co-evolution for Extract Entity}\greenCheck This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We adopted this example and solved it in \S\ref{query-rewriting}, although only in a fragmentary query language.
 
-  \item \textbf{Structured Document Edits}\redCross The problem is to parse string data into tabular information and merge that change with other edits. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
+  \item \textbf{Structured Document Edits}\ \faQuestion\  The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
 
-  \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problems adds code rewriting onto the previous one. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
+  \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
 
-  \item \textbf{Divergence Control for Extract Entity}\greenCheck This problem is to transfer changes bidirectionally through the schema evolution of problem 2. We solved it in \S\ref{db-vc}.
+  \item \textbf{Divergence Control for Extract Entity}\greenCheck This problem extends problem \#2, requiring that changes be bidirectionally transferable through the schema evolution. We solved it in \S\ref{db-vc}, albeit with the well-known limitations of view updates.
 
-  \item \textbf{Multiplicity Change in Schema}\greenCheck This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We solved this problem in \S\ref{transfer}.
-% We offer this example as a solution to challenge problem \#7~\cite{challenge-problems} which arises when we want different versions of code to interoperate even though they have different schema.
-% Techniques like lenses~\cite{Foster2007} have the counter-intuitive behavior of losing the correlation between Jacque and Jill.
+  \item \textbf{Multiplicity Change in Schema}\greenCheck This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by \citet{Cambria} (Appendix III) involving null values that we can't handle yet.
 
-
-
-  \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but by restricting to DSLs like a state-machine language there may be hope.
+  \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
 
 \end{enumerate}
 
