@@ -659,30 +659,7 @@ We can automatically synchronize replicas, but only if one of them is a \textit{
 Although we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and was in fact inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
 
 
-\subsection{Lenses}
-% static transform written in a complex language
-% edit lenses transform values edits not type edits.
-% can't transform transforms
-% transform is static and outside the data
-
-\subsection{Deletion}\label{deletion}
-
-% handle cambria problem?
-% Use delete flag instead of tombstone: simplifies projection rules
-% Add this here as an extension to model, leave out of primary model
-% Alt syntax on colon: slash overlay or % or division sign ÷ \div
-% List of required value auto-deletes blank values. Moves out of projection rules into engine!
-% But then manual delete can get confused by projecting writes through it to mantain zombie state. Delete has to discard writes to be sticky. In which case there is no point to zombie state.
-% simpler model is to auto-convert blank elements to tombstones
-% but then a fresh insert auto-deletes, though assignining into it undeletes. UI would need to reveal autodelete?
-
-
-% and tombstones. note not used currently
-% Ref the OT problems: https://inria.hal.science/inria-00109039/document
-% Explain our novel solution?
-% Maybe move this entirely to Appendix and take tombstones out of model.
-
-\subsection{Much Ado About Nothing}
+% \subsection{Much Ado About Nothing}
 % Possibly merge with deletion
 % Conjecture: don’t need Null, Option, Result
 % Snobol and verse show we don't need Results
@@ -1119,13 +1096,12 @@ Overall it would be fair to say that this paper raises more questions than it an
 
 % \subsection{The Impedance Mismatch Problem} \label{impedance}
 
-% orthogonal persistence, ORMs, Linq, single tier (Tier, hop), naked objects, DBOS, durable computation
 
-% \subsection{PL State Management}\label{PLstate}
-
-% FP: Monads, Lenses
-
-% Imperative: immutable, React state menagement
+% \subsection{Lenses}
+% static transform written in a complex language
+% edit lenses transform values edits not type edits.
+% can't transform transforms
+% transform is static and outside the data
 
 % Remark: lenses and state libraries
 % Built in Mutable structure semantics?
@@ -1154,6 +1130,19 @@ Overall it would be fair to say that this paper raises more questions than it an
 % We would like to thank Joshua Horowitz, Devamardeep Hayatpur, and the anonymous reviewers for their helpful comments.
 
 \appendix
+
+\section{Deletion and Tombstones}\label{deletion}
+
+% Deletion is a notorious problem for OT algorithms, which we inherit.
+\citet{Oster06} first reported a flaw in how all prior OT algorithms handled deletion. Say that there are three replicas of the string \textsf{abc}. Replica 1 inserts \textsf{x} before \textsf{b}, yielding \textsf{axbc}. Replica 2 inserts \textsf{y} before \textsf{c}, yielding \textsf{abyc}. Replica 3 deletes \textsf{b}. The problem is that the intervening \textsf{b} is the only way the two insertions can be distinguished, so if the deletion arrives before the inertions they become conflated and can be ordered improperly. The solution is that deletions should leave behind a \textit{tombstone} to keep the insertions on either side distinct. The tombstone is hidden from the user, but still occupies space in the string.
+
+The current implementation of Baseline does not use tombstones. We essentially move the tombstones into the \textsf{insert} operations. Each insert operation records a sequence of the IDs of ``virtual tombstones'' that record the fact that the insertion was shifted left over a deletion. We believe that this is a novel solution to the tombstone problem.
+However it substantially complicates the rules for projecting and retracting insertions through deletions.
+
+Tombstones are easier to understand, so we have presented Baseline in this paper using them. Tombstones have also proven useful in the UI as placeholders when diffing insertions and deletions. We plan to adopt tombstones in the next implementation.
+
+
+
 
 
 \section{Visualizing Structure and Change}\label{UI}
