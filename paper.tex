@@ -520,7 +520,8 @@ Retraction is defined with rules like those for projection so we skip over them 
 \end{note}
 
 \begin{remark}
-How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. Well-designed rules will agree with intuition and avoid surprises. We have learned that these rules can hinge on subtle details in the semantics of operations so they must be designed together.
+How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. Well-designed rules will agree with intuition and avoid surprises. One of these intuitions is that transfer should be symmetric: transfering an operation across a diff and then transferring it back again should bring back the same operation. We call this the \textit{roundtrip law} and we test that our rules obey it. Except there are exceptions, like when an operation gets dropped because its target was deleted. We keep discovering new exceptions that require weakening the law, so in future work we hope to come to a more principled understanding.
+
 
 % % note have dropped the override rule because it is awkward to explain
 % % note duplication in a join probably breaks this principle! But that only comes later
@@ -648,7 +649,7 @@ This approach is more flexible: since versions and branches no longer belong to 
 % defer to related work or handle here while hot?
 Operational Differencing has similarities to
 Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
-They ensures that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. They predetermine how conflicts will be resolved using distributed timestamps. However that is non-deterministic: the same user operations can yield different results depending on timing and network behavior, albeit all replicas will converge to the same non-determinsitically chosen result. Version control needs to not only be deterministic, but to let humans make the determination of how conflicts will be resolved. On the other hand, most OT and all CRDT techniques are decentralized, which is not a requirement for version control.
+Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. They predetermine how conflicts will be resolved using distributed timestamps. However that is non-deterministic: the same user operations can yield different results depending on timing and network behavior, albeit all replicas will converge to the same non-determinsitically chosen result. Version control needs to not only be deterministic, but to let humans make the determination of how conflicts will be resolved. Managing divergence is as important as convergence. On the other hand, most OT and all CRDT algorithms are decentralized, which is not a requirement for version control.
 We can automatically synchronize replicas, but only if one of them is a \textit{primary} serializing all transfers.
 
 Although we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and was in fact inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
@@ -1042,7 +1043,7 @@ We evaluate Baseline against the challenge problems proposed in
 
   \item \textbf{Code Co-evolution for Extract Entity}\greenCheck This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We adopted this example and solved it in \S\ref{query-rewriting}, although only in a fragmentary query language.
 
-  \item \textbf{Structured Document Edits}\ \faQuestion\  The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
+  \item \textbf{Structured Document Edits}\redCross The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
 
   \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
 
@@ -1060,53 +1061,29 @@ Altogether we solved four of the eight challenge problems. We keep the remaining
 
 \section{Discussion}\label{discussion}
 
-There is an abundance of research problems for future work:
+While we are excited by the novel capabilities of Baseline there are problems that must be solved:
+% There is an abundance of research problems for future work:
 
-As noted previously, implementing projection and retraction rules with if statements has proven impractical. We want to build a DSL for specifying rules more succinctly, exploiting their inherent symmetries.
+One situation where state-based version control has an advantage is when
+two branches evolve in parallel to similar states. Baseline assigns distinct IDs to all insert operations and so treats them as unrelated. The diffing UI needs to detect such cases of adjacent similar insertions and offer to coallesce them (with \textsf{move} operations).
 
-Because of the deduping anomalies mentioned earlier we want to implement a proper set datatype that automatically collapses duplicates into equivalence classes. We need further work to settle on the best set of operations for schema evolution in nested relations.
-% proper sets should help
+Implementing projection and retraction rules with if statements has proven impractical. We want to build a DSL for specifying rules more succinctly, exploiting their inherent symmetries.
+% Ideally this DSL can be rendered as diagrams for publication.
+We want to use property-based testing to check that the rules obey the \textit{roundtrip law}, but first we need to better understand exactly what that law minimally requires.
 
-% move into remark somewhere
-Two branches might evolve in parallel to the same state, but assign different IDs in insert operations. This is one situation were state-based approaches have an advantage. Diffing should detect such situations and allow the divergence to be collapsed (with \textsf{move} operations).
+Our simple approach to deduplication is flawed. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. We believe these sets will smooth the difficulties we have had in defining a set of orthogonal operations for schema evolution in nested relations.
 
-\begin{itemize}
+Perhaps the most important question is whether we can build out a full operationalized query language. Could that be extended into a general purpose functional programming language?
 
-  \item The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
-
-
-
-
-
-\item We need operations for editing formulas/timelines and they need to be surfaced conveniently in the UI.
-
-
-
-
-\item Should batch transfers support some form of transactional consistency?
-
-\item Can our query language fragment be extended into a full-featured operationalized query language as we conjecture? Can that be extended further into a general purpose functional programming language?
-
-% \item Could we apply version control to the software supply chain? Could updating dependencies be a pull? Could deployment be a push?
-
-% \item Could we apply data version control in a PL runtime? Could a replay debugger~\cite{Sundmark02, ocallahan16} let us step back in time, hot-patch a change, then roll foward and see the diffs? Could we fork and merge alternative runtime states~\cite{warth11}? Could testing be done in a branch pulling code changes and diffing with an ``expected'' branch?
-
-% vision: Lisp/Smalltalk fully unified programming system reengineered for the modern world. VC solves killer problems of image-base programming.
-
-\end{itemize}
-
-
+% The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
 
 \subsection{Conclusion}
 
 Integrating type/schema operations into a data model allows schema evolution to be handled properly as a first-class concern,
 solving four of the eight challenge problems identified in prior work.
-Operational Differencing enables a new kind of version control on data with capabilities beyond known techniques. It also simplifies the user's conceptual model.
-Preliminary work on an operationalized query language is encouraging.
-% We have developed  new UI visualizations and are experimenting with a playable demo as an evaluation method.
+Operational Differencing enables a new kind of version control on data with novel capabilities. It also provides a simplified conceptual model for ad hoc usage.
+Our preliminary work on operationalizing a query language is intriguing.
 Overall it would be fair to say that this paper raises more questions than it answers, which we hope is seen as a positive sign of progress and promise.
-
-
 
 
 
