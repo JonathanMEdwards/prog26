@@ -633,7 +633,7 @@ Note that in Figure~\ref{fig:transfer} the bottom of the diagram produces a new 
 Diff optimization lets us synthesize an optimal diff from the histories of any two states. A history always starts from the unit value as its initial state. So all histories are branches from the initial state and we just optimize that primordial diff.
 
 \begin{note}
-  We left out a detail in the diffing algorithm. Sometimes changes cancel each other out, like an insert followed later by a delete, or an \textit{undo}~\ref{undo}. The diff timelines are simplified by attempting to fully retract each operation---if the retraction results in a \textsf{noop} it was canceled out and the simplified adjusted timeline is used instead.
+  We left out a detail in the diffing algorithm. Sometimes changes cancel each other out, like an insert followed later by a delete, or an operation followed later by its \textit{undo} (Appendix~\ref{undo}). The diff timelines are simplified by attempting to fully retract each operation---if the retraction results in a \textsf{noop} it was canceled out and the simplified adjusted timeline is used instead.
 \end{note}
 
 \subsection{Low-fuss Version Control}
@@ -653,10 +653,10 @@ This approach is more flexible: since versions and branches no longer belong to 
 % defer to related work or handle here while hot?
 Operational Differencing has similarities to
 Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
-Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. They predetermine how conflicts will be resolved using distributed timestamps. However that is non-deterministic: the same user operations can yield different results depending on timing and network behavior, albeit all replicas will converge to the same non-determinsitically chosen result. Version control needs to not only be deterministic, but to let humans make the determination of how conflicts will be resolved. Managing divergence is as important as convergence. On the other hand, most OT and all CRDT algorithms are decentralized, which is not a requirement for version control.
-We can automatically synchronize replicas, but only if one of them is a \textit{primary} serializing all transfers.
+Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence. On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are not:
+we can automatically synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers.
 
-Although we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and was in fact inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
+Although we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and was indeed inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
 
 
 % \subsection{Much Ado About Nothing}
@@ -669,20 +669,6 @@ Although we have different requirements it would be fair to say that Operational
 % but this is an independent decision
 % Exception is numbers, but already have familiar NaN
 % Maybe skip initial values?
-
-
-
-\subsection{Undo}
-% needed for query rewriting where it is called inverse
-% https://cedanet.com.au/ceda/ot/selective-undo.php
-% maybe appendix
-
-% laws: retract to noop
-
-% Reasonable to expect inverses. Why don't I have them? Lossy operations. Undo must reconstruct loss info in a group
-% Inverses of ListFrom and ListInto? ListInto wants to use first not an ID.
-
-
 
 
 
@@ -1000,7 +986,7 @@ For example, we can transfer the prior example query on the normalized database 
 \]
 which defines a query to filter the pending orders from the unnormalized orders table.
 
-Forward rewriting is more complicated. It occurs when a formula definition is transfered into a branch containing type differences (i.e., schema changes). Forward rewriting is also done on all formulas within a database whenever a type operation is executed. To transfer a formula forward through a type operation it's inverse is prepended to the formula. The intuition here is that the query was written to apply to the old schema, so to preserve its meaning in the new schema we must first convert the schema back again
+Forward rewriting is more complicated. It occurs when a formula definition is transfered into a branch containing type differences (i.e., schema changes). Forward rewriting is also done on all formulas within a database whenever a type operation is executed. To transfer a formula forward through a type operation its \textit{inverse} (Appendix~\ref{undo}) is prepended to the formula. The intuition here is that the query was written to apply to the old schema, so to preserve its meaning in the new schema we must first convert the schema back again
 \footnote{This naive algorithm would clutter up the formula with irrelevant schema changes. We simplify them out by retracting the original formula back through them as much as possible, retaining only those schema changes the formula is dependent upon.}.
 For example if we were to transfer the prior backported query forward again through the \textsf{Split} operation then the inverse operation \textsf{Join} would be prepended to the \textsf{deletePresent} operation, correctly reconstructing the original query.
 
@@ -1042,8 +1028,8 @@ Altogether we solved four of the eight challenge problems. We keep the remaining
 
 \section{Discussion}\label{discussion}
 
-While we are excited by the novel capabilities of Baseline there are problems that must be solved:
-% There is an abundance of research problems for future work:
+% While we are excited by the novel capabilities of Baseline there are problems that must be solved:
+There is an abundance of problems for future work.
 
 Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesireable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result.
 The diffing UI should detect such cases of adjacent similar insertions and offer to coallesce them (with \textsf{move} operations).
@@ -1054,7 +1040,7 @@ We want to use property-based testing to check that the rules obey the \textit{r
 
 Our simple approach to deduplication is flawed. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. We believe these sets will smooth the difficulties we have had in defining a set of orthogonal operations for schema evolution in nested relations.
 
-Perhaps the most important question is whether we can build out a full operationalized query language. Could that be extended into a general purpose functional programming language?
+Perhaps the most important question is whether we can build out a full operationalized query language. Could that even be extended into a general purpose functional programming language?
 
 % The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
 
@@ -1134,14 +1120,29 @@ Overall it would be fair to say that this paper raises more questions than it an
 \section{Deletion and Tombstones}\label{deletion}
 
 % Deletion is a notorious problem for OT algorithms, which we inherit.
-\citet{Oster06} first reported a flaw in how all prior OT algorithms handled deletion. Say that there are three replicas of the string \textsf{abc}. Replica 1 inserts \textsf{x} before \textsf{b}, yielding \textsf{axbc}. Replica 2 inserts \textsf{y} before \textsf{c}, yielding \textsf{abyc}. Replica 3 deletes \textsf{b}. The problem is that the intervening \textsf{b} is the only way the two insertions can be distinguished, so if the deletion arrives before the inertions they become conflated and can be ordered improperly. The solution is that deletions should leave behind a \textit{tombstone} to keep the insertions on either side distinct. The tombstone is hidden from the user, but still occupies space in the string.
+\citet{Oster06} first reported a flaw in how all prior OT algorithms handled deletion. Say that there are three replicas of the string \textsf{abc}. Replica 1 inserts \textsf{x} before \textsf{b}, yielding \textsf{axbc}. Replica 2 inserts \textsf{y} before \textsf{c}, yielding \textsf{abyc}. Replica 3 deletes \textsf{b}. The problem is that the intervening \textsf{b} is the only way the two insertions can be distinguished, so if the deletion arrives before the insertions they will be conflated and might be ordered improperly. The solution is that deletions should leave behind a \textit{tombstone} to keep the insertions on either side separate. The tombstone is hidden from the user, but still occupies space in the string.
 
-The current implementation of Baseline does not use tombstones. We essentially move the tombstones into the \textsf{insert} operations. Each insert operation records a sequence of the IDs of ``virtual tombstones'' that record the fact that the insertion was shifted left over a deletion. We believe that this is a novel solution to the tombstone problem.
+The current implementation of Baseline does not use tombstones. We essentially move the tombstones into the \textsf{insert} operations. Each insert operation includes a sequence of IDs of ``virtual tombstones'' that record the fact that the insertion was shifted right over a deletion. We believe that this is a novel solution to the tombstone problem.
 However it substantially complicates the rules for projecting and retracting insertions through deletions.
 
 Tombstones are easier to understand, so we have presented Baseline in this paper using them. Tombstones have also proven useful in the UI as placeholders when diffing insertions and deletions. We plan to adopt tombstones in the next implementation.
 
 
+
+\section{Undo}\label{undo}
+
+
+
+% needed for query rewriting where it is called inverse
+% https://cedanet.com.au/ceda/ot/selective-undo.php
+% maybe appendix
+
+% laws: retract to noop
+
+% Reasonable to expect inverses. Why don't I have them? Lossy operations. Undo must reconstruct loss info in a group
+% Inverses of ListFrom and ListInto? ListInto wants to use first not an ID.
+
+% advantage of all OT over CRDT
 
 
 
