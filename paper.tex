@@ -1054,31 +1054,7 @@ We evaluate Baseline against the challenge problems proposed in
 
 \end{enumerate}
 
-Altogether we solved four of the eight problems. We keep the remaining four as goals for future work.
-
-
-
-\subsection{Technical Dimensions}
-% https://tomasp.net/techdims/#footer=index,navigation;left=catalogue,list;top=catalogue,index
-We can heuristically evaluate Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
-% but we designed the system with these goals in mind
-
-\paragraph{Interaction} Strictly speaking Baseline has two \textbf{modes of interaction}: user and developer, however user mode is a strict subset of developer mode (no type operations) so it is fair to say there is really only one mode of interaction.
-Operationalized queries minimize \textbf{abstraction construction} since they correspond exactly to interactive actions in the UI, suporting Programming by Demonstration.
-% An intriguing question is how well we can hew to this principle as we add general programming language capabilities following the path previously explored in Subtext~\cite{reifying-programming, direct-programming}.
-Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evaluation is reduced because all operations are concrete direct manipulations; The Gulf of Interpretation is reduced by visualizing changes in terms of concrete difference operations. Version control of data enables collaborative feedback loops that are not practical with conventional techniques.
-
-\paragraph{Notation} Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably because Baseline involves a rich set of operations they do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}.
-% In future work we want to investigate whether there is a normal form for sequences of operations.
-
-\paragraph{Conceptual structure} Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
-
-\paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transfered later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not hold that as a goal. Our ID-annotated tree structures provide some level of \textbf{addressing and externalizability}.
-
-\paragraph{Complexity, Errors, and Adoptability} Baseline is still very immature in these dimensions.
-
-\paragraph{\textcolor{red}{Not sure tech dims are useful here. Drop it? Move to Appendix?}}
-
+Altogether we solved four of the eight challenge problems. We keep the remaining four as goals for future work. Appendix~\ref{tech-dims} contains an evaluation of Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
 
 
 
@@ -1247,6 +1223,28 @@ written narratives and recorded demos? Our early results are mixed.
 \item Despite these negatives, users consistently report that when following the script they feel they understand what is being presented.
 
 \end{itemize}
+
+
+
+
+\section{Technical Dimensions}\label{tech-dims}
+% https://tomasp.net/techdims/#footer=index,navigation;left=catalogue,list;top=catalogue,index
+We can heuristically evaluate Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+% but we designed the system with these goals in mind
+
+\paragraph{Interaction} Strictly speaking Baseline has two \textbf{modes of interaction}: user and developer, however user mode is a strict subset of developer mode (no type operations) so it is fair to say there is really only one mode of interaction.
+Operationalized queries minimize \textbf{abstraction construction} since they correspond exactly to interactive actions in the UI, suporting Programming by Demonstration.
+% An intriguing question is how well we can hew to this principle as we add general programming language capabilities following the path previously explored in Subtext~\cite{reifying-programming, direct-programming}.
+Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evaluation is reduced because all operations are concrete direct manipulations; The Gulf of Interpretation is reduced by visualizing changes in terms of concrete difference operations. Version control of data enables collaborative feedback loops that are not practical with conventional techniques.
+
+\paragraph{Notation} Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably because Baseline involves a rich set of operations they do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}.
+% In future work we want to investigate whether there is a normal form for sequences of operations.
+
+\paragraph{Conceptual structure} Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
+
+\paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transfered later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not hold that as a goal. Our ID-annotated tree structures provide some level of \textbf{addressing and externalizability}.
+
+\paragraph{Complexity, Errors, and Adoptability} Baseline is still very immature in these dimensions.
 
 
 
