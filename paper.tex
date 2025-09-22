@@ -632,6 +632,10 @@ Note that in Figure~\ref{fig:transfer} the bottom of the diagram produces a new 
 
 Diff optimization lets us synthesize an optimal diff from the histories of any two states. A history always starts from the unit value as its initial state. So all histories are branches from the initial state and we just optimize that primordial diff.
 
+\begin{note}
+  We left out a detail in the diffing algorithm. Sometimes changes cancel each other out, like an insert followed later by a delete, or an \textit{undo}~\ref{undo}. The diff timelines are simplified by attempting to fully retract each operation---if the retraction results in a \textsf{noop} it was canceled out and the simplified adjusted timeline is used instead.
+\end{note}
+
 \subsection{Low-fuss Version Control}
 
 The ability to synthesize diffs for any two histories avoids the need for a \textit{repo} to determine the last common ancestor for operations like merging. As we have seen that can be sub-optimal as a basis for three-way diffing. But more importantly, understanding and maintaining the repo imposes a large mental burden on the users of version control systems. Git~\cite{ProGit} is infamous for causing confusion and frustration~\cite{perez13, church2014case, xkcd1597}.
@@ -1064,8 +1068,8 @@ Altogether we solved four of the eight challenge problems. We keep the remaining
 While we are excited by the novel capabilities of Baseline there are problems that must be solved:
 % There is an abundance of research problems for future work:
 
-One situation where state-based version control has an advantage is when
-two branches evolve in parallel to similar states. Baseline assigns distinct IDs to all insert operations and so treats them as unrelated. The diffing UI needs to detect such cases of adjacent similar insertions and offer to coallesce them (with \textsf{move} operations).
+Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesireable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result.
+The diffing UI should detect such cases of adjacent similar insertions and offer to coallesce them (with \textsf{move} operations).
 
 Implementing projection and retraction rules with if statements has proven impractical. We want to build a DSL for specifying rules more succinctly, exploiting their inherent symmetries.
 % Ideally this DSL can be rendered as diagrams for publication.
