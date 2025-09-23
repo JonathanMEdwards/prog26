@@ -2166,3 +2166,86 @@ keywords = {Distributed objects, components, Application-aware adaptation, conta
   location  = {Newport, Rhode Island, USA},
   series    = {UIST '07}
 }
+
+@inproceedings{sun00,
+  author    = {Sun, Chengzheng},
+  title     = {Undo any operation at any time in group editors},
+  year      = {2000},
+  isbn      = {1581132220},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/358916.358990},
+  doi       = {10.1145/358916.358990},
+  abstract  = {The ability to undo operations is an indispensable feature of real-time group editors, but supporting group undo is a difficult problem.  None of the existing solutions for group undo is able to support undoing any operation at any time with guaranteed success. In this paper, we contribute a novel group undo solution with such a capability. The basic idea is to interpret an undo command as a concurrent inverse operation by means of operational transformation, so that an operation is always undoable regardless of its undo context. By separating undo policy from undo mechanism, multiple undo modes, such as single-step undo, chronological undo, and selective undo, can be supported in the same collaborative editing session.  In addition, solutions to known undo puzzles are also   provided. A web-based group text editor using the proposed undo solution has been implemented and is accessible at: http://reduce.qpsf.edu.au.},
+  booktitle = {Proceedings of the 2000 ACM Conference on Computer Supported Cooperative Work},
+  pages     = {191–200},
+  numpages  = {10},
+  keywords  = {operational transformation, groupware, group undo, group editors, distributed computing},
+  location  = {Philadelphia, Pennsylvania, USA},
+  series    = {CSCW '00}
+}
+
+
+@techreport{weiss08,
+  title       = {{A Flexible Undo Framework for Collaborative Editing}},
+  author      = {Weiss, St{\'e}phane and Urso, Pascal and Molli, Pascal},
+  url         = {https://inria.hal.science/inria-00275754},
+  type        = {Research Report},
+  number      = {RR-6516},
+  institution = {{INRIA}},
+  year        = {2008},
+  pdf         = {https://inria.hal.science/inria-00275754v2/file/RR-6516.pdf},
+  hal_id      = {inria-00275754},
+  hal_version = {v2}
+}
+@techreport{martin10,
+  title       = {{Scalable XML Collaborative Editing with Undo}},
+  author      = {Martin, St{\'e}phane and Urso, Pascal and Weiss, St{\'e}phane},
+  url         = {https://inria.hal.science/inria-00508436},
+  type        = {Research Report},
+  number      = {RR-7362},
+  pages       = {23},
+  institution = {{INRIA}},
+  year        = {2010},
+  month       = Aug,
+  pdf         = {https://inria.hal.science/inria-00508436v1/file/RR-7362.pdf},
+  hal_id      = {inria-00508436},
+  hal_version = {v1}
+}
+
+@article{abowd92,
+    author = {Abowd, Gregory D. and Dix, Alan J.},
+    title = {Giving undo attention},
+    journal = {Interacting with Computers},
+    volume = {4},
+    number = {3},
+    pages = {317-342},
+    year = {1992},
+    month = {12},
+    abstract = {The problems associated with the provision of an undo support facility in the context of a synchronous shared or group editor are investigated. Previous work on the development of formal models of ‘undo’ has been restricted to single user systems and has focused on the functionality of undo, as opposed to discussing the support that users require from any error recovery facility. Motivated by new issues that arise in the context of computer supported co-operative work, the authors aim to integrate formal modelling of undo with an analysis of how users understand undo facilities. Together, these combined perspectives of the system and user lead to concrete design advice for implementing an undo facility. The special issues that arise in the context of shared undo also shed light on the emphasis that should be placed on single user undo. In particular, the authors regard undo not as a system command to be implemented, but as a user intention to be supported by the system.},
+    issn = {0953-5438},
+    doi = {10.1016/0953-5438(92)90021-7},
+    url = {https://doi.org/10.1016/0953-5438(92)90021-7},
+    eprint = {https://academic.oup.com/iwc/article-pdf/4/3/317/2175174/iwc4-0317.pdf},
+}
+
+@article{berlage94,
+  author     = {Berlage, Thomas},
+  title      = {A selective undo mechanism for graphical user interfaces based on command objects},
+  year       = {1994},
+  issue_date = {Sept. 1994},
+  publisher  = {Association for Computing Machinery},
+  address    = {New York, NY, USA},
+  volume     = {1},
+  number     = {3},
+  issn       = {1073-0516},
+  url        = {https://doi.org/10.1145/196699.196721},
+  doi        = {10.1145/196699.196721},
+  abstract   = {It is important to provide a recovery operation for applications with a graphical user interface. A restricted linear undo mechanism can conveniently be implemented using object-oriented techniques. Although linear undo provides an arbitrarily long history, it is not possible to undo isolated commands from the history without undoing all following commands. Various undo models have been proposed to overcome this limitation, but they all ignore the problem that in graphical user interfaces a previous user action might not have a sensible interpretation in another state.Selective undo introduced here can undo isolated commands by copying them into the current state “if that is meaningful.” Furthermore, the semantics of selective  undo are argued to be more natural for the user, because the mechanism only looks at the command to undo and the current state and does not depend on the history in between. The user interface for selective undo can also be implemented generically. Such a generic implementation is able to provide a consistent recovery mechanism in arbitrary applications.},
+  journal    = {ACM Trans. Comput.-Hum. Interact.},
+  month      = sep,
+  pages      = {269–294},
+  numpages   = {26},
+  keywords   = {command objects, groupware, undo}
+}
+

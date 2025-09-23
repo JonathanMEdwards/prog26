@@ -1068,6 +1068,8 @@ Overall it would be fair to say that this paper raises more questions than it an
 % Challenge problem paper.
 % I&S: cambria, peritext, universal version control
 % Braid time machine https://braid.org/time-machines
+% https://cedanet.com.au/ceda/
+% https://cedanet.com.au/ceda/papers/Introducing%20CEDA.pdf academic style paper
 
 % cite hatra/paint papers!
 
@@ -1120,30 +1122,41 @@ Overall it would be fair to say that this paper raises more questions than it an
 \section{Deletion and Tombstones}\label{deletion}
 
 % Deletion is a notorious problem for OT algorithms, which we inherit.
-\citet{Oster06} first reported a flaw in how all prior OT algorithms handled deletion. Say that there are three replicas of the string \textsf{abc}. Replica 1 inserts \textsf{x} before \textsf{b}, yielding \textsf{axbc}. Replica 2 inserts \textsf{y} before \textsf{c}, yielding \textsf{abyc}. Replica 3 deletes \textsf{b}. The problem is that the intervening \textsf{b} is the only way the two insertions can be distinguished, so if the deletion arrives before the insertions they will be conflated and might be ordered improperly. The solution is that deletions should leave behind a \textit{tombstone} to keep the insertions on either side separate. The tombstone is hidden from the user, but still occupies space in the string.
+\citet{Oster06} first reported a flaw in how all prior OT algorithms handled deletion. Insertions on either side of a deletion can become conflated and misordered.
+% Say that there are three replicas of the string \textsf{abc}. Replica 1 inserts \textsf{x} before \textsf{b}, yielding \textsf{axbc}. Replica 2 deletes \textsf{b} yielding \textsf{ac}. Replica 3 inserts \textsf{y} before \textsf{c}, yielding \textsf{abyc}. The problem is that the deleted \textsf{b} is the only way the two insertions can be distinguished, so if replica 1's insertion arrives at replica 2 before replica 3's insertion then they will be reversed, producing \textsf{ayxc} whereas 1 and 3 will settle correctly on \textsf{axyc}.
+The now-standard solution is that deletions should leave behind a \textit{tombstone} as a placeholder to keep the insertions on either side separate. The tombstone is hidden from the user, but still occupies space in the string.
 
 The current implementation of Baseline does not use tombstones. We essentially move the tombstones into the \textsf{insert} operations. Each insert operation includes a sequence of IDs of ``virtual tombstones'' that record the fact that the insertion was shifted right over a deletion.
-When an insert operation is projected through a deletion of its insertion point (the \textsf{before} paramater) the insertion point is shifted to the right of the deletion and the ID of the deleted element is added to the list of tombstones in the insert operation. When inserts at the same insertion point are projected through each other their tombstone lists are compared to decide which to shift in front of the other. We believe that this is a novel solution to the tombstone problem,
+When an insert operation is projected through a deletion of its insertion point (the \textsf{before} paramater) the insertion point is shifted to the right of the deletion and the ID of the deleted element is appended to the list of tombstones in the insert operation. When inserts at the same point are projected through each other their tombstone lists are compared to decide which to shift in front of the other. We believe that this is a novel solution to the tombstone problem,
 however it substantially complicates the projection and retraction rules for inserts and deletes.
 
 Tombstones are easier to understand, so we have adopted them in this paper's description of Baseline. Tombstones have also proven useful in the UI as placeholders when diffing insertions and deletions. We plan to adopt tombstones in the next implementation.
 
 
 
-\section{Undo}\label{undo}
+\section{Selective Undo}\label{undo}
 
+\textit{Undo} is an essential feature when editing any sort of information, although it is frustrating that the common approach only allows undoing the last operation. Often we only realize mistakes later. \textit{Selective undo}~\cite{berlage94} allows the user to undo past operations. Intuitively, undoing a past operation should result in what ``would have happened'' if that operation had never occured but all subsequent operations still did.
 
+It is tempting to think of selective undo as simply deleting an operation from the timeline. There are two problems with this view. Firstly, subsequent operations might depend upon the effects of that operation. Subsequent operations have to somehow be scrubbed of all traces of the undone operation. Secondly, in the setting of collaborative replicas or version control we can't just change history---we need to calculate the delta to the current state that will result in the same thing as that hypothetical changed history. In this way the undo operation can be shared with collaborators like any other operation.
 
-% needed for query rewriting where it is called inverse
-% https://cedanet.com.au/ceda/ot/selective-undo.php
-% maybe appendix
+Selective undo has been implemented in OT~\cite{sun00, weiss08} and Baseline takes a similar approach, diagrammed below.
+\[\begin{tikzcd}[column sep=large]
+	{\{\}} & {A_{i-1}} & {A_i} & {A_n} \\
+	&& {A_{i-1}} & {A'}
+	\arrow["{{{a_{1 \cdots i-1}}}}", from=1-1, to=1-2]
+	\arrow["{{{a_i}}}", from=1-2, to=1-3]
+	\arrow["{{{a_{i+1 \cdots n}}}}", from=1-3, to=1-4]
+	\arrow["{{{-\, a_i}}}"'{pos=0.33}, from=1-3, to=2-3]
+	\arrow["{{\begin{array}{c} \textsf{P}\Downarrow \end{array}}}"{description, pos=0.2}, draw=none, from=1-3, to=2-4]
+	\arrow["{{{\Delta}}}"{pos=0.33}, dashed, from=1-4, to=2-4]
+	\arrow[dashed, from=2-3, to=2-4]
+\end{tikzcd}\]
 
-% laws: retract to noop
+The top row of the diagram shows the complete history of $A$ starting at the unit value $\{\}$ and ending with $A_n$. To undo a past operation $a_i$ we first calculate its \textit{inverse} $- \, a_i$ that takes the state $A_i$ back to the state $A_{i-1}$. In general the inverse is a sequence of operations and it depends upon the actual state involved. For example if $a_i$ is a \textsf{delete} operation its inverse will first re-insert the deleted element at the proper location and then completely restore its prior value.
 
-% Reasonable to expect inverses. Why don't I have them? Lossy operations. Undo must reconstruct loss info in a group
-% Inverses of ListFrom and ListInto? ListInto wants to use first not an ID.
+Given the inverse operations we then project the subsequent timeline through them. Note the downward direction of the projection, which causes subsequent operations to override the inverse. For example if we undo a past \textsf{write} operation but there were subsequent writes to the same location then undoing should have no effect. The projection produces the $\Delta$ operations on the right hand side, which is the delta we are looking for. We execute the delta on $A$ producing the result of the undo in $A'$. The projection also produces the dashed arrow on the bottom, which is not utilized, but is of interest because it is that hypothetical history scrubbed of the effects of the undone operation we imagined earlier.
 
-% advantage of all OT over CRDT
 
 
 
