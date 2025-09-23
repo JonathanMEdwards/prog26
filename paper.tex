@@ -1122,10 +1122,11 @@ Overall it would be fair to say that this paper raises more questions than it an
 % Deletion is a notorious problem for OT algorithms, which we inherit.
 \citet{Oster06} first reported a flaw in how all prior OT algorithms handled deletion. Say that there are three replicas of the string \textsf{abc}. Replica 1 inserts \textsf{x} before \textsf{b}, yielding \textsf{axbc}. Replica 2 inserts \textsf{y} before \textsf{c}, yielding \textsf{abyc}. Replica 3 deletes \textsf{b}. The problem is that the intervening \textsf{b} is the only way the two insertions can be distinguished, so if the deletion arrives before the insertions they will be conflated and might be ordered improperly. The solution is that deletions should leave behind a \textit{tombstone} to keep the insertions on either side separate. The tombstone is hidden from the user, but still occupies space in the string.
 
-The current implementation of Baseline does not use tombstones. We essentially move the tombstones into the \textsf{insert} operations. Each insert operation includes a sequence of IDs of ``virtual tombstones'' that record the fact that the insertion was shifted right over a deletion. We believe that this is a novel solution to the tombstone problem.
-However it substantially complicates the rules for projecting and retracting insertions through deletions.
+The current implementation of Baseline does not use tombstones. We essentially move the tombstones into the \textsf{insert} operations. Each insert operation includes a sequence of IDs of ``virtual tombstones'' that record the fact that the insertion was shifted right over a deletion.
+When an insert operation is projected through a deletion of its insertion point (the \textsf{before} paramater) the insertion point is shifted to the right of the deletion and the ID of the deleted element is added to the list of tombstones in the insert operation. When inserts at the same insertion point are projected through each other their tombstone lists are compared to decide which to shift in front of the other. We believe that this is a novel solution to the tombstone problem,
+however it substantially complicates the projection and retraction rules for inserts and deletes.
 
-Tombstones are easier to understand, so we have presented Baseline in this paper using them. Tombstones have also proven useful in the UI as placeholders when diffing insertions and deletions. We plan to adopt tombstones in the next implementation.
+Tombstones are easier to understand, so we have adopted them in this paper's description of Baseline. Tombstones have also proven useful in the UI as placeholders when diffing insertions and deletions. We plan to adopt tombstones in the next implementation.
 
 
 
