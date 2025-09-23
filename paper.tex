@@ -652,9 +652,10 @@ This approach is more flexible: since versions and branches no longer belong to 
 
 % defer to related work or handle here while hot?
 Operational Differencing has similarities to
-Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
-Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence. On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are not:
-we can automatically synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers.
+Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06}, Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}, and attempts to unify them~\cite{braid}.
+Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence (although Patchwork~\cite{patchwork} does branching with CRDTs).
+
+% On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are not: we can automatically synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers.
 
 Although we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and was indeed inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
 
@@ -792,8 +793,7 @@ Although we have different requirements it would be fair to say that Operational
 In this section we apply Operational Differencing to the problem of \textit{schema evolution} in relational databases. We do this by adding relational database features into our data types and operations.
 % We use as a running example \textit{Extract Entity} from~\citet{challenge-problems}.
 For example Figure~\ref{fig:tables-single} shows a table of orders for the Acme Corporation. A database professional will immediately see a problem: the customer name and address is duplicated across all orders by the same customer, so any changes to that information would need to be duplicated.
-Database textbooks teach to avoid this sort of problem by properly \textit{normalizing} the schema before adding any data. However in practice the need for schema changes often arises after there is data, which must then be \textit{migrated} into the changed schema. There is a plethora of tools and DSLs and research projects to assist in schema migration (\S\ref{schema-evolution})
-but in practice it typically comes down to writing custom SQL code.
+Database textbooks teach to avoid this sort of problem by properly \textit{normalizing} the schema before adding any data. However in practice the need for schema changes often arises after there is data, which must then be \textit{migrated} into the changed schema, typically with ad hoc SQL programs.
 
 One approach a SQL migration program could take is to populate a new \textsf{customers} table from a query projecting out the \textsf{name} and \textsf{address} columns and excluding duplicates. Then it would need to generate primary keys for the deduped customers (the name cannot be the primary key because it is mutable). A new column \textsf{customer} would be added to \textsf{orders} declared as a foreign key containing the customer's primary key. Finally the \textsf{name} and \textsf{address} columns in the \textsf{orders} table would be dropped.
 
@@ -944,7 +944,7 @@ General purpose queries require a general language of predicates. We could embed
 
 We have seen how an auto-synced branch of a database can serve as a query on it, and how we can build that query by sculpting the database in the UI. But that leaves us having to hop around different branches to view queries. It is more convenient to embed multiple queries into the database itself as \textit{formulas}. A field defined as a formula has its value computed by evaluating the formula, like a formula in a spreadsheet cell. Matching the form of operational queries, we define a formula as a type in Figure~\ref{fig:query-syntax} consisting of a timeline of operations ending with a \textit{return path}. A formula is evaluated by executing the timeline of operations starting with the current state of the database and then returning the final value of the return path. In this sense a formula is a \textit{future timeline}---it is a speculatively executed branch off of the present that returns a value from that hypothetical future.
 
-Formulas as future timelines makes it easy to program them by demonstration. In the previous example we created a query by making a copy of the database and ``sculpting'' it into the result we wanted with \textsf{Join} and \textsf{deletePresent} operations. The UI lets us view the differences between the original and sculpted databases (Appendix \ref{UI}) and provides a command \textit{Transfer into Formula} that takes the timeline of differences on one branch of the diff and injects them as a formula into the other side. The return path of the formula is set from the location currently selected in the UI. Applied to the previous example after selecting the denormalized \textsf{orders} table it will append a formula to the normalized database with the operations:
+Formulas as future timelines makes it easy to use Programming by Demonstration~\cite{cypher93-pbd}. In the previous example we created a query by making a copy of the database and ``sculpting'' it into the result we wanted with \textsf{Join} and \textsf{deletePresent} operations. The UI lets us view the differences between the original and sculpted databases (Appendix \ref{UI}) and provides a command \textit{Transfer into Formula} that takes the timeline of differences on one branch of the diff and injects them as a formula into the other side. The return path of the formula is set from the location currently selected in the UI. Applied to the previous example after selecting the denormalized \textsf{orders} table it will append a formula to the normalized database with the operations:
 \[
 \begin{array}{l}
   \ldotp \textsf{ Append } \textit{new-formula} \exec\\
@@ -1056,63 +1056,53 @@ Overall it would be fair to say that this paper raises more questions than it an
 
 \section{Related Work}
 
+The most directly related work has already been cited in situ.
+We only have room here to highlight some of the vast adjacent research literature.
 
+\paragraph{Databases}
+% Schema evolution has long been a major problem for SQL databases because
+% the SQL Data Definition Language (DDL) has limited capabilities to redefine existing data. It can rename tables and columns. SQLite \cite{sqliteDatatypes} uses dynamically typed values allowing them to be implicitly converted if the datatype of the column changes.
+% MYSql \cite{mysqlAlterTable} can reorder columns without destroying their data. But apart from such special cases, SQL databases have no general purpose support for data migration. As a result in practice schema evolution is mostly done by writing custom SQL Data Manipulation Language (DML) code to migrate the data. Such custom code is greatly complicated if it needs to be done without taking the database offline or must be coordinated across multiple shards.
+In \emph{Refactoring Databases} \citet{ambler06} offer a comprehensive taxonomy of schema evolution patterns, including typical strategies for online migration and sample SQL implementations.
+% \citet{bernstein07} observed in 2007 ``There are hardly any schema evolution tools today. This is rather surprising since there is a huge literature on schema evolution spanning more than two decades.'' There are now more tools available.
+Many tools have been developed to assist in database schema evolution, but we will skip over those that still require ad hoc programming.
+Some tools such as Liquibase~\cite{liquibase} and PlanetScale\cite{planetscale} could be characterized as version control and continuous integration/deployment for schema definitions. They track schema changes and can calculate diffs in the form of SQL DDL statements to convert one schema version to another, but do not help migrate data. Comparing schemas can be ambiguous as to intentions.
+% For example has a column been renamed or has it been deleted and a new one created? That distinction makes a big difference to the data in that column.
+EvolveDB\cite{evolvedb} addresses this ambiguity by reverse-engineering the schema into a richer data model and tracking the operations on that model within an IDE. This operation history is used to generate SQL scripts to evolve the database. EdgeDB~\cite{edgedb} resolves ambiguities by asking questions of the developer, with some answers supplying custom migration code in a proprietary query language.
 
-% tribute to primary inspirations. wrangler, ultorg, lenses, refactoring DBs, SMOs, BiDel, Cambria [UVC?]
-% git as anti-inspiration
+% Some tools provide a Domain Specific Language (DSL) to describe schema evolution. Rails Migrations~\cite{RailsMigrations} embeds a DSL in Ruby to manage schema migration but is comparable to the capabilities of SQL DDL, often requiring the addition of custom Ruby or SQL code.
+Schema evolution is related to the classical view-update problem~\cite{Bancilhon81} which was approached from a language perspective by lenses~\cite{Foster2007}. Generalizing from lenses \citet{curino08} founded a field of research on Database Evolution Languages (DEL) using Schema Modification Operators (SMOs).
+%  (SMO) as ``a function that receives as input a relational schema and the underlying database, and produces as output a (modified) version of the input schema and a migrated version of the database''. SMOs can also rewrite queries to accommodate schema changes.
+ \citet{herrmann15} defined a relationally complete DEL and then extended it into a Bidirectional Database Evolution Language (BiDEL)~\cite{herrmann17} that has bidirectional transformation capabilities comparable to Baseline, although limited to supporting concurrent schema within one database.
 
-% compare against existing techniques for schema evolution and version control.
+Schema evolution is also a problem for NoSQL~\cite{sadalage12} databases. While such databases are sometimes called ``schemaless'' in effect that means the schema is left implicit and tools must try to infer it~\cite{storl20, storl22}. \citet{Cambria} uses lenses~\cite{Foster2007} for bidirectional transformation of JSON. \citet{scherzinger13} define a set of operators like the relational SMOs discussed above. \citeauthor*{chillon21}~\cite{chillon21, chillon22} offer a more comprehensive set of SMOs.
+% None of the above approaches to NoSQL evolution have yet extended into updating code or rewriting queries like their SQL cousins.
 
-% actually related work:
-% Alex's worlds. Roly. Ask them for comment?
-% Challenge problem paper.
+Schema evolution has also been studied for Object Oriented Databases(OODB)~\cite{li99, banerjee87}. Smalltalk~\cite{Goldberg80} is itself an OODB, persisting all object instances in an ``image file'' with some evolution capabilities incorporated in the programming environment~\cite[pp.252-272]{Goldberg80}. Gemstone turns the Smalltalk image into a production-quality database and accordingly provides a complex schema evolution API~\cite{Gemstone}. CEDA~\cite{ceda} is a multi-paradigm distributed database built with OT.
+
+\paragraph{Type-Driven Transformations}
+% Programming language theory undergirds research on type-driven transformations.
+ Bidirectional Transformations~\cite{czarnecki2009bidirectional} have been used for data format conversion and view update.
+Coupled Transformations~\cite{Berdaguer07, alcino06, Cleve2006} express transformations coordinated between types and their instances by encoding them into functions on Haskell GADTs built with strategy combinators. \citet{JVisser08} extends the encoding to transform queries written in point-free style. \citet{lammel16} recapitulates coupled transformations within logic programming which extends it to transform logic programs.
+% It is not clear how bidirectional transformations can handle generating the unique IDs required in some evolutions, nor einformation loss and duplication.
+
+\paragraph{Model Driven Engineering}
+% Model Driven Engineering must also handle evolution.
+Unlike the textual artifacts involved in other domains, models typically assign unique identifiers enabling more precise differencing and mergeing~\cite{alanen2003}.
+Models are often themselves modeled by a metamodel, which lifts the evolution problem to the metalevel: models must be migrated through the evolution of their metamodel, analogously to changing the grammar of a programming language.~\cite{Herrmannsdoerfer11}. \citet{Cicchetti11} study metamodel evolution in the context of divergent changes.
+\citet{vermolen11} define a DSL for evolving a data model by generating SQL migrations on the backing database. They develop comparable capabilities to Baseline, although non-interactive. They consider the evolution of OO-style subclass hierarchies which goes beyond our and most other work.
+\citet{SemanticDeltas} proposes a research agenda for thoroughly live DSL programming focusing on \emph{Semantic Deltas} that unify edit-time and run-time change.
+
+\paragraph{Data Wrangling}
+% The evolution of data formats is a concern in Data Science.
+Data~Diff~\cite{sutton18} compares two versions of tabular data and finds a minimal matching transformation. AI~assistants~\cite{AIassistants} provide a mechanism for interactively correcting
+transformations inferred by Data~Diff and similar automatic tools.
+Wrangler~\cite{kandel11} observes interactive manipulation of sampled data to write data transformation programs.
+\citet{petersohn20} present an algebra of operations on Python dataframes that include shape transformations.
+
 % I&S: cambria, peritext, universal version control
-% Braid time machine https://braid.org/time-machines
-% https://cedanet.com.au/ceda/
-% https://cedanet.com.au/ceda/papers/Introducing%20CEDA.pdf academic style paper
-
 % cite hatra/paint papers!
 
-% \subsection{Version Control}\label{VC}
-
-% git, darcs, pijul
-
-% git is the most established tool for change management but is also the source of much discontent. Pull refs from schema change paper. santiago's stuff. intentional?
-
-% Understanding Version Control as Material Interaction with Quickpose
-% https://dl.acm.org/doi/10.1145/3544548.3581394
-
-% \subsection{The Impedance Mismatch Problem} \label{impedance}
-
-
-% \subsection{Lenses}
-% static transform written in a complex language
-% edit lenses transform values edits not type edits.
-% can't transform transforms
-% transform is static and outside the data
-
-% Remark: lenses and state libraries
-% Built in Mutable structure semantics?
-% Pure FP uses lenses
-% Imperative langs put it in libraries “immutable data” libraries and “reactive state management” libraries have cursors/paths (check immutable.js)
-% We just add a path to values and build it into basic semantics
-% Value + Path = context, pointed value, ?? “call-by-context”?
-% Note UI manifest selection
-
-
-% \subsection{OT}\label{OT}
-% https://en.wikipedia.org/wiki/Operational_transformation
-% inclusion/exclusion transform
-% https://cedanet.com.au/ceda/ot/ot-control/
-% forward/backward transposition %https://ieeexplore.ieee.org/document/655755
-
-% \subsection{CRDT}\label{CRDT}
-
-% \subsection{Schema Evolution}\label{schema-evolution}
-% copy from challenge problems paper
-
-% \citet{ambler06} propose in \textit{Refactoring Databases} the \textit{Split Table} refactoring and sketch the SQL needed. \citet(curino08) include \textit{Decompose Table} in a set of \textit{Schema Modification Operations} that automate evolutions. In our example these actions would split out the \textit{name} and \textit{address} columns into a new \textit{Customers} table and add a \textit{order} column as a \textit{foreign key} copying the \textit{primary key} of the order. But that does not solve the problem---we still have duplicate customers.
-% BiDEL is only thing that solves problem
 
 \acks
 % We would like to thank Joshua Horowitz, Devamardeep Hayatpur, and the anonymous reviewers for their helpful comments.
@@ -1126,11 +1116,11 @@ Overall it would be fair to say that this paper raises more questions than it an
 % Say that there are three replicas of the string \textsf{abc}. Replica 1 inserts \textsf{x} before \textsf{b}, yielding \textsf{axbc}. Replica 2 deletes \textsf{b} yielding \textsf{ac}. Replica 3 inserts \textsf{y} before \textsf{c}, yielding \textsf{abyc}. The problem is that the deleted \textsf{b} is the only way the two insertions can be distinguished, so if replica 1's insertion arrives at replica 2 before replica 3's insertion then they will be reversed, producing \textsf{ayxc} whereas 1 and 3 will settle correctly on \textsf{axyc}.
 The now-standard solution is that deletions should leave behind a \textit{tombstone} as a placeholder to keep the insertions on either side separate. The tombstone is hidden from the user, but still occupies space in the string.
 
-The current implementation of Baseline does not use tombstones. We essentially move the tombstones into the \textsf{insert} operations. Each insert operation includes a sequence of IDs of ``virtual tombstones'' that record the fact that the insertion was shifted right over a deletion.
+The current implementation of Baseline does not leave tombstones in the state. Instead they are tracked in the affected \textsf{insert} operations. Each insert operation includes a sequence of IDs of ``virtual tombstones'' that record the fact that the insertion was shifted right over a deletion.
 When an insert operation is projected through a deletion of its insertion point (the \textsf{before} paramater) the insertion point is shifted to the right of the deletion and the ID of the deleted element is appended to the list of tombstones in the insert operation. When inserts at the same point are projected through each other their tombstone lists are compared to decide which to shift in front of the other. We believe that this is a novel solution to the tombstone problem,
 however it substantially complicates the projection and retraction rules for inserts and deletes.
 
-Tombstones are easier to understand, so we have adopted them in this paper's description of Baseline. Tombstones have also proven useful in the UI as placeholders when diffing insertions and deletions. We plan to adopt tombstones in the next implementation.
+State tombstones are easier to understand, so we have adopted them in this paper's description of Baseline. Tombstones have also proven useful in the UI as placeholders when diffing insertions and deletions. We plan to adopt them in the next implementation.
 
 
 
