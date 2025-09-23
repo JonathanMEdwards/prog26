@@ -648,17 +648,6 @@ This approach is more flexible: since versions and branches no longer belong to 
   Large projects will still need to maintain a list of all branches, but that could be as lightweight as a file directory. Large projects will also want to compress storage and compute cryptographic hashs. We believe all these capabilities could be added on top of our approach with far less user-facing complexity than git. But that is not an immediate goal: we want to first optimize for small-scale ad hoc usage.
 \end{remark}
 
-\subsection{Comparison to OT and CRDTs}
-
-% defer to related work or handle here while hot?
-Operational Differencing has similarities to
-Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06}, Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}, and attempts to unify them~\cite{braid}.
-Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence (although Patchwork~\cite{patchwork} does branching with CRDTs).
-
-% On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are not: we can automatically synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers.
-
-Although we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and was indeed inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
-
 
 % \subsection{Much Ado About Nothing}
 % Possibly merge with deletion
@@ -1056,8 +1045,16 @@ Overall it would be fair to say that this paper raises more questions than it an
 
 \section{Related Work}
 
-The most directly related work has already been cited in situ.
-We only have room here to highlight some of the vast adjacent research literature.
+% We only have room here to highlight some of the vast adjacent research literature.
+
+\paragraph{OT and CRDT}
+
+Operational Differencing is related to
+Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
+% , and attempts to unify them~\cite{braid}.
+Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence (although Patchwork~\cite{patchwork} does simple branching with CRDTs). On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are centralized: we can synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers.
+
+While we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and indeed was inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
 
 \paragraph{Databases}
 % Schema evolution has long been a major problem for SQL databases because
@@ -1066,12 +1063,14 @@ We only have room here to highlight some of the vast adjacent research literatur
 In \emph{Refactoring Databases} \citet{ambler06} offer a comprehensive taxonomy of schema evolution patterns, including typical strategies for online migration and sample SQL implementations.
 % \citet{bernstein07} observed in 2007 ``There are hardly any schema evolution tools today. This is rather surprising since there is a huge literature on schema evolution spanning more than two decades.'' There are now more tools available.
 Many tools have been developed to assist in database schema evolution, but we will skip over those that still require ad hoc programming.
-Some tools such as Liquibase~\cite{liquibase} and PlanetScale\cite{planetscale} could be characterized as version control and continuous integration/deployment for schema definitions. They track schema changes and can calculate diffs in the form of SQL DDL statements to convert one schema version to another, but do not help migrate data. Comparing schemas can be ambiguous as to intentions.
+Some tools such as Liquibase~\cite{liquibase} and PlanetScale\cite{planetscale} could be characterized as version control and continuous integration/deployment for schema definitions. They track schema changes and can calculate diffs in the form of SQL DDL statements to convert one schema version to another, but do not help migrate data.
+
+Comparing schemas can leave intentions ambiguous.
 % For example has a column been renamed or has it been deleted and a new one created? That distinction makes a big difference to the data in that column.
 EvolveDB\cite{evolvedb} addresses this ambiguity by reverse-engineering the schema into a richer data model and tracking the operations on that model within an IDE. This operation history is used to generate SQL scripts to evolve the database. EdgeDB~\cite{edgedb} resolves ambiguities by asking questions of the developer, with some answers supplying custom migration code in a proprietary query language.
 
 % Some tools provide a Domain Specific Language (DSL) to describe schema evolution. Rails Migrations~\cite{RailsMigrations} embeds a DSL in Ruby to manage schema migration but is comparable to the capabilities of SQL DDL, often requiring the addition of custom Ruby or SQL code.
-Schema evolution is related to the classical view-update problem~\cite{Bancilhon81} which was approached from a language perspective by lenses~\cite{Foster2007}. Generalizing from lenses \citet{curino08} founded a field of research on Database Evolution Languages (DEL) using Schema Modification Operators (SMOs).
+Schema evolution is related to the classical view-update problem~\cite{Bancilhon81} which was approached from a language perspective by lenses~\cite{Foster2007}. Generalizing from lenses \citet{curino08} founded a field of research on Database Evolution Languages (DELs) using Schema Modification Operators (SMOs).
 %  (SMO) as ``a function that receives as input a relational schema and the underlying database, and produces as output a (modified) version of the input schema and a migrated version of the database''. SMOs can also rewrite queries to accommodate schema changes.
  \citet{herrmann15} defined a relationally complete DEL and then extended it into a Bidirectional Database Evolution Language (BiDEL)~\cite{herrmann17} that has bidirectional transformation capabilities comparable to Baseline, although limited to supporting concurrent schema within one database.
 
@@ -1079,6 +1078,14 @@ Schema evolution is also a problem for NoSQL~\cite{sadalage12} databases. While 
 % None of the above approaches to NoSQL evolution have yet extended into updating code or rewriting queries like their SQL cousins.
 
 Schema evolution has also been studied for Object Oriented Databases(OODB)~\cite{li99, banerjee87}. Smalltalk~\cite{Goldberg80} is itself an OODB, persisting all object instances in an ``image file'' with some evolution capabilities incorporated in the programming environment~\cite[pp.252-272]{Goldberg80}. Gemstone turns the Smalltalk image into a production-quality database and accordingly provides a complex schema evolution API~\cite{Gemstone}. CEDA~\cite{ceda} is a multi-paradigm distributed database built with OT.
+
+\paragraph{Data Science}
+% The evolution of data formats is a concern in Data Science.
+Data~Diff~\cite{sutton18} compares two versions of tabular data and finds a minimal matching transformation. AI~assistants~\cite{AIassistants} provide a mechanism for interactively correcting
+transformations inferred by Data~Diff and similar automatic tools.
+Wrangler~\cite{kandel11} observes interactive manipulation of sampled data to write data transformation programs.
+\citet{petersohn20} present an algebra of operations on Python dataframes that include shape transformations.
+
 
 \paragraph{Type-Driven Transformations}
 % Programming language theory undergirds research on type-driven transformations.
@@ -1093,15 +1100,7 @@ Models are often themselves modeled by a metamodel, which lifts the evolution pr
 \citet{vermolen11} define a DSL for evolving a data model by generating SQL migrations on the backing database. They develop comparable capabilities to Baseline, although non-interactive. They consider the evolution of OO-style subclass hierarchies which goes beyond our and most other work.
 \citet{SemanticDeltas} proposes a research agenda for thoroughly live DSL programming focusing on \emph{Semantic Deltas} that unify edit-time and run-time change.
 
-\paragraph{Data Wrangling}
-% The evolution of data formats is a concern in Data Science.
-Data~Diff~\cite{sutton18} compares two versions of tabular data and finds a minimal matching transformation. AI~assistants~\cite{AIassistants} provide a mechanism for interactively correcting
-transformations inferred by Data~Diff and similar automatic tools.
-Wrangler~\cite{kandel11} observes interactive manipulation of sampled data to write data transformation programs.
-\citet{petersohn20} present an algebra of operations on Python dataframes that include shape transformations.
 
-% I&S: cambria, peritext, universal version control
-% cite hatra/paint papers!
 
 
 \acks
