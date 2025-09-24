@@ -324,6 +324,18 @@ For example a common design evolution is when a single value needs to become a l
 The \textsf{ListOf} operation takes any type and wraps it inside a list, and wraps all corresponding values into single-element lists using the element ID $\mathbb{1}$. We will return to this example in the next section.
 
 
+% \subsection{Much Ado About Nothing}
+% Possibly merge with deletion
+% Conjecture: don’t need Null, Option, Result
+% Snobol and verse show we don't need Results
+% Conjecture: common-sense solution to the conundrum of nulls.
+% Mention along with sums?
+% Or just skip as irrelevant and argument-triggering
+% but this is an independent decision
+% Exception is numbers, but already have familiar NaN
+% Maybe skip initial values?
+
+
 \section{Operational Differencing}
 
 Change management systems deal with what happens when two copies/replicas/branches of something diverge.
@@ -649,16 +661,6 @@ This approach is more flexible: since versions and branches no longer belong to 
 \end{remark}
 
 
-% \subsection{Much Ado About Nothing}
-% Possibly merge with deletion
-% Conjecture: don’t need Null, Option, Result
-% Snobol and verse show we don't need Results
-% Conjecture: common-sense solution to the conundrum of nulls.
-% Mention along with sums?
-% Or just skip as irrelevant and argument-triggering
-% but this is an independent decision
-% Exception is numbers, but already have familiar NaN
-% Maybe skip initial values?
 
 
 
@@ -1050,7 +1052,7 @@ Overall it would be fair to say that this paper raises more questions than it an
 \paragraph{OT and CRDT}
 
 Operational Differencing is related to
-Operational Transformation (OT)~\cite{Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
+Operational Transformation (OT)~\cite{ceda-ot, Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
 % , and attempts to unify them~\cite{braid}.
 Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence (although Patchwork~\cite{patchwork} does simple branching with CRDTs). On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are centralized: we can synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers.
 
@@ -1136,13 +1138,13 @@ Selective undo has been implemented in OT~\cite{sun00, weiss08} and Baseline tak
 	\arrow["{{{a_{1 \cdots i-1}}}}", from=1-1, to=1-2]
 	\arrow["{{{a_i}}}", from=1-2, to=1-3]
 	\arrow["{{{a_{i+1 \cdots n}}}}", from=1-3, to=1-4]
-	\arrow["{{{-\, a_i}}}"'{pos=0.33}, from=1-3, to=2-3]
+	\arrow["{{{- \langle A_{i-1}\fatsemi\  a_i \rangle}}}"'{pos=0.4}, from=1-3, to=2-3]
 	\arrow["{{\begin{array}{c} \textsf{P}\Downarrow \end{array}}}"{description, pos=0.2}, draw=none, from=1-3, to=2-4]
-	\arrow["{{{\Delta}}}"{pos=0.33}, dashed, from=1-4, to=2-4]
+	\arrow["{{{\Delta}}}"{pos=0.4}, dashed, from=1-4, to=2-4]
 	\arrow[dashed, from=2-3, to=2-4]
 \end{tikzcd}\]
 
-The top row of the diagram shows the complete history of $A$ starting at the unit value $\{\}$ and ending with $A_n$. To undo a past operation $a_i$ we first calculate its \textit{inverse} $- \, a_i$ that takes the state $A_i$ back to the state $A_{i-1}$. In general the inverse is a sequence of operations and it depends upon the actual state involved. For example if $a_i$ is a \textsf{delete} operation its inverse will first re-insert the deleted element at the proper location and then completely restore its prior value.
+The top row of the diagram shows the complete history of $A$ starting at the unit value $\{\}$ and ending with $A_n$. To undo a past operation $a_i$ we first calculate its \textit{inverse} $- \langle A_{i-1}\!\fatsemi a_i \rangle$ that takes the state $A_i$ back to the state $A_{i-1}$. In general the inverse takes a timeline and produces a sequence of operations that may depend upon the initial state. For example if $a_i$ is a \textsf{delete} operation its inverse will first re-insert the deleted element at the proper location and then completely restore its value in the prior state.
 
 Given the inverse operations we then project the subsequent timeline through them. Note the downward direction of the projection, which causes subsequent operations to override the inverse. For example if we undo a past \textsf{write} operation but there were subsequent writes to the same location then undoing should have no effect. The projection produces the $\Delta$ operations on the right hand side, which is the delta we are looking for. We execute the delta on $A$ producing the result of the undo in $A'$. The projection also produces the dashed arrow on the bottom, which is not utilized, but is of interest because it is that hypothetical history scrubbed of the effects of the undone operation we imagined earlier.
 
