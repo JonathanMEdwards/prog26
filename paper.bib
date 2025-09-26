@@ -315,6 +315,32 @@ month                = nov
   primaryclass  = {cs.DB}
 }
 
+@article{candel22,
+  title    = {A unified metamodel for NoSQL and relational databases},
+  journal  = {Information Systems},
+  volume   = {104},
+  pages    = {101898},
+  year     = {2022},
+  issn     = {0306-4379},
+  doi      = {https://doi.org/10.1016/j.is.2021.101898},
+  url      = {https://www.sciencedirect.com/science/article/pii/S0306437921001149},
+  author   = {Carlos J. Fernández Candel and Diego {Sevilla Ruiz} and Jesús J. García-Molina},
+  keywords = {Unified metamodel, NoSQL databases, Schemaless, Schema inference, Model-driven engineering},
+  abstract = {The Database field is undergoing significant changes. Although relational systems are still predominant, the interest in NoSQL systems is continuously increasing. In this scenario, polyglot persistence is envisioned as the database architecture to be prevalent in the future. Therefore, database tools and systems are evolving to support several data models. Multi-model database tools normally use a generic or unified metamodel to represent schemas of the data model that they support. Such metamodels facilitate developing database utilities, as they can be built on a common representation. Also, the number of mappings required to migrate databases from a data model to another is reduced, and integrability is favored. In this paper, we present the U-Schema unified metamodel able to represent logical schemas for the four most popular NoSQL paradigms (columnar, document, key–value, and graph) as well as relational schemas. We will formally define the mappings between U-Schema and the data model defined for each database paradigm. How these mappings have been implemented and validated will be discussed, and some applications of U-Schema will be shown. To achieve flexibility to respond to data changes, most of NoSQL systems are “schema-on-read,” and the declaration of schemas is not required. Such an absence of schema declaration makes structural variability possible, i.e., stored data of the same entity type can have different structure. Moreover, data relationships supported by each data model are different; For example, document stores have aggregate objects but not relationship types, whereas graph stores offer the opposite. Through the paper, we will show how all these issues have been tackled in our approach. As far as we know, no proposal exists in the literature of a unified metamodel for relational and the NoSQL paradigms which describes how each individual data model is integrated and mapped. Our metamodel goes beyond the existing proposals by distinguishing entity types and relationship types, representing aggregation and reference relationships, and including the notion of structural variability. Our contributions also include developing schema extraction strategies for schemaless systems of each NoSQL data model, and tackling performance and scalability in the implementation for each store.}
+}
+
+ @inproceedings{chillon23 ,
+  title     = {Propagating Schema Changes to Code: An Approach Based on a Unified Data Model},
+  volume    = {3379},
+  issn      = {1613-0073},
+  booktitle = {CEUR Workshop Proceedings},
+  publisher = {CEUR-WS},
+  author    = {Chillón, Alberto Hernández and Molina, Jesús García and Hoyos, José Ramón and Ortín, María José},
+  year      = {2023},
+  keywords  = {Code update ; NoSQL databases ; Schema evolution ; Taxonomy of changes}
+}
+
+
 @inproceedings{Cicchetti11,
   author    = {Cicchetti, Antonio and Ciccozzi, Federico and Leveque, Thomas and Pierantonio, Alfonso},
   title     = {On the concurrent versioning of metamodels and models: challenges and possible solutions},
@@ -373,25 +399,6 @@ month                = nov
   numpages   = {12}
 }
 
-@inproceedings{czarnecki2009bidirectional,
-  author    = {Krzysztof Czarnecki and
-               J. Nathan Foster and
-               Zhenjiang Hu and
-               Ralf L{\"{a}}mmel and
-               Andy Sch{\"{u}}rr and
-               James F. Terwilliger},
-  editor    = {Richard F. Paige},
-  title     = {Bidirectional Transformations: {A} Cross-Discipline Perspective},
-  booktitle = {Theory and Practice of Model Transformations - 2nd International Conference,
-               ICMT@TOOLS 2009, Zurich, Switzerland, June 29-30, 2009. Proceedings},
-  series    = {Lecture Notes in Computer Science},
-  volume    = {5563},
-  pages     = {260--283},
-  publisher = {Springer},
-  year      = {2009},
-  doi       = {10.1007/978-3-642-02408-5\_19},
-  timestamp = {Fri, 30 Dec 2022 23:08:54 +0100},
-}
 
 @online{daff,
 title={daff},
@@ -1866,24 +1873,41 @@ keywords = {Distributed objects, components, Application-aware adaptation, conta
 }
 
 
- @inproceedings{denicek,
-  author    = {Tomas Petricek and Jonathan Edwards},
+@inproceedings{denicek,
+  author    = {Petricek, Tomas and Edwards, Jonathan},
   title     = {Denicek: Computational Substrate for Document-Oriented End-User Programming},
   year      = {2025},
+  isbn      = {9798400720376},
   publisher = {Association for Computing Machinery},
   address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3746059.3747646},
+  doi       = {10.1145/3746059.3747646},
+  abstract  = {User-centric programming research gave rise to a variety of compelling programming experiences, including collaborative source code editing, programming by demonstration, incremental recomputation, schema change control, end-user debugging and concrete programming. Those experiences advance the state of the art of end-user programming, but they are hard to implement on the basis of established programming languages and system. We contribute Denicek, a computational substrate that simplifies the implementation of the above programming experiences. Denicek represents a program as a series of edits that construct and transform a document consisting of data and formulas. Denicek provides three operations on edit histories: edit application, merging of histories and conflict resolution. Many programming experiences can be easily implemented by composing these three operations. We present the architecture of Denicek, discuss key design considerations and elaborate the implementation of a variety of programming experiences. To evaluate the proposed substrate, we use Denicek to develop an innovative interactive data science notebook system. The case study shows that the Denicek computational substrate provides a suitable basis for the design of rich, interactive end-user programming systems.},
+  booktitle = {Proceedings of the 38th Annual ACM Symposium on User Interface Software and Technology},
+  articleno = {32},
+  numpages  = {19},
+  keywords  = {Programming Systems, End-User Programming},
+  location  = {},
   series    = {UIST '25}
 }
 
  @inproceedings{sculpin,
-  author    = {Joshua Horowitz and Devamardeep Hayatpur and Haijun Xia and Jeffrey Heer},
+  author    = {Horowitz, Joshua and Hayatpur, Devamardeep and Xia, Haijun and Heer, Jeffrey},
   title     = {Sculpin: Direct-Manipulation Transformation of JSON},
   year      = {2025},
+  isbn      = {9798400720376},
   publisher = {Association for Computing Machinery},
   address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3746059.3747651},
+  doi       = {10.1145/3746059.3747651},
+  abstract  = {Many end-user programming tasks require programmatically processing JSON, wrangling it from one format to another or building interactive applications atop it. But end-users are impeded by the indirectness and steep learning curve of textual code. We present Sculpin, a direct-manipulation environment supporting a broad range of JSON-transformation tasks. A user of Sculpin transforms JSON data step by step, recording a program in the process. Sculpin makes three design commitments to ensure directness and versatility: (1) steps are small and precise, not inferred; (2) steps are general-purpose and open to re-appropriation; (3) steps operate on JSON itself, rather than on a limited intermediate representation. To support these commitments, Sculpin introduces a mechanism of sculptable selections: the user can direct their action by guiding a selection on top of the data through small steps like generalization and hierarchical navigation. Sculpin also extends JSON with embedded interface elements like form inputs and buttons, allowing applications to be sculpted incrementally from source data. We demonstrate the breadth and directness of Sculpin in use-cases ranging from wrangling data to building applications. We evaluate Sculpin through a heuristic analysis, situating it in a broad space of programming systems and surfacing limitations such as difficulties editing preexisting programs.},
+  booktitle = {Proceedings of the 38th Annual ACM Symposium on User Interface Software and Technology},
+  articleno = {34},
+  numpages  = {15},
+  keywords  = {end-user programming, programming by demonstration, direct manipulation},
+  location  = {},
   series    = {UIST '25}
 }
-
 
 @misc{perera2021,
   title         = {Linked visualisations via Galois dependencies},
@@ -2286,3 +2310,144 @@ Orion Henry},
   urldate = {2025-09-14}
 }
 
+@article{zloof77,
+  author   = {Zloof, M. M.},
+  journal  = {IBM Systems Journal},
+  title    = {Query-by-Example: A data base language},
+  year     = {1977},
+  volume   = {16},
+  number   = {4},
+  pages    = {324-343},
+  keywords = {},
+  doi      = {10.1147/sj.164.0324}
+}
+
+@online{hackage-optics,
+  author  = {Adam Gundry, Andres Löh, Andrzej Rybczak, Oleg Grenrus},
+  title   = {Optics as an Abstract Interface},
+  year    = 2024,
+  url     = {https://hackage.haskell.org/package/optics},
+  urldate = {2025-09-14}
+}
+
+@online{hackage-lens,
+  author  = {Gabriella Gonzalez},
+  title   = {Lens Tutorial},
+  year    = 2024,
+  url     = {https://hackage.haskell.org/package/lens-tutorial},
+  urldate = {2025-09-14}
+}
+
+@inproceedings{czarnecki2009bidirectional,
+  author    = {Czarnecki, Krzysztof
+               and Foster, J. Nathan
+               and Hu, Zhenjiang
+               and L{\"a}mmel, Ralf
+               and Sch{\"u}rr, Andy
+               and Terwilliger, James F.},
+  editor    = {Paige, Richard F.},
+  title     = {Bidirectional Transformations: A Cross-Discipline Perspective},
+  booktitle = {Theory and Practice of Model Transformations},
+  year      = {2009},
+  publisher = {Springer Berlin Heidelberg},
+  address   = {Berlin, Heidelberg},
+  pages     = {260--283},
+  abstract  = {The GRACE International Meeting on Bidirectional Transformations was held in December 2008 near Tokyo, Japan. The meeting brought together researchers and practitioners from a variety of sub-disciplines of computer science to share research efforts and help create a new community. In this report, we survey the state of the art and summarize the technical presentations delivered at the meeting. We also describe some insights gathered from our discussions and introduce a new effort to establish a benchmark for bidirectional transformations.},
+  isbn      = {978-3-642-02408-5}
+}
+
+@book{hu2024bidirectional,
+  editor    = {Hu, Zhenjiang and Onizuka, Makoto and Yoshikawa, Masatoshi},
+  title     = {Bidirectional Collaborative Data Management: Collaboration Frameworks for Decentralized Systems},
+  publisher = {Springer},
+  year      = {2024},
+  isbn      = {978-981-97-6428-0}
+}
+
+@inproceedings{ignat-synql,
+  title       = {{Synql: A CRDT-Based Approach for~Replicated Relational Databases with~Integrity Constraints}},
+  author      = {Ignat, Claudia-Lavinia and Elvinger, Victorien and Ba, Habibatou},
+  url         = {https://inria.hal.science/hal-04969158},
+  booktitle   = {{Lecture Notes in Computer Science}},
+  address     = {Groningen, Netherlands},
+  editor      = {Rolando Martins},
+  publisher   = {{Springer Nature Switzerland}},
+  series      = {Distributed Applications and Interoperable Systems},
+  volume      = {LNCS-14677},
+  pages       = {18-35},
+  year        = {2024},
+  month       = Jun,
+  doi         = {10.1007/978-3-031-62638-8\_2},
+  pdf         = {https://inria.hal.science/hal-04969158v4/file/DAIS2024.pdf},
+  hal_id      = {hal-04969158},
+  hal_version = {v4}
+}
+
+@article{exelmans25,
+  abstract      = {Live modeling is the ability to edit an executable model at run-time, and to subsequently continue the execution instead of having to restart it. Few modeling frameworks support this feature. Much of the research concerning live modeling attempts to bring ``liveness''to existing modeling languages and environments, which is a complex, and often ad hoc endeavor. We instead argue to build modeling environments on an operation-based versioning foundation, to not only record edit operations, but also execution steps on an explicit run-time model. This reduces the complexity of patching the run-time state with edit operations to a simple merge-operation, while getting powerful features such as collaborative editing and debugging ``for free.''},
+  author        = {Exelmans, Joeri and Teodorov, Ciprian and Vangheluwe, Hans},
+  date          = {2025/06/01},
+  date-added    = {2025-09-26 13:33:26 -0400},
+  date-modified = {2025-09-26 13:33:26 -0400},
+  doi           = {10.1007/s10270-024-01212-x},
+  id            = {Exelmans2025},
+  isbn          = {1619-1374},
+  journal       = {Software and Systems Modeling},
+  number        = {3},
+  pages         = {721--739},
+  title         = {Operation-based versioning as a foundation for live executable models},
+  url           = {https://doi.org/10.1007/s10270-024-01212-x},
+  volume        = {24},
+  year          = {2025},
+  bdsk-url-1    = {https://doi.org/10.1007/s10270-024-01212-x}
+}
+
+@inproceedings{carvalho24,
+  author    = {Carvalho, Lu{\'\i}s and Costa Seco, Jo\~{a}o},
+  title     = {{A Language-Based Version Control System for Python}},
+  booktitle = {38th European Conference on Object-Oriented Programming (ECOOP 2024)},
+  pages     = {9:1--9:27},
+  series    = {Leibniz International Proceedings in Informatics (LIPIcs)},
+  isbn      = {978-3-95977-341-6},
+  issn      = {1868-8969},
+  year      = {2024},
+  volume    = {313},
+  editor    = {Aldrich, Jonathan and Salvaneschi, Guido},
+  publisher = {Schloss Dagstuhl -- Leibniz-Zentrum f{\"u}r Informatik},
+  address   = {Dagstuhl, Germany},
+  url       = {https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ECOOP.2024.9},
+  urn       = {urn:nbn:de:0030-drops-208586},
+  doi       = {10.4230/LIPIcs.ECOOP.2024.9},
+  annote    = {Keywords: Software evolution, type theory}
+}
+
+@online{automerge-conflicts,
+  author  = {Automerge Contributors},
+  title   = {Automerge Conflicts},
+  year    = 2025,
+  url     = {https://automerge.org/docs/reference/documents/conflicts/},
+  urldate = {2025-09-14}
+}
+
+@online{couchdb-conflicts,
+  author  = {Apache CouchDB Contributors},
+  title   = {CouchDB Replication and Conflict Model},
+  year    = 2025,
+  url     = {https://docs.couchdb.org/en/stable/replication/conflicts.html#},
+  urldate = {2025-09-14}
+}
+
+@article{kamina25,
+  pdf       = {programming2025-evolution.pdf},
+  author    = {Tetsuo Kamina and Tomoyuki Aotani and Hidehiko Masuhara},
+  title     = {Evolution Language Framework for Persistent Objects},
+  journal   = {The Art, Science, and Engineering of Programming},
+  year      = 2025,
+  volume    = 10,
+  number    = 1,
+  month     = feb,
+  doi       = {10.22152/programming-journal.org/2025/10/12},
+  date      = {2025-02-15},
+  submitted = {2024-10-01},
+  url       = {https://2025.programming-conference.org/}
+}
