@@ -207,10 +207,12 @@ The data model is typed similarly to statically typed Functional Programming (FP
 %Record fields are named with a string which need not be unique.
 The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \textit{initial value}.
 We omit sum types and type aliases because they are not needed in this paper.
-We define a syntax for this model:
+Figure~\ref{rich-data} defines the syntax and operations of the model.
 
 % simple syntax table
+\begin{figure}[h]
 \tcbox{
+  \begin{minipage}{\textwidth}
 \[ \begin{array}{r@{\ }l|r@{\ }l|r@{\ }l|l}
   \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
   \hline
@@ -223,11 +225,8 @@ We define a syntax for this model:
 
   & \bot && \bigtimes & & \bigtimes & \textrm{tombstone}\\
 \end{array}\]
-}
 
 % data operations table
-\begin{figure}[h]
-\tcbox{
 \[
 \hspace{-22pt}
 \begin{array}{l|l}
@@ -268,17 +267,18 @@ We define a syntax for this model:
   p \textsf{ IntoField } F & \textrm{Convert record at $p$ into value of its field $F$} \\
 
 \end{array}\]
+\end{minipage}
 }
-\caption{Rich data operations}
-\label{fig:operations}
+\caption{Rich data syntax and operations}
+\label{fig:rich-data}
 \end{figure}
 
 
-A \textit{path} is a possibly empty sequence of IDs denoting a path drilling into nested records and lists. Paths can access both values and types. We separate the IDs in a path with dots, and a single dot is the empty (top) path. A special element ID~\mathbox{*} is used to access the element type of a list type.
+A \textit{path} \mathbox{p} is a possibly empty sequence of IDs denoting a path drilling into nested records and lists. Paths can access both values and types. We separate the IDs in a path with dots, and a single dot is the empty (top) path. A special element ID~\mathbox{*} is used to access the element type of a list type.
 
 A \textit{state} pairs a value with its type. We abuse the notation \mathbox{v \isa T} to both denote a state and assert that the value matches the type.
 An \textit{operation} is a partial function from an \textit{input state} to an \textit{output state}. Operations are not defined on all input states, imposing various preconditions.
-The operations are defined in Figure~\ref{fig:operations}. All operations take a \textit{target} path as a parameter indicating that the operation is to be performed at that path within the state.
+All operations take a \textit{target} path as a parameter indicating that the operation is to be performed at that path within the state.
 Operation use infix syntax, placing the target path first, then the operation name, followed by any other parameters.
 
 % For example the \textsf{write} operation takes a value as another parameter and writes that value into the target path. The \textsf{write} operation requires that the target path exists in the value and that its type matches the value parameter.
@@ -814,7 +814,7 @@ The original \textsf{name} column in \textsf{orders} is replaced with links to t
 (4) The \textsf{Rename} operation renames the links column to be \textsf{customer}\footnote{Abusing notation by conflating the name and ID}.
 The result is shown in Figure~\ref{fig:tables-split}.
 
-The last step of this database evolution is to de-duplicate the customers, for which we use the \textsf{move} operation from Figure~\ref{fig:operations}. Thus:
+The last step of this database evolution is to de-duplicate the customers, for which we use the \textsf{move} operation from Figure~\ref{fig:rich-data}. Thus:
 \[
 \ldotp \textsf{customers}\ldotp e_3 \textsf{ move } \ldotp \textsf{customers}\ldotp e_1
 \]
