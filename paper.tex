@@ -557,11 +557,12 @@ Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in 
 
 Retraction is defined with rules like those for projection so we skip over them in the interest of brevity.
 \begin{note}
-  Baseline implements projection and retraction rules with if and switch statements, which has become unwieldy as the number of operations has grown, so much so that the implementation is incomplete. We plan to build a more succinct DSL that exploits the inherent symmetries in the rules: projection is often symmetric in the two input operations; projection and retraction are often inverses.
+  Baseline implements projection and retraction rules with procedural if and switch statements, which has become unwieldy as the number of operations has grown, so much so that the implementation is incomplete. It should be possible to define a declarative DSL that exploits the inherent symmetries in the rules: projection is often symmetric in the two input operations; projection and retraction are often inverses. See \S~\ref{discussion}.
 \end{note}
 
 \begin{remark}
-How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. Well-designed rules will agree with intuition and avoid surprises. One of these intuitions is that transfer should be symmetric: transfering an operation across a diff and then transferring it back again should bring back the same operation. We call this the \textit{roundtrip law} and we test that our rules obey it. Except there are exceptions, like when an operation gets dropped because its target was deleted. The law has weakened as we discovered these exceptions, so in future work we hope to establish a more principled basis.
+How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. Well-designed rules will agree with intuition and avoid surprises. One of these intuitions is that transfer should be symmetric: transfering an operation across a diff and then transferring it back again should bring back the same operation (or in some cases grounding out into a \textsf{noop}). We call this the \textit{roundtrip law} and we test that our rules obey it.
+% Except there are exceptions, like when an operation gets dropped because its target was deleted. The law has weakened as we discovered these exceptions, so in future work we hope to establish a more principled basis.
 
 
 % % note have dropped the override rule because it is awkward to explain
@@ -668,7 +669,7 @@ Version control systems like git provide a variety of actions like \textit{merge
 
 We have been discussing transference assuming we are given a diff that specifies a shared state and timelines branching off of it. The intuition is that the shared state should contain everything the two final states have in common, and the branches should be just the differences. Not all branching timelines will satisfy that intuition. There might be redundant operations duplicated in both branches, either by coincidence or by explicit transfers. There could also be redundant changes within a branch that override earlier ones. All of these sorts of redundancies are undesirable because they add noise to a visualization of differences, and in some cases can cause transfer to produce surprising results. There is a simple algorithm that can be used to produce optimal diffs using transference itself.
 
-Note that in Figure~\ref{fig:transfer} the bottom of the diagram produces a new diff: two new timelines \mathbox{\mathit{adjust}_a} and \mathbox{\mathit{adjust}_b} branching from a new shared state \mathbox{O'}. These \textit{adjusted} timelines eliminate the redundancy of the original operation and its transferred image. Clearly after executing a transfer we should drop the original diff and use the adjusted diff instead. In the same way we can use transfers to remove redundancies in diffs as follows. Given a pair of branching timelines we iterate over all the actions on both sides in order\footnote{The order in which the two branches are interleaved does not matter because of the roundtrip law, but if that law is weakened then a causal ordering on transferred operations may be required.}. For each operation we try to transfer it to the other branch. If the transfer succeeds and is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the transferred operation makes no difference to the other side then it isn't really a difference, so we append it to the history of the shared state. After we have tried every transfer from both sides the result will be optimal in the sense that the history of the shared state is maximal while the timelines branching off of it are minimal, without redundancies. Note however that this maximal shared state may not have ever actually occurred in either history---it is the \textit{hypothetical} ideal last common ancestor if history had happened in a fortuitously non redundant order. This ideal common ancestor avoids the problems that can be caused by cherry-picking in git~\cite{philomatics-git}.
+Note that in Figure~\ref{fig:transfer} the bottom of the diagram produces a new diff: two new timelines \mathbox{\mathit{adjust}_a} and \mathbox{\mathit{adjust}_b} branching from a new shared state \mathbox{O'}. These \textit{adjusted} timelines eliminate the redundancy of the original operation and its transferred image. Clearly after executing a transfer we should drop the original diff and use the adjusted diff instead. In the same way we can use transfers to remove redundancies in diffs as follows. Given a pair of branching timelines we iterate over all the actions on both sides in order\footnote{The order in which the two branches are interleaved does not matter because of the roundtrip law.}. For each operation we try to transfer it to the other branch. If the transfer succeeds and is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the transferred operation makes no difference to the other side then it isn't really a difference, so we append it to the history of the shared state. After we have tried every transfer from both sides the result will be optimal in the sense that the history of the shared state is maximal while the timelines branching off of it are minimal, without redundancies. Note however that this maximal shared state may not have ever actually occurred in either history---it is the \textit{hypothetical} ideal last common ancestor if history had happened in a fortuitously non redundant order. This ideal common ancestor avoids the problems that can be caused by cherry-picking in git~\cite{philomatics-git}.
 
 Diff optimization lets us synthesize an optimal diff from the histories of any two states. A history always starts from the unit value as its initial state. So all histories are branches from the initial state and we just optimize that primordial diff.
 
@@ -813,7 +814,7 @@ To perform the migration in Baseline we first need to add support for relational
 We already support tables: they are lists of records, where the elements of the list are the rows and the fields of the record are the columns, which are homogeneously typed as in a relational database.
 Throughout the rest of the paper we will refer to any Baseline document containing tables as a \textit{database}.
 What is missing so far is \textit{relationships} between tables, which relational databases model through primary and foreign keys. We take a more PL-oriented approach.
-Instead of primary keys exposed as user data fields we annotate list elements with IDs that are unique, permanent, and opaque. Instead of foreign keys we add the \textit{link} data type in Figure~\ref{fig:db-addons}: the type of a link defines the table (or list) it ranges over; the value of a link is an element ID in that range, or $*$ for a null link. We also add the operations defined in Figure~\ref{fig:db-addons}. All operations that move a list must also adjust the path in the type of all links into that list.
+Instead of primary keys exposed as user data fields we annotate list elements with IDs that are unique, permanent, and opaque. Instead of foreign keys we add the \textit{link} data type in Figure~\ref{fig:db-addons}: the type of a link defines the table (or list) it ranges over; the value of a link is an element ID in that range, or \mathbox{*} for a null link. We also add the operations defined in Figure~\ref{fig:db-addons}. All operations that move a list must also adjust the path in the type of all links into that list.
 
 The first step in evolving the Acme database is to \textsf{Split} out a \textsf{Customers} table with the following operations:
 \[
@@ -841,10 +842,10 @@ The last step of this database evolution is to de-duplicate the customers, for w
 \[
 \ldotp \textsf{customers}\ldotp e_3 \textsf{ move } \ldotp \textsf{customers}\ldotp e_1
 \]
-The \textsf{move} operation merges $e_3$ into $e_1$, resulting in the state shown in  Figure~\ref{fig:tables-dedup}. Note that the order for Bird Seed has had its link to $e_3$ forwarded to $e_1$. This completes the schema evolution.
+The \textsf{move} operation merges \mathbox{e_3} into \mathbox{e_1}, resulting in the state shown in  Figure~\ref{fig:tables-dedup}. Note that the order for Bird Seed has had its link to \mathbox{e_3} forwarded to \mathbox{e_1}. This completes the schema evolution.
 
 \begin{note}
-The preceding discussion does not reflect the full complexity of our data model. Lists and tables can be nested. Links are set-valued, and can drill into nested tables. We believe this complexity is justified to cleanly unify PL and DB data models. The \textsf{Split} and \textsf{Join} operations are composed from a set of primitive operations on nested tables and links. We have experimented with several alternative sets of primitives, with subtle tradeoffs on transfer semantics (e.g. how does appending a column get projected through the split operation?). We need further work to settle this design.
+The preceding discussion does not reflect the full complexity of our data model. Lists and tables can be nested. Links are set-valued, and can drill into nested tables. We believe this complexity is justified to cleanly unify PL and DB data models. The \textsf{Split} and \textsf{Join} operations are composed from a set of primitive operations on nested tables and links. We have experimented with several alternative sets of primitives, with subtle tradeoffs on transfer semantics, for example how does appending a column get projected through the split operation? See \S~\ref{discussion}.
 \end{note}
 
 
@@ -872,7 +873,7 @@ For example say that the Order Fulfillment department at Acme Corporation is hap
 Even with the limitations on view updates, Operational Differencing brings many of the advantages of version control to the domain of databases. It is possible to calculate the precise differences between two database instances despite intervening schema changes. It is always possible to transfer all the differences from one to the other, and often possible to transfer individual differences.
 
 \begin{note}
-Above we used a \textsf{move} operation to deduplicate the two coyotes $e_1$ and $e_3$. We took that approach because it was the simplest thing that could possibly work, but arguably it doesn't. Say that $e_1$ changed its address in the old database and we transfer that change forward into the deduped table. Our current implementation drops the change, because $e_3$ overwrites $e_1$. We believe a more intuitive result would be to ``de-deduplicate''
+Above we used a \textsf{move} operation to deduplicate the two coyotes \mathbox{e_1} and \mathbox{e_3}. We took that approach because it was the simplest thing that could possibly work, but arguably it doesn't. Say that \mathbox{e_1} changed its address in the old database and we transfer that change forward into the deduped table. Our current implementation drops the change, because \mathbox{e_3} overwrites \mathbox{e_1}. We believe a more intuitive result would be to ``de-deduplicate''
 leaving two coyotes with the same name but different addresses.
 In \S\ref{discussion} we propose a set-like datatype to solve this problem.
 The moral of this story is that it is surprisingly hard to get the transfer semantics of operations right.
@@ -1033,31 +1034,31 @@ We judge that we have solved four of the eight challenge problems. The remaining
 
 \section{Discussion}\label{discussion}
 
-% While we are excited by the novel capabilities of Baseline there are problems that must be solved:
-There is an abundance of problems for future work.
+Baseline demonstrates novel capabilities but also raises questions requiring further research.
 
-Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result.
-The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
 
-Implementing projection and retraction rules with if statements has proven impractical. We want to build a DSL for specifying rules more succinctly, exploiting their inherent symmetries.
+% Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result. The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
+
+The simple approach of deduplicating by collapsing with \textsf{move} operations leads to transfer anomalies. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
+% These operations may require weakening the roundtrip law.
+%  and requiring that the diffing algorithm impose a causal ordering on transferred operations.
+
+Implementing projection and retraction rules with procedural if statements is laborious and would benefit from a more declarative approach. It should be possible to define a DSL for specifying rules more succinctly that exploits their inherent symmetries.
 % Ideally this DSL can be rendered as diagrams for publication.
-We want to use property-based testing to check that the rules obey the roundtrip law, but first we need to better understand exactly what that law minimally requires.
+This DSL should also support property-based testing of the roundtrip law.
 
-Our simple approach to deduplication is flawed. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. We believe these sets will smooth the difficulties we have had in defining a set of orthogonal primitive operations for schema evolution in nested relations.
-
-Perhaps the most important question is whether we can build out a full operationalized query language. Could that even be extended into a general purpose functional programming language?
+An intriguing question is whether it is possible to define an operationalized query language as we conjecture. Could that be extended into a general purpose functional programming language?
 
 % The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
 
 \subsection{Conclusion}
 
-Baseline unifies data change across multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It leverages \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes.
-Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought. It enables solutions to four of the eight challenge problems identified in prior work.
+Baseline unifies data management across multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It leverages \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes.
+Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought, enabling solutions to four of the eight challenge problems identified in prior work.
+Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches. It also offers a simplified conceptual model for ad hoc usage.
 
-Operational Differencing enables a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches. It also offers a simplified conceptual model for ad hoc usage. Our preliminary exploration of an operational query language is intriguing.
-
-Overall it would be fair to say that Baseline is research in progress, offering novel capabilities, but also raising more questions than it answers. We hope that is taken as a sign of progress and promise.
-
+Our preliminary exploration of an operationalized query language opens an intriguing avenue for further research.
+We believe that Baseline demonstrates, at the least, that operation-based approaches to data have been under-explored and offer a broad range of new possibilities.
 
 
 \section{Related Work}
@@ -1172,7 +1173,7 @@ Selective undo has been implemented in OT~\cite{sun00, weiss08} and Baseline tak
 
 The top row of the diagram shows the complete history of document \mathbox{A} starting at the unit value \mathbox{\{\}} and ending with state \mathbox{A_n}. To undo a past operation \mathbox{a_i} we first calculate its \textit{inverse} \mathbox{- \langle A_{i-1}\!\fatsemi a_i \rangle} that takes the state \mathbox{A_i} back to the state \mathbox{A_{i-1}}. In general the inverse takes a timeline and produces a sequence of operations that may depend upon the initial state. For example if \mathbox{a_i} is a \textsf{delete} operation its inverse will first re-insert the deleted element at the proper location and then completely restore its value in the prior state.
 
-Given the inverse operations we then project the subsequent timeline through them. Note the downward direction of the projection, which causes subsequent operations to override the inverse. For example if we undo a past \textsf{write} operation but there were subsequent writes to the same location then undoing should have no effect. The projection produces the \mathbox{\Delta} operations on the right hand side, which is the delta we are looking for. We execute the delta on \mathbox{A} producing the result of the undo in \mathbox{A'}. The projection also produces the dashed arrow on the bottom, which is not utilized, but is of interest because it is that hypothetical history scrubbed of the effects of the undone operation we imagined earlier.
+Given the inverse operations we then project the subsequent timeline through them. Note the downward direction of the projection, which causes subsequent operations to override the inverse. For example if we undo a past \textsf{write} operation but there were subsequent writes to the same location then undoing should have no effect. The projection produces the \mathbox{\Delta} operations on the right hand side, which is the delta we are looking for. We execute the delta on \mathbox{A} producing the result of the undo in \mathbox{A'}. The projection also produces the dashed arrow on the bottom, which is not utilized, but is of interest because it is that hypothetical history scrubbed of the effects of the undone operation that we imagined earlier.
 
 
 
