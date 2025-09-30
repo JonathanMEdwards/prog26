@@ -26,7 +26,7 @@
 % define natbib citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
 
-\newcommand{\mathbox}[1]{\colorbox{black!10}{$#1$}}
+\newcommand{\mathbox}[1]{\colorbox{black!10}{$#1$\phantom{i\hspace{-3.5pt}}}}
 \usepackage{tcolorbox}
 \tcbset{colback=black!10, colframe=white, right=-20pt}
 
@@ -126,7 +126,7 @@ he can be reached at \email{tomas@tomasp.net}.}
 
 \begin{abstract}
 
-  Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes. We use operational differencing to construct an operation-based form of version control over data structures used in programming languages and relational databases.
+  Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes. We use operational differencing to construct an operation-based form of version control on data structures used in programming languages and relational databases.
 
   This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control for ad hoc usage: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared as is commonly done with document files, except with the added benefit of diffing and merging.
 
@@ -170,7 +170,7 @@ Data changes in multiple dimensions. Data changes over time, indeed often that i
 Baseline is a research project to develop a general purpose mechanism for data change in all these dimensions, and to provide it conveniently to both programs and humans.
 To ground this research we first surveyed one of the most problematic aspects of data change: schema evolution. In \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems} we and others formulated a suite of challenge problems across a range of contexts, including traditional database programming as well as live front-end programming, model-driven development, and collaboration in computational documents. These problems have guided our work and are used as examples in the rest of the paper.
 
-Systems that manage change split into \textit{state-based} and \textit{operation-based} approaches~\cite{diff3, Shapiro11, edit-lenses}. State-based approaches observe only the before and after of changes, while operation-based approaches record the execution of a set of possible operations.
+Systems that manage change split into \textit{state-based} and \textit{operation-based} approaches~\cite{diff3, Shapiro11}. State-based approaches observe only the before and after of changes, while operation-based approaches record the execution of a set of possible operations.
 The benefit of state-based approaches is that since they observe from the outside they more easily interoperate with existing tools.
 The benefit of operation-based approaches is that they can capture user intentions more accurately than can be inferred from the states. For example comparing states of a table schema, a move followed by a rename is indistinguishable from a delete followed by an insert, but that makes a big difference to the data.
 % We are exploring what is possible with an operation-based approach while defering the concerns of interoperability.
@@ -196,7 +196,7 @@ including refactorings. We define the primitive transformations \textit{projecti
 
 \item We develop a simplified form of version control without a repo: artifacts under version control have an append-only history of operations attached to them. Branching is just making a copy of the artifact with its history, which can then diverge. There is no need for a repo to record a graph of branches and merges because that can be synthesized from the histories on need, and can be done so optimally in a well-defined sense. By liberating branches and versions of artifacts from the repo they can be shared freely and independently, much like the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
-\item We enrich the data model to incorporate relational databases, including operations for schema change and normalization. We demonstrate version control on databases that works across schema changes, and can also be used to manage schema migrations.
+\item We enrich the data model to incorporate relational databases, including operations for schema change and normalization. We demonstrate version control on databases that works across schema changes, and which can also be used to manage schema migrations.
 
 \item We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations, in a form of Programming by Demonstration~\cite{cypher93-pbd}. We develop this idea on a query language fragment containing selects and joins. Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. This conjecture could open up an unexplored space of query language designs.
 
@@ -231,7 +231,7 @@ The empty record \mathbox{\text{\{\}}}serves as a unit type. Every type has an \
 We omit sum types and type aliases because they are not needed in this paper.
 Figure~\ref{rich-data} defines the syntax and operations of the model.
 
-% simple syntax table
+% data syntax table
 \begin{figure}[h]
 \tcbox{
   \begin{minipage}{\textwidth}
@@ -309,11 +309,12 @@ Operation use infix syntax, placing the target path first, then the operation na
 
 We execute operations with the \mathbox{\fatsemi} infix operator taking an input state on the left, an operation on the right, and yielding an output state which may be chained into subsequent executions. Here is an example that starts with an empty list of numbers and adds an element with ID $e$ and value $1$:
 \begin{align*}
-S_1 &= [] \isa \textsf{List Number}\\
-S_2 &= S_1 \exec \ldotp \textsf{ append } e \exec \ldotp e \textsf{ write } 1\\
-&= [e \is 1] \isa \textsf{List Number}\\
+  S_1 &= [] \isa \textsf{List Number}\\
+  S_2 &= S_1 \exec \ldotp \textsf{ append } e \exec \ldotp e \textsf{ write } 1\\
+  &= [e \is 1] \isa \textsf{List Number}\\
 \end{align*}
-The \textsf{append} targets the empty path \mathbox{\ldotp} referring to the whole list. Then the \textsf{write} targets the new element with the path \mathbox{\ldotp e}. In all our examples we take IDs like $e$ as given but in practice the Baseline API generates them uniquely.
+\vspace{-30pt}\\
+The \textsf{append} targets the empty path \mathbox{\ldotp} referring to the whole list. Then the \textsf{write} targets the new element with the path \mathbox{\ldotp e}. In all our examples we take IDs like \mathbox{e} as given but in practice the Baseline API generates them uniquely.
 
 A \textit{table} is a list of records, the fields of which are the \textit{columns} while the elements of the list are the \textit{rows}. Here is an example of changing the type of a table:
 \begin{align*}
@@ -321,12 +322,13 @@ S_1 &= [e \is \{x \is 1 \comma  y \is 2\}] \isa \textsf{List} \{x \is \textsf{Nu
 S_2 &= S_1 \exec \ldotp * \textsf{ Append } z \exec \ldotp * \ldotp z \textsf{ Define Number}\\
  &= [e \is \{x \is 1\comma  y \is 2,\ z\is \textsf{NaN}\}] \isa \textsf{List} \{x \is \textsf{Number}\comma  y \is \textsf{Number}\comma z\is \textsf{Number}\}\\
 \end{align*}
-The \textsf{Append} operation targets the path \mathbox{\ldotp *} which is the record type of the list's elements and adds a new field \mathbox{z} to it, in effect adding a column to the table. The \textsf{Define} operation targets the path \mathbox{\ldotp  * \ldotp z} which is the type of the new field (initially the unit type $\{\}$) and changes it to \textsf{Number}. The new field is also inserted into all elements of the list with the initial value \textsf{NaN}.
+\vspace{-30pt}\\
+The \textsf{Append} operation targets the path \mathbox{\ldotp *} which is the record type of the list's elements and adds a new field \mathbox{z} to it, in effect adding a column to the table. The \textsf{Define} operation targets the path \mathbox{\ldotp  * \ldotp z} which is the type of the new field (initially the unit type \mathbox{\{\}}) and changes it to \mathbox{\textsf{Number}}. The new field is also inserted into all elements of the list with the initial value \mathbox{\textsf{NaN}}.
 
-The \textsf{append} and \textsf{write} operations are \textit{value operations}, meaning they do not modify the type of the state. On the other hand \textsf{Append} and \textsf{Define} are \textit{type operatons} that may modify both the type and value. Type operations do what databases call \textit{schema migration}: the value is adapted to match the type while minimizing loss of information, iterating over list elements as needed (think of the $*$ in the type path as a wildcard). By convention we capitalize the name of type operations. Baseline has a \textit{user mode} in which only value operations are permitted.
+The \textsf{append} and \textsf{write} operations are \textit{value operations}, meaning they do not modify the type of the state. On the other hand \textsf{Append} and \textsf{Define} are \textit{type operatons} that may modify both the type and value. Type operations do \textit{schema migration}: the value is adapted to match the type while minimizing loss of information, iterating over list elements as needed (think of the \mathbox{*} in the type path as a wildcard). By convention we capitalize the name of type operations. Baseline has a \textit{user mode} in which only value operations are permitted.
 
 \begin{remark}
-In this presentation we adopt the standard approach of defining values and types as distinct objects. However Baseline only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped version of our approach~\cite{denicek}.
+In this presentation we adopt the standard approach of defining values and types as distinct mathematical objects. Actually Baseline only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped version of our approach~\cite{denicek}.
 \end{remark}
 
 Many of the type operations exist in order to do schema migration on values: they would not be needed just to define a type prior to populating it with data. We think of these operations as \textit{type refactorings}, capturing high-level design changes. They are manifested in the UI as direct manipulations so that schema evolution can be done interactively. Schema evolution is also needed in \textit{live programming}~\cite{challenge-problems}.
@@ -365,8 +367,8 @@ The \textsf{ListOf} operation takes any type and wraps it inside a list, and wra
 
 \section{Operational Differencing}
 
-Change management systems deal with what happens when two copies/replicas/branches of something diverge.
-Among these systems there is a dichotomy between \textit{state-based} and \textit{operation-based} techniques~\cite{diff3, Shapiro11, edit-lenses}.
+Change management systems deal with what happens when two copies (or replicas or branches) of something diverge.
+These systems split into \textit{state-based} and \textit{operation-based} approaches~\cite{diff3, Shapiro11}.
 In this section we introduce a new form of operation-based change management: \textit{Operational Differencing}.
 
 The benefit of operation-based techniques is that they can capture more information than can be inferred from the states.
@@ -374,7 +376,7 @@ For example a \textsf{Rename} operation makes many changes throughout the state,
 The benefit of state-based techniques is that they can observe other systems from the outside, which may explain why all existing version control systems are state-based.
 
 \begin{remark}
-We discuss source code version control systems like git as a point of reference, but we do not propose to compete with them. Git is highly adapted to the needs of intensive development in the Unix environment and the cultural norms of Unix developers. In that context version control must be state-based in order to interoperate with existing tools and practices. Instead of source code we focus on rich data, where we believe operation-based version control offers important benefits.
+We discuss source code version control systems like git~\cite{ProGit} as a point of reference, but we do not propose to compete with them. Git is highly adapted to the needs of intensive development in the Unix environment and the cultural norms of Unix developers. In that context version control must be state-based in order to interoperate with existing tools and practices. Instead of source code we focus on rich data, where we believe operation-based version control offers important benefits.
 \end{remark}
 
 We define a \textit{timeline} to be an initial state and a sequence of operations executed in order that are each valid on their input state, producing an end state.
@@ -434,11 +436,11 @@ Baseline records histories by observing the operations executed in the API and i
 \end{figure}
 
 The \textsf{Project} function takes as inputs two timelines with the same initial state and produces two new timelines continuing from the input timelines and converging on the same final state. It is easier to understand this with diagrams.
-In Figure~\ref{fig:projection}(a) the arrow on the left takes the state $0$ (we elide the obvious type signature) and writes a $2$ over it. The arrow on the top wraps that $0$ into a list with one element $[\mathbb{1}\is 0]$. The projection function takes these two arrows as input and produces the two dashed arrows such that the diagram \textit{commutes}, meaning the dashed arrow operations are valid on the states at their bases, and they both produce the same state $[\mathbb{1}\is 2]$. The way this is achieved is to map the target path of the \textsf{write} operation through the \textsf{ListOf} operation. We say that the two \textsf{write} operations have the same \textit{intention}---they ``do the same thing''---they convert the $0$ to a $2$, even though the $0$ has moved to a different location. That is the key principle of projection: it produce a right-hand operation that ``does the same thing'' as the left-hand operation despite the top operation having intervened.
+In Figure~\ref{fig:projection}(a) the arrow on the left takes the state \mathbox{0} (we elide the obvious type signature) and writes a \mathbox{2} over it. The arrow on the top wraps that \mathbox{0} into a list with one element \mathbox{[\mathbb{1}\is 0]}. The projection function takes these two arrows as input and produces the two dashed arrows such that the diagram \textit{commutes}, meaning the dashed arrow operations are valid on the states at their bases, and they both produce the same state \mathbox{[\mathbb{1}\is 2]}. The way this is achieved is to map the target path of the \textsf{write} operation through the \textsf{ListOf} operation producing the operation \mathbox{\ldotp\mathbb{1} \textsf{ write } 2}. We say that the two \textsf{write} operations have the same \textit{intention}---they ``do the same thing'' in different states---they convert the \mathbox{0} to a \mathbox{2}, even though the \mathbox{0} has moved to a different location. That is the key principle of projection: it produce a right-hand operation that ``does the same thing'' as the left-hand operation despite the top operation having intervened.
 
 Figure~\ref{fig:projection}(b) shows a messier situation. Here the left and top operations are both writing different values to the same location. This is called a \textit{conflict}. The rule is that projection attempts to preserve the intention of the left operation, even if that means overriding the top operation, which as a consequence gets converted to a \textsf{noop} on the bottom.
 
-This last example shows that projection is asymmetric: flipping the diagram on its diagonal to switch left and top yields a different result. And in fact we will have occasion to flip and rotate these diagrams, so we cannot depend on terminology like ``left'' and ``top''. Figure~\ref{fig:projection}(c) shows our orientation-neutral terminology: projection converts the \textit{pre} operation into the \textit{post} operation, preserving its intent after the \textit{base} operation intervenes. The \textit{base} operation is converted into the \textit{adjust} operation preserving as much of its intention as is allowed by the first rule. We also graphically indicate the orientation of the diagram by placing $\textsf{P}\!\Rightarrow$ into the corner of the initial state.
+This last example shows that projection is asymmetric: flipping the diagram on its diagonal to switch left and top yields a different result. And in fact we will have occasion to flip and rotate these diagrams, so we cannot depend on terminology like ``left'' and ``top''. Figure~\ref{fig:projection}(c) shows our orientation-neutral terminology: projection converts the \textit{pre} operation into the \textit{post} operation, preserving its intent after the \textit{base} operation intervenes. The \textit{base} operation is converted into the \textit{adjust} operation preserving as much of its intention as is allowed by the first rule. We also graphically indicate the orientation of the diagram by placing \mathbox{\textsf{P}\!\Rightarrow} into the corner of the initial state.
 
 
 % projection rules
@@ -491,7 +493,7 @@ This last example shows that projection is asymmetric: flipping the diagram on i
 \label{fig:projection-rules}
 \end{figure}
 
-Projection is defined with rules that can be diagrammed similarly. Figure~\ref{fig:projection-rules}(a) is a rule covering the \textsf{ListOf} example. The target path of the \textsf{ListOf} is abstracted to $p$, and the \textsf{write} operation is abstracted into any operation $A$ targeting $p$ or deeper, which is indicated with the path concatenation operator in $p \ldotp\ldotp q$. Operation $A$ is projected down into the \textsf{ListOf} with the path $p \ldotp \mathbb{1} \ldotp\ldotp q$.
+Projection is defined with rules that can be diagrammed similarly. Figure~\ref{fig:projection-rules}(a) is a rule covering the \textsf{ListOf} example. The target path of the \textsf{ListOf} is abstracted to \mathbox{p}, and the \textsf{write} operation is abstracted into any operation \mathbox{A} targeting \mathbox{p} or deeper, which is indicated with the path concatenation operator in \mathbox{p \ldotp\ldotp q}. Operation \mathbox{A} is projected down into the \textsf{ListOf} with the path \mathbox{p \ldotp \mathbb{1} \ldotp\ldotp q}.
 
 Figure~\ref{fig:projection-rules}(b) is the rule for conflicting writes.
 % Figure~\ref{fig:projection-rules}(c) is a generic rule that identical operations cancel out in projection, which overrides all the other rules. HoW?
@@ -555,11 +557,11 @@ Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in 
 
 Retraction is defined with rules like those for projection so we skip over them in the interest of brevity.
 \begin{note}
-  We have implemented projection and retraction rules with if and switch statements, which has become impractical as the number of operations has grown, so much so that our implementation is still incomplete. We plan to build a more succinct DSL that exploits the inherent symmetries in the rules: projection is often symmetric in the two input operations; projection and retraction are often inverses.
+  Baseline implements projection and retraction rules with if and switch statements, which has become unwieldy as the number of operations has grown, so much so that the implementation is incomplete. We plan to build a more succinct DSL that exploits the inherent symmetries in the rules: projection is often symmetric in the two input operations; projection and retraction are often inverses.
 \end{note}
 
 \begin{remark}
-How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. Well-designed rules will agree with intuition and avoid surprises. One of these intuitions is that transfer should be symmetric: transfering an operation across a diff and then transferring it back again should bring back the same operation. We call this the \textit{roundtrip law} and we test that our rules obey it. Except there are exceptions, like when an operation gets dropped because its target was deleted. We keep discovering new exceptions that require weakening the law, so in future work we hope to come to a more principled understanding.
+How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. Well-designed rules will agree with intuition and avoid surprises. One of these intuitions is that transfer should be symmetric: transfering an operation across a diff and then transferring it back again should bring back the same operation. We call this the \textit{roundtrip law} and we test that our rules obey it. Except there are exceptions, like when an operation gets dropped because its target was deleted. The law has weakened as we discovered these exceptions, so in future work we hope to establish a more principled basis.
 
 
 % % note have dropped the override rule because it is awkward to explain
@@ -585,7 +587,7 @@ How do we know if the rules for projection and retraction are correct, that they
 
 \subsection{Across the Multiverse}\label{transfer}
 
-A \textit{diff} between two states $A$ and $B$ is a pair of timelines that branch off some shared state $O$ to yield $A$ and $B$, diagrammed like this:
+  A \textit{diff} between two states \mathbox{A} and \mathbox{B} is a pair of timelines that branch off some shared state \mathbox{O} resulting in \mathbox{A} and \mathbox{B}, diagrammed like this:
 \[\begin{tikzcd}
 	A & {} & {} & O & {} & {} & B
 	\arrow["{{a_n}}"', from=1-2, to=1-1]
@@ -620,12 +622,12 @@ The two timelines are called the \textit{branches} of the diff and we call their
 \label{fig:transfer}
 \end{figure}
 
-Transfer\footnote{Transfer was called migrate in previous publications~\cite{edwards21, edwards22}.} retracts $a_n$ backwards through all earlier operations on the $A$ timeline onto the original state $O$ and then projects that operation forwards through all the operations of the $B$ timeline. The final result is the operation $b'$ that yields a new version $B'$. The effect of the transfer is that the final operation $b'$ preserves the intention of the original operation $a_n$ given all the operations traversed while traveling backward in time to $O$ and then forward to $B$. Transfer also computes a new diff between $A_n$ and $B'$: the transferred operation is now shared between them in $O'$ with branching timelines $\mathit{adjust}_a$ and $\mathit{adjust}_b$. This updated diff is used later for diff optimization (\S\ref{diff-synth}).
+Transfer\footnote{Transfer was called migrate in earlier publications~\cite{edwards21, edwards22}.} retracts \mathbox{a_n} backwards through all earlier operations on the \mathbox{A} timeline onto the original state \mathbox{O} and then projects that operation forwards through all the operations of the \mathbox{B} timeline. The final result is the operation \mathbox{b'} that yields a new version \mathbox{B'}. The effect of the transfer is that the final operation \mathbox{b'} preserves the intention of the original operation \mathbox{a_n} given all the operations traversed while traveling backward in time to \mathbox{O} and then forward to \mathbox{B}. Transfer also computes a new diff between \mathbox{A_n} and \mathbox{B'}: the transferred operation is now shared between them in \mathbox{O'} with branching timelines \mathbox{\mathit{adjust}_a} and \mathbox{\mathit{adjust}_b}. This updated diff is used later for diff optimization (\S\ref{diff-synth}).
 
-In this definition we transferred the last operation of the $A$ branch---an earlier operation can be transferred by using the corresponding truncation of $A$.
-Since transfer uses retraction it may fail because of a dependency on an earlier operation in the $A$ branch. However it is always possible to transfer any operation by first transfering all of its dependencies earlier in the branch. A \textit{sync} action that transfers all operations in the branch will always succeed. We also provide a finer-grained \textit{dependency transfer} function that transfers just the transitive dependencies and so always succeeds.
+In this definition we transferred the last operation of the \mathbox{A} branch---an earlier operation can be transferred by using the corresponding truncation of \mathbox{A}.
+Since transfer uses retraction it may fail because of a dependency on an earlier operation in the \mathbox{A} branch. However it is always possible to transfer any operation by first transfering all of its dependencies earlier in the branch. A \textit{sync} action that transfers all operations in the branch will always succeed. We also provide a finer-grained \textit{dependency transfer} function that transfers just the transitive dependencies and so always succeeds.
 
-As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor} into two branches: branch $A$ reassigns the TODO from Jack to Jill; branch $B$ converts the assignment into a list, changes the assignment from Jack to Jacque and inserts a new assignment to Tom:
+As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor} into two branches: branch \mathbox{A} reassigns the TODO from Jack to Jill; branch \mathbox{B} converts the assignment into a list, changes the assignment from Jack to Jacque and inserts a new assignment to Tom:
 \begin{align*}
   O &= [
     e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \quotedstring{Jack} \}
@@ -646,28 +648,27 @@ As an example we extend the TODO refactoring in Figure~\ref{fig:TODO-refactor} i
   \end{align*}
   \vspace{-30pt}\\
 We can transfer these operations individually from one side to the other.
-If we transfer $b_2$ into $A$ the change from Jack to Jacque gets applied to the \textsf{who} field (showing the change in bold):\\
-\mathbox{A' =
-[e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \textbf{\quotedstring{Jacque}} \}]}.
-If we transfer $a_1$ into $B$ the change from Jack to Jill gets applied to the list element containing Jack, even though it has been wrapped and shifted:\\
-\mathbox{B' = [
+If we transfer \mathbox{b_2} into \mathbox{A} the change from Jack to Jacque gets applied to the \textsf{who} field (showing the change in bold):
+\[A' = [e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \textbf{\quotedstring{Jacque}} \}]\]
+If we transfer \mathbox{a_1} into \mathbox{B} the change from Jack to Jill gets applied to the list element containing Jack, even though it has been wrapped and shifted:\\
+\[B' = [
     e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is
     [ g \is \quotedstring{Tom} \comma \mathbb{1}\is \textbf{\quotedstring{Jill}}] \}
-]}.
+]\]
 
 % diagram one of these examples?
 
 This example demonstrates how transference can propagate changes bidirectionally through structural changes. Standard state-based version control techniques would see only a big conflict and require a human to pick out and propagate finer-grained changes correctly.
 Operational differencing does this more precisely because it tracks how locations shift through time.
 
-Version control systems like git provide a variety of actions like \textit{merge}, \textit{rebase}, and \textit{cherry-pick} with subtly different semantics. We provide transferrance as the sole primitive and then build coarser-grained actions out of sets of transfers. For example all the changes in one branch can be transferred to the other. Just the type changes or just the data changes can be transferred. The dependency transfer action mentioned earlier transfers all transitive dependencies. To \textit{synchronize} two branches all changes are transferred from one to the other and then all changes remaining in the other branch are transferred back. Note that synchronization has a direction: syncing from $A$ into $B$ resolves all conflicts in favor of $A$.
+Version control systems like git provide a variety of actions like \textit{merge}, \textit{rebase}, and \textit{cherry-pick} with subtly different effects. We provide transferrance as the sole primitive and then build coarser-grained actions out of sets of transfers. For example all the changes in one branch can be transferred to the other. Just the type changes or just the data changes can be transferred. The dependency transfer action mentioned earlier transfers all transitive dependencies. To \textit{synchronize} two branches all changes are transferred from one to the other and then all changes remaining in the other branch are transferred back. Note that synchronization has a direction: syncing from \mathbox{A} into \mathbox{B} resolves all conflicts in favor of \mathbox{A}.
 
 
 \subsection{Diff Optimization and Synthesis}\label{diff-synth}
 
-We have been discussing transference assuming we are given a diff that specifies a shared state and timelines branching off of it. The intuition is that the shared state should contain everything the two final states have in common, and the branches should represent the differences. Not all branching timelines will satisfy that intuition. There might be redundant operations duplicated in both branches, either by coincidence or by explicit transfers. There could also be redundant changes within a branch that override earlier ones. All of these sorts of redundancies are undesirable because they add noise to a visualization of differences, and in some cases can cause transfer to produce surprising results. There is a simple algorithm that can be used to produce optimal diffs using transference itself.
+We have been discussing transference assuming we are given a diff that specifies a shared state and timelines branching off of it. The intuition is that the shared state should contain everything the two final states have in common, and the branches should be just the differences. Not all branching timelines will satisfy that intuition. There might be redundant operations duplicated in both branches, either by coincidence or by explicit transfers. There could also be redundant changes within a branch that override earlier ones. All of these sorts of redundancies are undesirable because they add noise to a visualization of differences, and in some cases can cause transfer to produce surprising results. There is a simple algorithm that can be used to produce optimal diffs using transference itself.
 
-Note that in Figure~\ref{fig:transfer} the bottom of the diagram produces a new diff: two new timelines $\mathit{adjust}_a$ and $\mathit{adjust}_b$ branching from a new shared state $O'$. These \textit{adjusted} timelines eliminate the redundancy of the original operation and its transferred image. Clearly after executing a transfer we should drop the original diff and use the adjusted diff instead. In the same way we can use transfers to remove redundancies in diffs as follows. Given a pair of branching timelines we iterate over all the actions on both sides in order\footnote{Currently it does not matter how the two branches are interleaved by this algorithm, but future plans may require a causal ordering on transferred operations.}. For each operation we try to transfer it to the other branch. If the transfer succeeds and its result is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the transferred operation makes no difference to the other side then it isn't really a difference, so we append it to the history of the shared state. After we have tried every transfer from both sides the result will be optimal in the sense that the history of the shared state is maximal while the timelines branching off of it are minimal, without redundancies. Note however that this maximal shared state may not have ever actually occurred in either history---it is the \textit{hypothetical} ideal last common ancestor if history had happened in a fortuitously non redundant order. This ideal common ancestor avoids the problems that can be caused by cherry-picking in git~\cite{philomatics-git}.
+Note that in Figure~\ref{fig:transfer} the bottom of the diagram produces a new diff: two new timelines \mathbox{\mathit{adjust}_a} and \mathbox{\mathit{adjust}_b} branching from a new shared state \mathbox{O'}. These \textit{adjusted} timelines eliminate the redundancy of the original operation and its transferred image. Clearly after executing a transfer we should drop the original diff and use the adjusted diff instead. In the same way we can use transfers to remove redundancies in diffs as follows. Given a pair of branching timelines we iterate over all the actions on both sides in order\footnote{The order in which the two branches are interleaved does not matter because of the roundtrip law, but if that law is weakened then a causal ordering on transferred operations may be required.}. For each operation we try to transfer it to the other branch. If the transfer succeeds and is a fixpoint (it doesn't alter the state of the other side), then we discard the branches in favor of the adjusted ones and continue the loop. The intuition here is that if the transferred operation makes no difference to the other side then it isn't really a difference, so we append it to the history of the shared state. After we have tried every transfer from both sides the result will be optimal in the sense that the history of the shared state is maximal while the timelines branching off of it are minimal, without redundancies. Note however that this maximal shared state may not have ever actually occurred in either history---it is the \textit{hypothetical} ideal last common ancestor if history had happened in a fortuitously non redundant order. This ideal common ancestor avoids the problems that can be caused by cherry-picking in git~\cite{philomatics-git}.
 
 Diff optimization lets us synthesize an optimal diff from the histories of any two states. A history always starts from the unit value as its initial state. So all histories are branches from the initial state and we just optimize that primordial diff.
 
@@ -677,14 +678,14 @@ Diff optimization lets us synthesize an optimal diff from the histories of any t
 
 \subsection{Low-fuss Version Control}
 
-The ability to synthesize diffs for any two histories avoids the need for a \textit{repo} to determine the last common ancestor for operations like merging. As we have seen that can be sub-optimal as a basis for three-way diffing. But more importantly, understanding and maintaining the repo imposes a large mental burden on the users of version control systems. Git~\cite{ProGit} is infamous for causing confusion and frustration~\cite{perez13, church2014case, xkcd1597}.
+The ability to synthesize diffs for any two histories avoids the need for a \textit{repo} to determine the last common ancestor for operations like merging. As we have seen that can be sub-optimal as a basis for three-way diffing. But more importantly, understanding and maintaining the repo imposes a large mental burden on the users of version control systems. Git is infamous for causing confusion and frustration~\cite{perez13, church2014case, xkcd1597}.
 
 We present the user with a simpler conceptual model: every document has an append-only history. To branch an alternate version of a document, simply copy it. The copies can then diverge, and their histories can be compared at any time to compute their diff, which can then be used to transfer differences between them. We can record copy and transfer events as comments in histories in order to reconstruct a version graph like that maintained in a repo.
 
 This approach is more flexible: since versions and branches no longer belong to a repo they can be shared without sharing the whole repo. They are like files (and likely implemented as files): independent storage units that can participate in overlapping and shifting webs of collaboration. They can be emailed. We regain the flexibility of the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
 \begin{remark}
-  Large projects will still need to maintain a list of all branches, but that could be as lightweight as a file directory. Large projects will also want to compress storage and cache diffs. We believe all these capabilities could be added on top of our approach with far less user-facing complexity than git. But that is not an immediate goal: we want to first optimize for small-scale ad hoc usage.
+  Large projects will still need to maintain a list of all branches, but that could be as lightweight as a file directory. Large projects will also want to compress storage and cache diffs. We believe all these capabilities could be added on top of our approach with far less user-facing complexity than git. But that is not an immediate goal: first we want to optimize for small-scale ad hoc usage.
 \end{remark}
 
 
@@ -880,31 +881,21 @@ The moral of this story is that it is surprisingly hard to get the transfer sema
 
 \section{Operationalized Queries}
 
-We saw in the last section that although the Fulfillment department preferred the unnormalized view of orders it would be forced to migrate to the normalized database to stay fully in sync with all changes. Relational databases offer a better solution: \textit{queries}. In this section we discuss how Operational Differencing can build queries and updatable views. But the simplest solution doesn't even require a query. We can just make a copy of the database and denormalize it.
+We saw in the last section that although the Fulfillment department preferred the unnormalized view of orders it would be forced to migrate to the normalized database to stay fully in sync with all changes. Relational databases offer a better solution: \textit{queries}. In this section we discuss how Operational Differencing can build queries and updatable views. But the simplest solution doesn't even require a query. We can just fork a copy of the database and denormalize it.
 
-The \textsf{Join} operation in Figure~% \ref{fig:db-operations}
-is the inverse of \textsf{Split}. It replaces a link column with all the columns of the linked table, copying their contents to match the link values\footnote{With the set-valued links discussed earlier it becomes a relational join operation.}. Specifically:
+The \textsf{Join} operation in Figure~\ref{fig:db-addons}
+is the inverse of \textsf{Split}. It replaces a link column with all the columns of the linked table, copying their contents to match the link values\footnote{With the set-valued links discussed earlier it effectively becomes a relational join operation.}. Specifically:
 \[
 \ldotp \textsf{orders}\ldotp * \ldotp \textsf{customer Join} \\
 \]
 resulting in exactly the database we started with in Figure~\ref{fig:tables-single}.
 The Fulfillment department can perform this operations directly in the UI, allowing them
-to operate in their preferred schema and bidirectionally sync changes with the normalized primary database in the Cutomer Relationship department. Bidirectional sync works now when it didn't before because the \textsf{Join} operation does not create any dependencies. We could make this even more convenient by automatically syncing on all changes. We have essentially built an updatable view by doing schema changes on a copy, and we did this in the UI without programming.
+to operate in their preferred schema and bidirectionally sync changes with the normalized primary database in the Cutomer Relationship department. Bidirectional sync works now when it didn't before because the \textsf{Join} operation does not create any dependencies. We could make this even more convenient by automatically syncing on all changes. We have essentially built an \textit{updatable view} by doing schema changes on a copy, and we did this in the UI without programming.
 
 This example raises an interesting question: could we generalize it into a general technique for building queries? Instead of writing a query in an abstract language we make a copy of the database and perform schema change and data mutation operations in the UI to \textit{sculpt}~\cite{sculpin} it into the desired form. This sculpted database acts like a query if we automatically sync changes from the primary database into it. Such forward projection is always possible. We can also update the sculpted view and sync those changes back to the real database, limited to those cases where a traditional query-based view would also be updatable.
 
 We call this idea \textit{operationalized queries}. It can be seen as a form of \textit{Programming by Demonstration}~\cite{cypher93-pbd}. We can draw another analogy: query languages are a classic example of pure functional programming that avoids mutation. Pure functions can often be implemented by copying values, mutating them, then returning the result. That is exactly what we are
 doing: computing a query by mutating a copy of the database.
-
-It takes more than a join operation to make a query language. We can take another step with a simple selection predicate. When the Fulfillment department ships an order it sets the date in the \textsf{ship\_date} field. They would like a view showing just the pending orders, which lack a ship date. We can further sculpt the view with the \textsf{deletePresent} operation in Figure~\ref{fig:query-addons}:
-\[
-\ldotp \textsf{orders}\ldotp * \ldotp \textsf{ship\_date deletePresent} \\
-\]
-The target path is the type of the \textsf{ship\_date} column---all orders with a non-blank value in that column are deleted, producing the desired view. When a ship date is entered into this view the change will transfer back into the primary database, which has the effect of dropping that order from the recalculated view.
-%\footnote{Operation transfer computes the changes in both directions incrementally which is called \textit{incremental view maintenance}\cite{gupta93}. However performance is not a design goal at this time.}
-General purpose queries require a general language of predicates. We could embed a predicate as a Boolean-valued computed column and then use the \textsf{removePresent/removeAbsent} operations. That would be consistent with the philosophy of ``querying by sculpting'' but we plan to also explore adding predicates into the language of operations.
-
-
 
 \begin{figure}
 % query syntax
@@ -943,6 +934,15 @@ General purpose queries require a general language of predicates. We could embed
   \caption{Additional query syntax and operations}
   \label{fig:query-addons}
 \end{figure}
+
+It takes more than a join operation to make a query language. We can take another step with a simple selection predicate. When the Fulfillment department ships an order it sets the date in the \textsf{ship\_date} field. They would like a view showing just the pending orders, which lack a ship date. We can further sculpt the view with the \textsf{deletePresent} operation in Figure~\ref{fig:query-addons}:
+\[
+\ldotp \textsf{orders}\ldotp * \ldotp \textsf{ship\_date deletePresent} \\
+\]
+The target path is the type of the \textsf{ship\_date} column---all orders with a non-blank value in that column are deleted, producing the desired view. When a ship date is entered into this view the change will transfer back into the primary database, which has the effect of dropping that order from the recalculated view.
+%\footnote{Operation transfer computes the changes in both directions incrementally which is called \textit{incremental view maintenance}\cite{gupta93}. However performance is not a design goal at this time.}
+
+This selection was a special case: in general we need a language of predicates. We could embed a predicate as a Boolean-valued computed column and then use the \textsf{removePresent/removeAbsent} operations. That would be consistent with the philosophy of \textit{querying by sculpting} but we want to consider adding predicates into the language of operations.
 
 
 \subsection{Formulas as Future Timelines}\label{formulas}
@@ -1009,11 +1009,11 @@ We evaluate Baseline against the challenge problems proposed in
 \begin{enumerate}
 
   \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the state of an Elm application so that it needn't be restarted.
-  The example given is to evolve a field of a TODO item from \textsf{completed: bool} to \textsf{completed: Maybe<DateTime>}. This example raises the question of how Baseline handles optional types, but it is moot. Baseline does not yet have enough programming capabilities to implement the TODO application.
+  The example given is to evolve a field of a TODO item from \textsf{completed: bool} to \textsf{completed: Maybe<DateTime>}. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
 
-  \item \textbf{Extract Entity}\greenCheck We adopted this problem as the example  shown in Figure~\ref{fig:tables} and solved it in \S\ref{db-evolution} with the \textsf{Split} and \textsf{move} operations.
+  \item \textbf{Extract Entity}\greenCheck We adopted this problem verbatim as the example shown in Figure~\ref{fig:tables} and solved in \S\ref{db-evolution} with the \textsf{Split} and \textsf{move} operations.
 
-  \item \textbf{Code Co-evolution for Extract Entity}\greenCheck This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We adopted this example and solved it in \S\ref{query-rewriting}, although only in a fragmentary query language.
+  \item \textbf{Code Co-evolution for Extract Entity}\greenCheck This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We discussed this example and solved it in \S\ref{query-rewriting}, albeit in a fragmentary query language.
 
   \item \textbf{Structured Document Edits}\redCross The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
 
@@ -1021,13 +1021,13 @@ We evaluate Baseline against the challenge problems proposed in
 
   \item \textbf{Divergence Control for Extract Entity}\greenCheck This problem extends problem \#2, requiring that changes be bidirectionally transferable through the schema evolution. We solved it in \S\ref{db-vc}, albeit with the well-known limitations of view updates.
 
-  \item \textbf{Multiplicity Change in Schema}\greenCheck This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by \citet{Cambria} (Appendix III) involving null values that we can't handle yet.
+  \item \textbf{Multiplicity Change in Schema}\greenCheck This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by \citeauthor*{Cambria}~\cite[Appendex III]{Cambria} involving null values that we can't handle yet.
 
   \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
 
 \end{enumerate}
 
-Altogether we solved four of the eight challenge problems. We keep the remaining four as goals for future work. Appendix~\ref{tech-dims} contains an evaluation of Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+We judge that we have solved four of the eight challenge problems. The remaining four are goals for future work. Appendix~\ref{tech-dims} contains an evaluation of Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
 
 
 
@@ -1041,9 +1041,9 @@ The diffing UI should detect such cases of adjacent similar insertions and offer
 
 Implementing projection and retraction rules with if statements has proven impractical. We want to build a DSL for specifying rules more succinctly, exploiting their inherent symmetries.
 % Ideally this DSL can be rendered as diagrams for publication.
-We want to use property-based testing to check that the rules obey the \textit{roundtrip law}, but first we need to better understand exactly what that law minimally requires.
+We want to use property-based testing to check that the rules obey the roundtrip law, but first we need to better understand exactly what that law minimally requires.
 
-Our simple approach to deduplication is flawed. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. We believe these sets will smooth the difficulties we have had in defining a set of orthogonal operations for schema evolution in nested relations.
+Our simple approach to deduplication is flawed. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. We believe these sets will smooth the difficulties we have had in defining a set of orthogonal primitive operations for schema evolution in nested relations.
 
 Perhaps the most important question is whether we can build out a full operationalized query language. Could that even be extended into a general purpose functional programming language?
 
@@ -1051,11 +1051,12 @@ Perhaps the most important question is whether we can build out a full operation
 
 \subsection{Conclusion}
 
-Integrating type/schema operations into a data model allows schema evolution to be handled properly as a first-class concern,
-solving four of the eight challenge problems identified in prior work.
-Operational Differencing enables a new kind of version control on data with novel capabilities. It also provides a simplified conceptual model for ad hoc usage.
-Our preliminary work on operationalizing a query language is intriguing.
-Overall it would be fair to say that this paper raises more questions than it answers, which we hope is seen as a positive sign of progress and promise.
+Baseline unifies data change across multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It leverages \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes.
+Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought. It enables solutions to four of the eight challenge problems identified in prior work.
+
+Operational Differencing enables a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches. It also offers a simplified conceptual model for ad hoc usage. Our preliminary exploration of an operational query language is intriguing.
+
+Overall it would be fair to say that Baseline is research in progress, offering novel capabilities, but also raising more questions than it answers. We hope that is taken as a sign of progress and promise.
 
 
 
@@ -1169,9 +1170,9 @@ Selective undo has been implemented in OT~\cite{sun00, weiss08} and Baseline tak
 	\arrow[dashed, from=2-3, to=2-4]
 \end{tikzcd}\]
 
-The top row of the diagram shows the complete history of $A$ starting at the unit value $\{\}$ and ending with $A_n$. To undo a past operation $a_i$ we first calculate its \textit{inverse} $- \langle A_{i-1}\!\fatsemi a_i \rangle$ that takes the state $A_i$ back to the state $A_{i-1}$. In general the inverse takes a timeline and produces a sequence of operations that may depend upon the initial state. For example if $a_i$ is a \textsf{delete} operation its inverse will first re-insert the deleted element at the proper location and then completely restore its value in the prior state.
+The top row of the diagram shows the complete history of document \mathbox{A} starting at the unit value \mathbox{\{\}} and ending with state \mathbox{A_n}. To undo a past operation \mathbox{a_i} we first calculate its \textit{inverse} \mathbox{- \langle A_{i-1}\!\fatsemi a_i \rangle} that takes the state \mathbox{A_i} back to the state \mathbox{A_{i-1}}. In general the inverse takes a timeline and produces a sequence of operations that may depend upon the initial state. For example if \mathbox{a_i} is a \textsf{delete} operation its inverse will first re-insert the deleted element at the proper location and then completely restore its value in the prior state.
 
-Given the inverse operations we then project the subsequent timeline through them. Note the downward direction of the projection, which causes subsequent operations to override the inverse. For example if we undo a past \textsf{write} operation but there were subsequent writes to the same location then undoing should have no effect. The projection produces the $\Delta$ operations on the right hand side, which is the delta we are looking for. We execute the delta on $A$ producing the result of the undo in $A'$. The projection also produces the dashed arrow on the bottom, which is not utilized, but is of interest because it is that hypothetical history scrubbed of the effects of the undone operation we imagined earlier.
+Given the inverse operations we then project the subsequent timeline through them. Note the downward direction of the projection, which causes subsequent operations to override the inverse. For example if we undo a past \textsf{write} operation but there were subsequent writes to the same location then undoing should have no effect. The projection produces the \mathbox{\Delta} operations on the right hand side, which is the delta we are looking for. We execute the delta on \mathbox{A} producing the result of the undo in \mathbox{A'}. The projection also produces the dashed arrow on the bottom, which is not utilized, but is of interest because it is that hypothetical history scrubbed of the effects of the undone operation we imagined earlier.
 
 
 
@@ -1180,16 +1181,10 @@ Given the inverse operations we then project the subsequent timeline through the
 
 A primary goal of Baseline is useability. We believe that people should have the same power as programs, entailing that all state is visualized in a UI and that all operations are manifested as direct manipulations in it. The same goes for our version control capabilities: differences are visualized and can be transferred. There is a playable demo (see Appendix~\ref{demo}) and a short video presentation at  \url{https://www.hytradboi.com/2025/3b6de0f0-c61c-4e70-9bae-cca5a0e5bb7b-db-usability-as-if}.
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[width=\textwidth]{GUInumbered.png}
 \caption{A selection is a path through Miller columns containing indented outlines and flat tables.}
 \label{fig:UI}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\textwidth]{DiffNumbered.png}
-\caption{A diff is displayed across a split screen with coordinated selection.}
-\label{fig:Diff}
 \end{figure}
 
 \circledtextset{resize=real, charf=\LARGE\sffamily}
@@ -1198,6 +1193,12 @@ The following discussion concentrates on the rationale behind the key UI design 
 Figure~\ref{fig:UI} displays a screen shot. \circledtext{1} The left hand column shows the history of operations on this database. History sidebars are a common technique but we were particularly inspired by Wrangler~\cite{kandel11}.
 
 The three columns to the right are Miller columns~\cite{miller-columns} that display a path drilling into and across nested data structures. Usually Miller columns display a simple list, as in the MacOS Finder column view of directories. We elaborate that convention to show in each column either an indented outline or a flat table. Nested structures are indicated with summaries that when clicked open a new column to the right. Cyan outlines show the selected path through the columns. \circledtext{2} is the top-level structure of this document. \circledtext{3} is the \textsf{orders} table within it. The user has selected a link to the \textsf{customers} table, which is opened in the column \circledtext{4}. Selection not only drills into nested structures but also follows links crossing the hierarchy, as if the target table of the link was nested inside it. This design was inspired as a reaction to Ultorg~\cite{bakke:phdthesis, ultorg} which uses nested tables to represent queries crossing a flat relational database. Ultorg provides a single view of a nested structure whereas our use of Miller columns provides only a view of the context of a path within the structure. The compensation for that restriction is that each column contains a visually simpler and context-independent layout, keeping neighbors at each level adjacent to each other rather than being splayed across lower layers.
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{DiffNumbered.png}
+\caption{A diff is displayed across a split screen with coordinated selection.}
+\label{fig:Diff}
+\end{figure}
 
 Figure~\ref{fig:Diff} displays our representation of diffs. The challenge is that Operational Differencing can do fine-grained comparisons across schema changes. We split the screen in half vertically to compare two databases. Here we are displaying the differences due to database normalization between Figure~\ref{fig:tables-single} in the top half and Figure~\ref{fig:tables-dedup} in the bottom half. Differences on each side are given a green background, and the context menu on them provides a command to transfer that difference to the other side.
 
@@ -1243,7 +1244,7 @@ Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evalua
 
 \paragraph{Conceptual structure} Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
 
-\paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transfered later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not hold that as a goal. Our ID-annotated tree structures provide some level of \textbf{addressing and externalizability}.
+\paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transferred later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not hold that as a goal. Our ID-annotated tree structures provide some level of \textbf{addressing and externalizability}.
 
 \paragraph{Complexity, Errors, and Adoptability} Baseline is still very immature in these dimensions.
 
