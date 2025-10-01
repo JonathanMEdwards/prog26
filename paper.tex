@@ -1055,7 +1055,7 @@ An intriguing question is whether it is possible to define an operationalized qu
 
 Baseline unifies data management across multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It leverages \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes.
 Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought, enabling solutions to four of the eight challenge problems identified in prior work.
-Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches. It also offers a simplified conceptual model for ad hoc usage.
+Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches, able to work across schema evolutions. It also offers a simplified conceptual model for ad hoc usage.
 
 Our preliminary exploration of an operationalized query language opens an intriguing avenue for further research.
 We believe that Baseline demonstrates, at the least, that operation-based approaches to data management have been under-explored and offer a broad range of new possibilities.
@@ -1074,7 +1074,7 @@ Those techniques ensure that multiple replicas distributed across a network will
 
 While we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and indeed was inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
 
-There is work on adding branching and conflict resolution to CRDTs~\cite{patchwork, automerge-conflicts} and DB replication~\cite{couchdb-conflicts}.
+There is work on adding branching and conflict resolution to CRDTs~\cite{patchwork, automerge-conflicts} and to DB replication~\cite{couchdb-conflicts}.
 CEDA~\cite{ceda} is an OT-based multi-paradigm distributed database.
 Synql~\cite{ignat-synql} is a CRDT-based approach to replicating relational databases respecting integrity constraints.
 
@@ -1133,7 +1133,7 @@ Models are often themselves modeled by a metamodel, which lifts the evolution pr
 
 
 \acks
-% We would like to thank Joshua Horowitz, Devamardeep Hayatpur, and the anonymous reviewers for their helpful comments.
+% We thank Joshua Horowitz, Devamardeep Hayatpur, and the anonymous reviewers for their helpful comments.
 
 \appendix
 
