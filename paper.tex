@@ -17,9 +17,14 @@
 \usepackage{stmaryrd}
 \usepackage{quiver}
 \usepackage{hhline}
-\usepackage{circledtext}
-\usepackage{fontawesome5}
 
+% Arxiv doesn't like circledtext
+%\usepackage{circledtext}
+%\circledtextset{resize=real, charf=\LARGE\sffamily}
+\usepackage{circledsteps}
+\newcommand{\circledtext}[1]{{\sffamily\Circled{#1}}}
+
+\usepackage{fontawesome5}
 \newcommand{\redCross}{\textcolor{red}{\ \faTimes\ }}
 \newcommand{\greenCheck}{\textcolor{ForestGreen}{\ \faCheck\ }}
 
@@ -1187,8 +1192,6 @@ A primary goal of Baseline is useability. We believe that people should have the
 \caption{A selection is a path through Miller columns containing indented outlines and flat tables.}
 \label{fig:UI}
 \end{figure}
-
-\circledtextset{resize=real, charf=\LARGE\sffamily}
 
 The following discussion concentrates on the rationale behind the key UI design decisions.
 Figure~\ref{fig:UI} displays a screen shot. \circledtext{1} The left hand column shows the history of operations on this database. History sidebars are a common technique but we were particularly inspired by Wrangler~\cite{kandel11}.
