@@ -133,7 +133,7 @@ he can be reached at \email{tomas@tomasp.net}.}
 
   Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes. We use operational differencing to construct an operation-based form of version control on data structures used in programming languages and relational databases.
 
-  This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control for ad hoc usage: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared as is commonly done with document files, except with the added benefit of diffing and merging.
+  This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control for ad hoc usage: There is no repo; Branching is just copying. The information maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared as is commonly done with document files, except with the added benefit of diffing and merging.
 
   We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea on a query language fragment containing selects and joins.
   Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. Operationalized queries get rewritten to accommodate schema change ``for free'' by the machinery of operational differencing.
@@ -308,7 +308,7 @@ A \textit{path} \mathbox{p} is a possibly empty sequence of IDs denoting a path 
 A \textit{state} pairs a value with its type. We abuse the notation \mathbox{v \isa T} to both denote a state and assert that the value matches the type.
 An \textit{operation} is a partial function from an \textit{input state} to an \textit{output state}. Operations are not defined on all input states, imposing various preconditions.
 All operations take a \textit{target} path as a parameter indicating that the operation is to be performed at that path within the state.
-Operation use infix syntax, placing the target path first, then the operation name, followed by any other parameters.
+Operations use infix syntax, placing the target path first, then the operation name, followed by any other parameters.
 
 % For example the \textsf{write} operation takes a value as another parameter and writes that value into the target path. The \textsf{write} operation requires that the target path exists in the value and that its type matches the value parameter.
 
@@ -332,7 +332,7 @@ S_2 &= S_1 \exec \ldotp * \textsf{ Append } z \exec \ldotp * \ldotp z \textsf{ D
 \vspace{-30pt}\\
 The \textsf{Append} operation targets the path \mathbox{\ldotp *} which is the record type of the list's elements and adds a new field \mathbox{z} to it, in effect adding a column to the table. The \textsf{Define} operation targets the path \mathbox{\ldotp  * \ldotp z} which is the type of the new field (initially the unit type \mathbox{\{\}}) and changes it to \mathbox{\textsf{Number}}. The new field is also inserted into all elements of the list with the initial value \mathbox{\textsf{NaN}}.
 
-The \textsf{append} and \textsf{write} operations are \textit{value operations}, meaning they do not modify the type of the state. On the other hand \textsf{Append} and \textsf{Define} are \textit{type operatons} that may modify both the type and value. Type operations do \textit{schema migration}: the value is adapted to match the type while minimizing loss of information, iterating over list elements as needed (think of the \mathbox{*} in the type path as a wildcard). By convention we capitalize the name of type operations. Baseline has a \textit{user mode} in which only value operations are permitted.
+The \textsf{append} and \textsf{write} operations are \textit{value operations}, meaning they do not modify the type of the state. On the other hand \textsf{Append} and \textsf{Define} are \textit{type operations} that may modify both the type and value. Type operations do \textit{schema migration}: the value is adapted to match the type while minimizing loss of information, iterating over list elements as needed (think of the \mathbox{*} in the type path as a wildcard). By convention we capitalize the name of type operations. Baseline has a \textit{user mode} in which only value operations are permitted.
 
 \begin{remark}
 In this presentation we adopt the standard approach of defining values and types as distinct mathematical objects. Actually Baseline only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped version of our approach~\cite{denicek}.
@@ -575,7 +575,7 @@ How do we know if the rules for projection and retraction are correct, that they
 % % note have dropped the override rule because it is awkward to explain
 % % note duplication in a join probably breaks this principle! But that only comes later
 % % correctness -> laws
-% Nevertheless there are some principles we can expect any system of transfer rules to follow. One of them is that projection and retraction should be inverses---that transferring an operation to a different branch and then back again should return it unchanged. After all ``doing the same thing'' seems like a symmetric relation. Unfortunately we have aleady seen examples where an operation gets wiped out during transfer into a \textsf{noop}, which will always return as a \textsf{noop}. Therefore we weaken the principle to say that roundtripping an operation must return an operation that does the same thing or less than the original. To make that precise we define an ordering on branches \mathbox{\leq}:
+% Nevertheless there are some principles we can expect any system of transfer rules to follow. One of them is that projection and retraction should be inverses---that transferring an operation to a different branch and then back again should return it unchanged. After all ``doing the same thing'' seems like a symmetric relation. Unfortunately we have already seen examples where an operation gets wiped out during transfer into a \textsf{noop}, which will always return as a \textsf{noop}. Therefore we weaken the principle to say that roundtripping an operation must return an operation that does the same thing or less than the original. To make that precise we define an ordering on branches \mathbox{\leq}:
 % \[
 % O; a \leq O; b \quad\textrm{iff} \quad
 % \begin{tikzcd}
@@ -1113,7 +1113,7 @@ Schema evolution has also been studied for Object Oriented Databases(OODB)~\cite
 
 \paragraph{Data Science}
 % The evolution of data formats is a concern in Data Science.
-% Data~Diff~\cite{sutton18} compares two versions of tabular data and finds a shortest seqeuence of matching transformations.
+% Data~Diff~\cite{sutton18} compares two versions of tabular data and finds a shortest sequence of matching transformations.
 AI~assistants~\cite{AIassistants} provide a mechanism for interactively correcting
 transformations inferred by state-based schema comparisons.
 Wrangler~\cite{kandel11} observes interactive manipulation of sampled data to write data transformation programs.
@@ -1140,7 +1140,7 @@ Models are often themselves modeled by a metamodel, which lifts the evolution pr
 
 
 \acks
-% We thank Joshua Horowitz, Devamardeep Hayatpur, and the anonymous reviewers for their helpful comments.
+We thank Joshua Horowitz and Devamardeep Hayatpur for their helpful comments.
 
 \appendix
 
