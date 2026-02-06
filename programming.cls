@@ -1114,34 +1114,32 @@
   \par%
   \vfill%
 
-% Remove Prog Journal banner for arXiv
-
-  % \noindent\null\begin{minipage}[t][6\P@corebaselineskip][t]{\linewidth}{}%
-  %   \vspace*{0pt}%
-  %   \ifthenelse{\value{page} > 1}{\P@warning{%
-  %       Your abstract seems to extend over the first page. Please consider
-  %       adding \string\smaller\ right after \string\begin{abstract}.
-  %     }}{}%
-  % {\microtypesetup{activate=false}%
-  %   \Large\selectfont \P@banner\par}
-  % {\color{P@Blue}\rule{\linewidth}{.5\P@corebaselineskip}\par}%
-  % \sffamily
-  %   \ifboolexpr{bool{P@submission}}{%
-  %     {{\P@headersection{\rlap{Perspective}\phantom{Area of Submission}}}{\normalsize\P@perspective}}\strut%
-  %     {{\P@headersection{Area of Submission}}{\normalsize\P@area}}\strut%
-  %   }{%
-  %     \DTMifsaveddate{P@date@submitted}{%
-  %       {{\P@headersection{{Submitted}}}
-  %           \DTMUsedate{P@date@submitted}}}{}\strut%
-  %     \DTMifsaveddate{P@date@published}{%
-  %       {{{\P@headersection{\rlap{Published}\phantom{Submitted}}}
-  %           \DTMUsedate{P@date@published}}}}{}\strut%
-  %     \ifcsvoid{P@DOI}{}{%
-  %       {{\P@headersection{\rlap{\textsc{doi}}\phantom{Submitted}}}
-  %         \href{\P@DOI@BASE\P@DOI}{\P@DOI}}}%
-  %   }\par
-  %   \vfill
-  % \end{minipage}
+  \noindent\null\begin{minipage}[t][6\P@corebaselineskip][t]{\linewidth}{}%
+    \vspace*{0pt}%
+    \ifthenelse{\value{page} > 1}{\P@warning{%
+        Your abstract seems to extend over the first page. Please consider
+        adding \string\smaller\ right after \string\begin{abstract}.
+      }}{}%
+  {\microtypesetup{activate=false}%
+    \Large\selectfont \P@banner\par}
+  {\color{P@Blue}\rule{\linewidth}{.5\P@corebaselineskip}\par}%
+  \sffamily
+    \ifboolexpr{bool{P@submission}}{%
+      {{\P@headersection{\rlap{Perspective}\phantom{Area of Submission}}}{\normalsize\P@perspective}}\strut%
+      {{\P@headersection{Area of Submission}}{\normalsize\P@area}}\strut%
+    }{%
+      \DTMifsaveddate{P@date@submitted}{%
+        {{\P@headersection{{Submitted}}}
+            \DTMUsedate{P@date@submitted}}}{}\strut%
+      \DTMifsaveddate{P@date@published}{%
+        {{{\P@headersection{\rlap{Published}\phantom{Submitted}}}
+            \DTMUsedate{P@date@published}}}}{}\strut%
+      \ifcsvoid{P@DOI}{}{%
+        {{\P@headersection{\rlap{\textsc{doi}}\phantom{Submitted}}}
+          \href{\P@DOI@BASE\P@DOI}{\P@DOI}}}%
+    }\par
+    \vfill
+  \end{minipage}
 
 
   % \setlength{\skip\footins}{.5\baselineskip}
