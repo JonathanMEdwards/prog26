@@ -1,0 +1,2 @@
+latexdiff originalsubmission.tex paper.tex > diff.tex
+pdflatex -interaction=batchmode diff

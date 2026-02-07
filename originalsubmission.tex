@@ -11,23 +11,17 @@
 \theoremstyle{definition}
 \newtheorem*{remark}{Remark}
 \newtheorem*{note}{Note}
-\newtheorem*{casestudy}{Case study}
 
 \usepackage{mathtools}
 \usepackage{csquotes}
 \usepackage{stmaryrd}
 \usepackage{quiver}
 \usepackage{hhline}
+\usepackage{circledtext}
+\usepackage{fontawesome5}
 
-% Arxiv doesn't like circledtext
-%\usepackage{circledtext}
-%\circledtextset{resize=real, charf=\LARGE\sffamily}
-\usepackage{circledsteps}
-\newcommand{\circledtext}[1]{{\sffamily\Circled{#1}}}
-
-% \usepackage{fontawesome5}
-% \newcommand{\redCross}{\textcolor{red}{\ \faTimes\ }}
-% \newcommand{\greenCheck}{\textcolor{ForestGreen}{\ \faCheck\ }}
+\newcommand{\redCross}{\textcolor{red}{\ \faTimes\ }}
+\newcommand{\greenCheck}{\textcolor{ForestGreen}{\ \faCheck\ }}
 
 % define natbib citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
@@ -134,17 +128,14 @@ he can be reached at \email{tomas@tomasp.net}.}
 
   Baseline is a platform for richly structured data supporting change in multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It is built upon \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes. We use operational differencing to construct an operation-based form of version control on data structures used in programming languages and relational databases.
 
-  This approach to data version control offers high-fidelity diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control for ad hoc usage: There is no repo; Branching is just copying. The information maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared as is commonly done with document files, except with the added benefit of diffing and merging.
+  This approach to data version control does fine-grained diffing and merging despite intervening structural transformations like schema changes. It offers users a simplified conceptual model of version control for ad hoc usage: There is no repo; Branching is just copying. The informaton maintained in a repo can be synthesized more precisely from the append-only histories of branches. Branches can be flexibly shared as is commonly done with document files, except with the added benefit of diffing and merging.
 
   We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations. We develop that idea on a query language fragment containing selects and joins.
   Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. Operationalized queries get rewritten to accommodate schema change ``for free'' by the machinery of operational differencing.
 
   % We discuss the design of Baseline's direct manipulation UI supporting interactive schema changes as well as diffing and merging between databases.
   % A playable demo is available.
-
-  We evaluate Baseline with case studies of schema evolution problems identified in a recent paper and a literature review.
-
-% Prog Journal rubric for abstract. This is annoying to readers. Remove in camera ready!
+  Altogether we develop solutions to four of the eight challenge problems of schema evolution identified in a recent paper.
 
 \noindent\rule{\textwidth}{1pt}
 
@@ -162,7 +153,7 @@ Knowledge: Operational Differencing is able to do fine-grained version control o
 % Miller columns cen be used to visualize rich data structures. Coordinated selection can be used to visualize differences across schema changes.
 
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
-Grounding: In prior work with others we identified challenge problems of schema evolution in interactive programming systems based on our own experiences and a literature review. We use these problems as case studies to evaluate the usefulness and limitations of Baseline.
+Grounding: In prior work with others we identified eight challenge problems of schema evolution in interactive programming systems; We solve four of them.
 % The UI was iterated through three versions by feedback from demonstrations. We report initial experience with a \textit{Playable Demo} as a method of evaluation.
 
 % Importance: Why does this work matter?
@@ -201,7 +192,7 @@ The contributions of this paper are:
 \item We introduce \textit{Operational Differencing} by example in the familiar setting of typed nested lists and records supplied with a rich set of operations
 including refactorings. We define the primitive transformations \textit{projection} and \textit{retraction} and the rules governing them.
 
-\item Using these primitives we reconstruct the key features of version control: \textit{diffing} and \textit{transfer} (a specialization of merging more like cherry-picking). Because our technique is operation-based we are able to do high-fidelity diffing and merging across refactorings and structural transformations. For example renaming does not conflict with other changes, and movement of a structure does not conflict with changes inside it.
+\item Using these primitives we reconstruct the key features of version control: \textit{diffing} and \textit{transfer} (a specialization of merging more like cherry-picking). Because our technique is operation-based we are able to do fine-grained diffing and merging despite intervening structural transformations.
 
 \item We develop a simplified form of version control without a repo: artifacts under version control have an append-only history of operations attached to them. Branching is just making a copy of the artifact with its history, which can then diverge. There is no need for a repo to record a graph of branches and merges because that can be synthesized from the histories on need, and can be done so optimally in a well-defined sense. By liberating branches and versions of artifacts from the repo they can be shared freely and independently, much like the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
@@ -214,11 +205,9 @@ including refactorings. We define the primitive transformations \textit{projecti
 % \item We demonstrate Baseline's direct manipulation UI that supports interactive data and schema changes as well as diffing and merging between databases.
 % Miller columns~\cite{miller-columns} are used to drill into nested data and across relationhips, with each column containing an indented outline or a flat table. We discuss our design iteration on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. A \textit{Playable Demo} is available.
 
-% \item Altogether we develop solutions to four out of eight challenge problems of schema evolution~\cite{challenge-problems}.
+\item Altogether we develop solutions to four out of eight challenge problems of schema evolution~\cite{challenge-problems}.
 
 \end{enumerate}
-
-We evaluate the usefulness and limitations of Baseline with case studies of schema evolution scenarios that we (along with other collaborators) identified in an earlier paper, based on our own experiences and a literature review: \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
 
 % The superpower of our operation-based approach to schema evolution and version control is that, compared to traditional state-based approaches, it captures user intentions more accurately. We also seek to make these capabilities more concrete and interactive through a direct manipulation UI, reducing as much as we can the need for ad hoc scripting. Throughout, we seek to make things easier though conceptual simplification.
 % In summary, the goal of Baseline is to support all the dimensions of data evolution \textit{fluently}---with ease and accuracy.
@@ -312,7 +301,7 @@ A \textit{path} \mathbox{p} is a possibly empty sequence of IDs denoting a path 
 A \textit{state} pairs a value with its type. We abuse the notation \mathbox{v \isa T} to both denote a state and assert that the value matches the type.
 An \textit{operation} is a partial function from an \textit{input state} to an \textit{output state}. Operations are not defined on all input states, imposing various preconditions.
 All operations take a \textit{target} path as a parameter indicating that the operation is to be performed at that path within the state.
-Operations use infix syntax, placing the target path first, then the operation name, followed by any other parameters.
+Operation use infix syntax, placing the target path first, then the operation name, followed by any other parameters.
 
 % For example the \textsf{write} operation takes a value as another parameter and writes that value into the target path. The \textsf{write} operation requires that the target path exists in the value and that its type matches the value parameter.
 
@@ -336,13 +325,13 @@ S_2 &= S_1 \exec \ldotp * \textsf{ Append } z \exec \ldotp * \ldotp z \textsf{ D
 \vspace{-30pt}\\
 The \textsf{Append} operation targets the path \mathbox{\ldotp *} which is the record type of the list's elements and adds a new field \mathbox{z} to it, in effect adding a column to the table. The \textsf{Define} operation targets the path \mathbox{\ldotp  * \ldotp z} which is the type of the new field (initially the unit type \mathbox{\{\}}) and changes it to \mathbox{\textsf{Number}}. The new field is also inserted into all elements of the list with the initial value \mathbox{\textsf{NaN}}.
 
-The \textsf{append} and \textsf{write} operations are \textit{value operations}, meaning they do not modify the type of the state. On the other hand \textsf{Append} and \textsf{Define} are \textit{type operations} that may modify both the type and value. Type operations do \textit{schema migration}: the value is adapted to match the type while minimizing loss of information, iterating over list elements as needed (think of the \mathbox{*} in the type path as a wildcard). By convention we capitalize the name of type operations. Baseline has a \textit{user mode} in which only value operations are permitted.
+The \textsf{append} and \textsf{write} operations are \textit{value operations}, meaning they do not modify the type of the state. On the other hand \textsf{Append} and \textsf{Define} are \textit{type operatons} that may modify both the type and value. Type operations do \textit{schema migration}: the value is adapted to match the type while minimizing loss of information, iterating over list elements as needed (think of the \mathbox{*} in the type path as a wildcard). By convention we capitalize the name of type operations. Baseline has a \textit{user mode} in which only value operations are permitted.
 
 \begin{remark}
 In this presentation we adopt the standard approach of defining values and types as distinct mathematical objects. Actually Baseline only has values, with initial values serving as prototypes. Every list contains an initial \textit{header} element with the ID~\mathbox{*} containing an initial value which serves as the prototype of the list elements. Note how this convention corresponds to the visual rendering of a table where a header row describes the type of each column. Types are a powerful abstraction for the theory and implementation of programming systems but we conjecture that they can be replaced with prototypes, without loss of power, to simplify the programming experience. We have also explored an untyped version of our approach~\cite{denicek}.
 \end{remark}
 
-Many of the type operations exist in order to do schema migration on values: they would not be needed just to define a type prior to populating it with data. We think of these operations as \textit{type refactorings}, capturing high-level design changes. They are manifested in the UI as direct manipulations so that schema evolution can be done interactively. Interactive schema evolution is also needed in \textit{live programming}~\cite{challenge-problems}.
+Many of the type operations exist in order to do schema migration on values: they would not be needed just to define a type prior to populating it with data. We think of these operations as \textit{type refactorings}, capturing high-level design changes. They are manifested in the UI as direct manipulations so that schema evolution can be done interactively. Schema evolution is also needed in \textit{live programming}~\cite{challenge-problems}.
 \begin{figure}[h]
 \begin{align*}
   S_1 &= [
@@ -384,7 +373,7 @@ In this section we introduce a new form of operation-based change management: \t
 
 The benefit of operation-based techniques is that they can capture more information than can be inferred from the states.
 For example a \textsf{Rename} operation makes many changes throughout the state, and standard version control systems will see these changes as unrelated and conflicting with any other changes on the same text lines. In contrast operational differencing sees a renaming as a single change that conflicts only with renaming to a different name.
-On the other hand, the benefit of state-based techniques is that they can observe other systems from the outside, which may explain why all existing version control systems are state-based.
+The benefit of state-based techniques is that they can observe other systems from the outside, which may explain why all existing version control systems are state-based.
 
 \begin{remark}
 We discuss source code version control systems like git~\cite{ProGit} as a point of reference, but we do not propose to compete with them. Git is highly adapted to the needs of intensive development in the Unix environment and the cultural norms of Unix developers. In that context version control must be state-based in order to interoperate with existing tools and practices. Instead of source code we focus on rich data, where we believe operation-based version control offers important benefits.
@@ -572,14 +561,14 @@ Retraction is defined with rules like those for projection so we skip over them 
 \end{note}
 
 \begin{remark}
-How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention---intuitively doing the same thing. Well-designed rules will agree with intuition and avoid surprises. One of these intuitions is that transfer should be symmetric: transfering an operation across a diff and then transferring it back again should bring back the same operation (or in some cases grounding out into a \textsf{noop}). We call this the \textit{roundtrip law} and we test that our rules obey it.
+How do we know if the rules for projection and retraction are correct, that they do indeed preserve the intentions of operations? Our answer is that there is no objective answer to this question. The rules are essentially axioms defining what it means to preserve intention. Well-designed rules will agree with intuition and avoid surprises. One of these intuitions is that transfer should be symmetric: transfering an operation across a diff and then transferring it back again should bring back the same operation (or in some cases grounding out into a \textsf{noop}). We call this the \textit{roundtrip law} and we test that our rules obey it.
 % Except there are exceptions, like when an operation gets dropped because its target was deleted. The law has weakened as we discovered these exceptions, so in future work we hope to establish a more principled basis.
 
 
 % % note have dropped the override rule because it is awkward to explain
 % % note duplication in a join probably breaks this principle! But that only comes later
 % % correctness -> laws
-% Nevertheless there are some principles we can expect any system of transfer rules to follow. One of them is that projection and retraction should be inverses---that transferring an operation to a different branch and then back again should return it unchanged. After all ``doing the same thing'' seems like a symmetric relation. Unfortunately we have already seen examples where an operation gets wiped out during transfer into a \textsf{noop}, which will always return as a \textsf{noop}. Therefore we weaken the principle to say that roundtripping an operation must return an operation that does the same thing or less than the original. To make that precise we define an ordering on branches \mathbox{\leq}:
+% Nevertheless there are some principles we can expect any system of transfer rules to follow. One of them is that projection and retraction should be inverses---that transferring an operation to a different branch and then back again should return it unchanged. After all ``doing the same thing'' seems like a symmetric relation. Unfortunately we have aleady seen examples where an operation gets wiped out during transfer into a \textsf{noop}, which will always return as a \textsf{noop}. Therefore we weaken the principle to say that roundtripping an operation must return an operation that does the same thing or less than the original. To make that precise we define an ordering on branches \mathbox{\leq}:
 % \[
 % O; a \leq O; b \quad\textrm{iff} \quad
 % \begin{tikzcd}
@@ -670,16 +659,10 @@ If we transfer \mathbox{a_1} into \mathbox{B} the change from Jack to Jill gets 
 
 % diagram one of these examples?
 
-The prior example demonstrates how transference can propagate changes bidirectionally through structural changes. Standard state-based version control techniques would see only a big conflict and require a human to pick out and propagate finer-grained changes correctly.
+This example demonstrates how transference can propagate changes bidirectionally through structural changes. Standard state-based version control techniques would see only a big conflict and require a human to pick out and propagate finer-grained changes correctly.
 Operational differencing does this more precisely because it tracks how locations shift through time.
 
 Version control systems like git provide a variety of actions like \textit{merge}, \textit{rebase}, and \textit{cherry-pick} with subtly different effects. We provide transferrance as the sole primitive and then build coarser-grained actions out of sets of transfers. For example all the changes in one branch can be transferred to the other. Just the type changes or just the data changes can be transferred. The dependency transfer action mentioned earlier transfers all transitive dependencies. To \textit{synchronize} two branches all changes are transferred from one to the other and then all changes remaining in the other branch are transferred back. Note that synchronization has a direction: syncing from \mathbox{A} into \mathbox{B} resolves all conflicts in favor of \mathbox{A}.
-
-\begin{casestudy}
-The preceding example of a TODO refactoring was taken directly from the challenge problem \textbf{Multiplicity Change in Schema}~\cite{challenge-problems}. The problem is that different versions of the TODO application must interoperate after the schema evolution from a single assignee to a list. Specifically, changes to the single value \quotedstring{Jack} should be mapped into the list element copying it and vice-versa, despite insertions in the list. Baseline solves this problem by giving that list element the special ID $\mathbb{1}$ to persistently identify it.
-\textcolor{red}{[split into a separate case?]}
-This challenge problem was extracted from \citeauthor*{Cambria}~\cite[Appendex III]{Cambria}, which extends the problem: what happens when \quotedstring{Jack} is deleted from the list? They want to set the old version's single value to a JavaScript \textsf{null}. Baseline currently handles this situation by refusing to retract the \textsf{delete} backwards through the \textsf{ListOf}, decoupling subsequent changes to the old single value from the new list. Perhaps Baseline should instead map deletion to the empty string and vice-versa (or support proper nullable or optional types analogously). This case study is a good example of how ``doing the right thing'' can depend on the context of use---there is no universal truth.
-\end{casestudy}
 
 
 \subsection{Diff Optimization and Synthesis}\label{diff-synth}
@@ -1018,43 +1001,38 @@ For example if we were to transfer the prior backported query forward again thro
 
 
 
-% \section{Evaluation}
 
-% We evaluate Baseline against the challenge problems proposed in
-% \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
+\section{Evaluation}
 
-% \begin{enumerate}
+We evaluate Baseline against the challenge problems proposed in
+\textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
 
-%   \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the state of an Elm application so that it needn't be restarted.
-%   The example given is to evolve a field of a TODO item from \textsf{completed: bool} to \textsf{completed: Maybe<DateTime>}. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
+\begin{enumerate}
 
-%   \item \textbf{Extract Entity}\greenCheck We adopted this problem verbatim as the example shown in Figure~\ref{fig:tables} and solved in \S\ref{db-evolution} with the \textsf{Split} and \textsf{move} operations.
+  \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the state of an Elm application so that it needn't be restarted.
+  The example given is to evolve a field of a TODO item from \textsf{completed: bool} to \textsf{completed: Maybe<DateTime>}. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
 
-%   \item \textbf{Code Co-evolution for Extract Entity}\greenCheck This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We discussed this example and solved it in \S\ref{query-rewriting}, albeit in a fragmentary query language.
+  \item \textbf{Extract Entity}\greenCheck We adopted this problem verbatim as the example shown in Figure~\ref{fig:tables} and solved in \S\ref{db-evolution} with the \textsf{Split} and \textsf{move} operations.
 
-%   \item \textbf{Structured Document Edits}\redCross The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
+  \item \textbf{Code Co-evolution for Extract Entity}\greenCheck This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We discussed this example and solved it in \S\ref{query-rewriting}, albeit in a fragmentary query language.
 
-%   \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
+  \item \textbf{Structured Document Edits}\redCross The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
 
-%   \item \textbf{Divergence Control for Extract Entity}\greenCheck This problem extends problem \#2, requiring that changes be bidirectionally transferable through the schema evolution. We solved it in \S\ref{db-vc}, albeit with the well-known limitations of view updates.
+  \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
 
-%   \item \textbf{Multiplicity Change in Schema}\greenCheck This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by \citeauthor*{Cambria}~\cite[Appendex III]{Cambria} involving null values that we can't handle yet.
+  \item \textbf{Divergence Control for Extract Entity}\greenCheck This problem extends problem \#2, requiring that changes be bidirectionally transferable through the schema evolution. We solved it in \S\ref{db-vc}, albeit with the well-known limitations of view updates.
 
-%   \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
+  \item \textbf{Multiplicity Change in Schema}\greenCheck This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by \citeauthor*{Cambria}~\cite[Appendex III]{Cambria} involving null values that we can't handle yet.
 
-% \end{enumerate}
+  \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
 
-% We judge that we have solved four of the eight challenge problems. The remaining four are goals for future work.
+\end{enumerate}
 
-
-\section{Evaluation and Discussion}\label{discussion}
-
-\textcolor{red}{Summarize case study results? Discuss failed challenge problems?}
-
-Appendix~\ref{tech-dims} contains an evaluation of Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
-\textcolor{red}{absorb the appendix inline here? Conclusions?}
+We judge that we have solved four of the eight challenge problems. The remaining four are goals for future work. Appendix~\ref{tech-dims} contains an evaluation of Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
 
 
+
+\section{Discussion}\label{discussion}
 
 Baseline demonstrates novel capabilities but also raises questions requiring further research.
 
@@ -1128,7 +1106,7 @@ Schema evolution has also been studied for Object Oriented Databases(OODB)~\cite
 
 \paragraph{Data Science}
 % The evolution of data formats is a concern in Data Science.
-% Data~Diff~\cite{sutton18} compares two versions of tabular data and finds a shortest sequence of matching transformations.
+% Data~Diff~\cite{sutton18} compares two versions of tabular data and finds a shortest seqeuence of matching transformations.
 AI~assistants~\cite{AIassistants} provide a mechanism for interactively correcting
 transformations inferred by state-based schema comparisons.
 Wrangler~\cite{kandel11} observes interactive manipulation of sampled data to write data transformation programs.
@@ -1155,7 +1133,7 @@ Models are often themselves modeled by a metamodel, which lifts the evolution pr
 
 
 \acks
-We thank Joshua Horowitz, Devamardeep Hayatpur, and the anonymous reviewers for their helpful comments.
+% We thank Joshua Horowitz, Devamardeep Hayatpur, and the anonymous reviewers for their helpful comments.
 
 \appendix
 
@@ -1209,6 +1187,8 @@ A primary goal of Baseline is useability. We believe that people should have the
 \caption{A selection is a path through Miller columns containing indented outlines and flat tables.}
 \label{fig:UI}
 \end{figure}
+
+\circledtextset{resize=real, charf=\LARGE\sffamily}
 
 The following discussion concentrates on the rationale behind the key UI design decisions.
 Figure~\ref{fig:UI} displays a screen shot. \circledtext{1} The left hand column shows the history of operations on this database. History sidebars are a common technique but we were particularly inspired by Wrangler~\cite{kandel11}.
