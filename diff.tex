@@ -1,7 +1,7 @@
 % -*- coding: utf-8; -*-
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL originalsubmission.tex   Sat Feb  7 12:15:59 2026
-%DIF ADD paper.tex                Sun Feb  8 09:01:47 2026
+%DIF ADD paper.tex                Sun Feb  8 12:31:12 2026
 % vim: set fileencoding=utf-8 :
 \documentclass[english,submission]{programming}
 %% First parameter: the language is 'english'.
@@ -932,8 +932,14 @@ The \textsf{move} operation merges \mathbox{e_3} into \mathbox{e_1}, resulting i
 The preceding discussion does not reflect the full complexity of our data model. Lists and tables can be nested. Links are set-valued, and can drill into nested tables. We believe this complexity is justified to cleanly unify PL and DB data models. The \textsf{Split} and \textsf{Join} operations are composed from a set of primitive operations on nested tables and links. We have experimented with several alternative sets of primitives, with subtle tradeoffs on transfer semantics, for example how does appending a column get projected through the split operation? See \S~\ref{discussion}.
 \end{note}
 
+\DIFaddbegin \begin{casestudy}
+\DIFadd{The preceding example of Acme's database evolution is taken verbatim from the challenge problem }\textbf{\DIFadd{Extract Entity}}\DIFadd{~\mbox{%DIFAUXCMD
+\cite{challenge-problems}}\hskip0pt%DIFAUXCMD
+. In fact more than a case study, this problem was the primary motivating example in the design of Baseline.
+}\end{casestudy}
 
-% \begin{remark}
+
+\DIFaddend % \begin{remark}
 %   The \textit{Impedance Mismatch Problem}~\cite{Chen1996} is the fact that PLs and DBs use very different data models, requiring a lot of ad hoc code to translate between them. In our experience it is a large source of inessential complexity in application software. The Baseline project wants to avoid this problem by developing a data model coherently unifying the needs of both PLs and DBs. However that goal is tangential to the subject of this paper so we have included the bare minimum. We believe a fuller unified model should additionally include:
 %   \begin{itemize}
 %     \item Sum types and type references.
@@ -959,12 +965,18 @@ Even with the limitations on view updates, Operational Differencing brings many 
 \begin{note}
 Above we used a \textsf{move} operation to deduplicate the two coyotes \mathbox{e_1} and \mathbox{e_3}. We took that approach because it was the simplest thing that could possibly work, but arguably it doesn't. Say that \mathbox{e_1} changed its address in the old database and we transfer that change forward into the deduped table. Our current implementation drops the change, because \mathbox{e_3} overwrites \mathbox{e_1}. We believe a more intuitive result would be to ``de-deduplicate''
 leaving two coyotes with the same name but different addresses.
-In \S\ref{discussion} we propose a set-like datatype to solve this problem.
-The moral of this story is that it is surprisingly hard to get the transfer semantics of operations right.
-\end{note}
+\DIFdelbegin \DIFdel{In \S\ref{discussion} we propose a set-like datatype to solve this problem. The moral of this story is that it is surprisingly hard to get the transfer semantics of operations right. }\DIFdelend \DIFaddbegin \DIFadd{We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
+%DIF >  However it may require weakening the roundtrip law and requiring that the diffing algorithm impose a causal ordering on transferred operations.
+%DIF >  The moral of this story is that it is surprisingly hard to get the transfer semantics of operations right.
+}\DIFaddend \end{note}
 
+\DIFaddbegin \begin{casestudy}
+\DIFadd{The preceding example is taken from the challenge problem }\textbf{\DIFadd{Divergence Control for Extract Entity}}\DIFadd{~\mbox{%DIFAUXCMD
+\cite{challenge-problems}}\hskip0pt%DIFAUXCMD
+. Our literature review in that paper found surprisingly little prior work on the problems of deduplication and ID assignment despite that being a commonplace situation in database schema evolution. Indeed Baseline's solution is not entirely satisfactory, as discussed in the Note above. Our work on Baseline has taught us that the concept of identity is more problematic than is commonly acknowledged.
+}\end{casestudy}
 
-\section{Operationalized Queries}
+\DIFaddend \section{Operationalized Queries}
 
 We saw in the last section that although the Fulfillment department preferred the unnormalized view of orders it would be forced to migrate to the normalized database to stay fully in sync with all changes. Relational databases offer a better solution: \textit{queries}. In this section we discuss how Operational Differencing can build queries and updatable views. But the simplest solution doesn't even require a query. We can just fork a copy of the database and denormalize it.
 
@@ -1080,27 +1092,34 @@ Forward rewriting is more complicated. It occurs when a formula definition is tr
 \footnote{This naive algorithm would clutter up the formula with irrelevant schema changes. We simplify them out by retracting the original formula back through them as much as possible, retaining only those schema changes the formula is dependent upon.}.
 For example if we were to transfer the prior backported query forward again through the \textsf{Split} operation then the inverse operation \textsf{Join} would be prepended to the \textsf{deletePresent} operation, correctly reconstructing the original query.
 
-
-% We offer this as a solution to \textit{Challenge Problem \#3: Code Co-evolution for Extract Entity}~\cite{challenge-problems}.
+%DIF <  We offer this as a solution to \textit{Challenge Problem \#3: Code Co-evolution for Extract Entity}~\cite{challenge-problems}.
+\DIFaddbegin \begin{casestudy}
+\DIFadd{This example of query rewriting is a partial solution to the challenge problem }\textbf{\DIFadd{Code Co-evolution for Extract Entity}}\DIFadd{~\mbox{%DIFAUXCMD
+\cite{challenge-problems}}\hskip0pt%DIFAUXCMD
+. While admittedly partial it appears novel based on our literature review. Other solutions have repurposed query optimization techniques for query rewriting, whereas in Baseline it falls out of the semantics of operation transfer.
+}\end{casestudy}
+\DIFaddend 
 
 
 
 \DIFdelbegin \section{\DIFdel{Evaluation}}
 %DIFAUXCMD
 \addtocounter{section}{-1}%DIFAUXCMD
-\DIFdelend %DIF >  \section{Evaluation}
+\DIFdelend \DIFaddbegin \section{\DIFadd{Evaluation and Discussion}}\label{discussion}
+\DIFaddend 
 
 \DIFdelbegin \DIFdel{We evaluate Baseline against the challenge problems proposed in
 }\textit{\DIFdel{Schema Evolution in Interactive Programming Systems}}%DIFAUXCMD
 \DIFdel{~\mbox{%DIFAUXCMD
 \cite{challenge-problems}}\hskip0pt%DIFAUXCMD
 .
-}\DIFdelend %DIF >  We evaluate Baseline against the challenge problems proposed in
-%DIF >  \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
+}\DIFdelend \DIFaddbegin \DIFadd{\textcolor{red}{Need to add variations to the 3 Extract Entity problems}
+}\DIFaddend 
 
 \DIFdelbegin %DIFDELCMD < \begin{enumerate}
 %DIFDELCMD < %%%
-\DIFdelend %DIF >  \begin{enumerate}
+\DIFdelend \DIFaddbegin \DIFadd{\textcolor{red}{Summarize case study results here?}
+}\DIFaddend 
 
 \DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Live State Type Evolution}}%DIFAUXCMD
@@ -1109,71 +1128,66 @@ For example if we were to transfer the prior backported query forward again thro
   The example given is to evolve a field of a TODO item from }\textsf{\DIFdel{completed: bool}} %DIFAUXCMD
 \DIFdel{to }\textsf{\DIFdel{completed: Maybe<DateTime>}}%DIFAUXCMD
 \DIFdel{. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
-}\DIFdelend %DIF >    \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the state of an Elm application so that it needn't be restarted.
+}\DIFdelend \DIFaddbegin \DIFadd{\textcolor{red}{Discuss 4 failed challenge problems as case studies here?}
+%DIF >    \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the state of an Elm application so that it needn't be restarted.
 %DIF >    The example given is to evolve a field of a TODO item from \textsf{completed: bool} to \textsf{completed: Maybe<DateTime>}. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
+}\DIFaddend 
 
 \DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Extract Entity}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
 \DIFdel{We adopted this problem verbatim as the example shown in Figure~\ref{fig:tables} and solved in \S\ref{db-evolution} with the }\textsf{\DIFdel{Split}} %DIFAUXCMD
 \DIFdel{and }\textsf{\DIFdel{move}} %DIFAUXCMD
-\DIFdel{operations.
-}\DIFdelend %DIF >    \item \textbf{Extract Entity}\greenCheck We adopted this problem verbatim as the example shown in Figure~\ref{fig:tables} and solved in \S\ref{db-evolution} with the \textsf{Split} and \textsf{move} operations.
+\DIFdel{operations. }\DIFdelend %DIF >    \item \textbf{Structured Document Edits}\redCross The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
 
 \DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Code Co-evolution for Extract Entity}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
 \DIFdel{This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We discussed this example and solved it in \S\ref{query-rewriting}, albeit in a fragmentary query language.
-}\DIFdelend %DIF >    \item \textbf{Code Co-evolution for Extract Entity}\greenCheck This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We discussed this example and solved it in \S\ref{query-rewriting}, albeit in a fragmentary query language.
+}\DIFdelend %DIF >    \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
 
 \DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Structured Document Edits}}%DIFAUXCMD
 %DIFDELCMD < \redCross %%%
 \DIFdel{The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a }\textsf{\DIFdel{parse}} %DIFAUXCMD
-\DIFdel{operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
-}\DIFdelend %DIF >    \item \textbf{Structured Document Edits}\redCross The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
+\DIFdel{operation taking a regular expression that splits a string column of a table.
+But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
+}\DIFdelend %DIF >    \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
+
+
 
 \DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Code Co-Evolution for Structured Document Edits}}%DIFAUXCMD
 %DIFDELCMD < \redCross %%%
 \DIFdel{This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
-}\DIFdelend %DIF >    \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
+}%DIFDELCMD < 
 
-\DIFdelbegin %DIFDELCMD < \item %%%
+%DIFDELCMD <   \item %%%
 \textbf{\DIFdel{Divergence Control for Extract Entity}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
 \DIFdel{This problem extends problem \#2, requiring that changes be bidirectionally transferable through the schema evolution. We solved it in \S\ref{db-vc}, albeit with the well-known limitations of view updates.
-}\DIFdelend %DIF >    \item \textbf{Divergence Control for Extract Entity}\greenCheck This problem extends problem \#2, requiring that changes be bidirectionally transferable through the schema evolution. We solved it in \S\ref{db-vc}, albeit with the well-known limitations of view updates.
+}%DIFDELCMD < 
 
-\DIFdelbegin %DIFDELCMD < \item %%%
+%DIFDELCMD <   \item %%%
 \textbf{\DIFdel{Multiplicity Change in Schema}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
 \DIFdel{This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by }%DIFDELCMD < \citeauthor*{Cambria}%%%
 \DIFdel{~\mbox{%DIFAUXCMD
 \cite[Appendex III]{Cambria} }\hskip0pt%DIFAUXCMD
 involving null values that we can't handle yet.
-}\DIFdelend %DIF >    \item \textbf{Multiplicity Change in Schema}\greenCheck This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by \citeauthor*{Cambria}~\cite[Appendex III]{Cambria} involving null values that we can't handle yet.
+}%DIFDELCMD < 
 
-\DIFdelbegin %DIFDELCMD < \item %%%
+%DIFDELCMD <   \item %%%
 \textbf{\DIFdel{Live Editing Domain-Specific Languages}}%DIFAUXCMD
 %DIFDELCMD < \redCross %%%
 \DIFdel{This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
-}\DIFdelend %DIF >    \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
+}%DIFDELCMD < 
 
-\DIFdelbegin %DIFDELCMD < \end{enumerate}
+%DIFDELCMD < \end{enumerate}
+%DIFDELCMD < 
+
 %DIFDELCMD < %%%
-\DIFdelend %DIF >  \end{enumerate}
-
-\DIFdelbegin \DIFdel{We judge that we have solved four of the eight challenge problems. The remaining four are goals for future work. }\DIFdelend %DIF >  We judge that we have solved four of the eight challenge problems. The remaining four are goals for future work.
-\DIFaddbegin 
-
-
-\section{\DIFadd{Evaluation and Discussion}}\label{discussion}
-
-\DIFadd{\textcolor{red}{Summarize case study results? Discuss failed challenge problems?}
-}
-
-\DIFaddend Appendix~\ref{tech-dims} contains an evaluation of Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+\DIFdel{We judge that we have solved four of the eight challenge problems. The remaining four are goals for future work. }\DIFdelend Appendix~\ref{tech-dims} contains an evaluation of Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
 \DIFaddbegin \DIFadd{\textcolor{red}{absorb the appendix inline here? Conclusions?}
 }\DIFaddend 
 
@@ -1182,15 +1196,18 @@ involving null values that we can't handle yet.
 \DIFdelbegin \section{\DIFdel{Discussion}}%DIFAUXCMD
 \addtocounter{section}{-1}%DIFAUXCMD
 %DIFDELCMD < \label{discussion}
-%DIFDELCMD < 
+%DIFDELCMD < %%%
+\DIFdelend %DIF >  Baseline demonstrates novel capabilities but also raises questions requiring further research.
+
+\DIFdelbegin \DIFdel{Baseline demonstrates novel capabilities but also raises questions requiring further research.
+}%DIFDELCMD < 
 
 %DIFDELCMD < %%%
-\DIFdelend Baseline demonstrates novel capabilities but also raises questions requiring further research.
+\DIFdelend % Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result. The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
 
-
-% Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result. The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
-
-The simple approach of deduplicating by collapsing with \textsf{move} operations leads to transfer anomalies. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
+\DIFdelbegin \DIFdel{The simple approach of deduplicating by collapsing with }\textsf{\DIFdel{move}} %DIFAUXCMD
+\DIFdel{operations leads to transfer anomalies. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
+}\DIFdelend %DIF >  The simple approach of deduplicating by collapsing with \textsf{move} operations leads to transfer anomalies. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
 % These operations may require weakening the roundtrip law.
 %  and requiring that the diffing algorithm impose a causal ordering on transferred operations.
 
