@@ -25,7 +25,10 @@
 \usepackage{circledsteps}
 \newcommand{\circledtext}[1]{{\sffamily\Circled{#1}}}
 
-% \usepackage{fontawesome5}
+\usepackage{fontawesome5}
+\newcommand{\caseplus}{\noindent {\scriptsize\faPlus} \ }
+% \newcommand{\caseplus}{\noindent \textbf{?} \ }
+
 % \newcommand{\redCross}{\textcolor{red}{\ \faTimes\ }}
 % \newcommand{\greenCheck}{\textcolor{ForestGreen}{\ \faCheck\ }}
 
@@ -218,7 +221,7 @@ including refactorings. We define the primitive transformations \textit{projecti
 
 \end{enumerate}
 
-We evaluate the usefulness and limitations of Baseline with case studies of schema evolution scenarios that we (along with other collaborators) identified in an earlier paper, based on our own experiences and a literature review: \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}.
+We evaluate the usefulness of Baseline with case studies of schema evolution scenarios that we (along with other collaborators) identified in an earlier paper, based on our own experiences and a literature review: \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}. We explore variations on these cases, prefixed by {\scriptsize\faPlus}, to elucidate the current capabilities and limitations of Baseline.
 
 % The superpower of our operation-based approach to schema evolution and version control is that, compared to traditional state-based approaches, it captures user intentions more accurately. We also seek to make these capabilities more concrete and interactive through a direct manipulation UI, reducing as much as we can the need for ad hoc scripting. Throughout, we seek to make things easier though conceptual simplification.
 % In summary, the goal of Baseline is to support all the dimensions of data evolution \textit{fluently}---with ease and accuracy.
@@ -677,7 +680,8 @@ Version control systems like git provide a variety of actions like \textit{merge
 
 \begin{casestudy}
 The preceding example of a TODO refactoring was taken directly from the challenge problem \textbf{Multiplicity Change in Schema}~\cite{challenge-problems}. The problem is that different versions of the TODO application must interoperate after the schema evolution from a single assignee to a list. Specifically, changes to the single value \quotedstring{Jack} should be mapped into the list element copying it and vice-versa, despite insertions in the list. Baseline solves this problem by giving that list element the special ID $\mathbb{1}$ to persistently identify it.
-\textcolor{red}{[split into a separate case?]}
+
+\caseplus
 This challenge problem was extracted from \citeauthor*{Cambria}~\cite[Appendex III]{Cambria}, which extends the problem: what happens when \quotedstring{Jack} is deleted from the list? They want to set the old version's single value to a JavaScript \textsf{null}. Baseline currently handles this situation by refusing to retract the \textsf{delete} backwards through the \textsf{ListOf}, decoupling subsequent changes to the old single value from the new list. Perhaps Baseline should instead map deletion to the empty string and vice-versa (or support proper nullable or optional types analogously). This case study is a good example of how ``doing the right thing'' can depend on the context of use---there is no universal truth.
 \end{casestudy}
 
