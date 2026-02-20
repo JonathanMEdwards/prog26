@@ -32,7 +32,7 @@
 % \newcommand{\redCross}{\textcolor{red}{\ \faTimes\ }}
 % \newcommand{\greenCheck}{\textcolor{ForestGreen}{\ \faCheck\ }}
 
-% define natbib citet
+% define natbib \citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
 
 \newcommand{\mathbox}[1]{\colorbox{black!10}{$#1$\phantom{i\hspace{-3.5pt}}}}
@@ -363,14 +363,14 @@ S_2 &= S_1 \exec \ldotp *\ldotp \mathit{who} \textsf{ ListOf } \\
 \label{fig:TODO-refactor}
 \end{figure}
 
-For example a common design evolution is when a single value needs to become a list of multiple values. We capture this in the \textsf{ListOf} operation, shown on a TODO table in Figure~\ref{fig:TODO-refactor}.
+For example a common design evolution is when a single value needs to become a list of multiple values. We capture this in the \textsf{ListOf} operation, shown on a table of tasks for a TODO application in Figure~\ref{fig:TODO-refactor}. We want to change tasks from having a single assigned person to a list of people.
 The \textsf{ListOf} operation takes any type and wraps it inside a list, and wraps all corresponding values into single-element lists using the element ID $\mathbb{1}$. We will return to this example in the next section.
 
 
 % \subsection{Much Ado About Nothing}
 % Possibly merge with deletion
 % Conjecture: don’t need Null, Option, Result
-% Snobol and verse show we don't need Results
+% SNOBOL and verse show we don't need Results
 % Conjecture: common-sense solution to the conundrum of nulls.
 % Mention along with sums?
 % Or just skip as irrelevant and argument-triggering
@@ -615,7 +615,7 @@ How do we know if the rules for projection and retraction are correct, that they
 
 The two timelines are called the \textit{branches} of the diff and we call their operations the \textit{differences}. Many version control systems use something like a diff by looking for the \textit{last common ancestor} in a tree of branching versions, which is then used for \textit{three-way diffing}~\cite{diff3}. We do not do that---we will discuss how to calculate a diff in \S\ref{diff-synth} but for the moment let us take them as given. The key operation on a diff is to
 \textit{transfer} an operation from one side to another, which we define diagrammatically in Figure~\ref{fig:transfer} (where we lift projection and retraction from operations to timelines in the obvious way).
-\vspace{-16pt}
+%\vspace{-16pt}
 \begin{figure}[h]
 \[
 \textsf{Transfer}(a_{1\ldots n}, O, b_{1\ldots m}) = b' \textrm{ in }\quad
@@ -912,8 +912,12 @@ Indeed Baseline's solution is not entirely satisfactory either.
 We used a \textsf{move} operation to deduplicate the two coyotes \mathbox{e_1} and \mathbox{e_3}. We took that approach because it was the simplest thing that could possibly work, but arguably it doesn't. Say that \mathbox{e_1} changed its address in the old database and we transfer that change forward into the deduped table. Our current implementation drops the change, because \mathbox{e_3} overwrites \mathbox{e_1}. We believe a more intuitive result would be to ``de-deduplicate'' leaving two coyotes with the same name but different addresses.
 We plan to do that by offering a proper \textsf{Set} datatype that collapses duplicates into equivalence classes of IDs, retaining ID provenance to make change transfers like the above meet intuitive expectations.
 % This datatype should also simplify the primitive operations for schema evolution in nested relations.
-However that may require weakening the roundtrip law and requiring that the diffing algorithm impose a causal ordering on transferred operations.
+% However that may require weakening the roundtrip law and requiring that the diffing algorithm impose a causal ordering on transferred operations.
 % The moral of this story is that it is surprisingly hard to get the transfer semantics of operations right.
+
+\caseplus
+\citet{herrmann17} study the case of a task management system (similar to our \textsf{TODO} example), where they split an \textsf{author} column into a separate table while assigning unique IDs that are used as a foreign key. Their \textsf{Decompose} operation combines our \textsf{Split} operation with deduplication.
+Their system is not subject to the deduplication anomalies we discussed above, but at the cost of not supporting divergence of data: multiple schema are maintained as updatable views of a single materialized view.
 \end{casestudy}
 
 \section{Operationalized Queries}

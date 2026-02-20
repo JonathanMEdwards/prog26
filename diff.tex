@@ -1,7 +1,7 @@
 % -*- coding: utf-8; -*-
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL originalsubmission.tex   Sat Feb  7 15:15:59 2026
-%DIF ADD paper.tex                Tue Feb 10 20:46:18 2026
+%DIF ADD paper.tex                Sun Feb 22 13:21:23 2026
 % vim: set fileencoding=utf-8 :
 \documentclass[english,submission]{programming}
 %% First parameter: the language is 'english'.
@@ -48,7 +48,11 @@
 % \newcommand{\greenCheck}{\textcolor{ForestGreen}{\ \faCheck\ }} %DIF > 
 %DIF -------
 
-% define natbib citet
+%DIF 26c35
+%DIF < % define natbib citet
+%DIF -------
+% define natbib \citet %DIF > 
+%DIF -------
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
 
 \newcommand{\mathbox}[1]{\colorbox{black!10}{$#1$\phantom{i\hspace{-3.5pt}}}}
@@ -428,14 +432,15 @@ S_2 &= S_1 \exec \ldotp *\ldotp \mathit{who} \textsf{ ListOf } \\
 \label{fig:TODO-refactor}
 \end{figure}
 
-For example a common design evolution is when a single value needs to become a list of multiple values. We capture this in the \textsf{ListOf} operation, shown on a TODO table in Figure~\ref{fig:TODO-refactor}.
-The \textsf{ListOf} operation takes any type and wraps it inside a list, and wraps all corresponding values into single-element lists using the element ID $\mathbb{1}$. We will return to this example in the next section.
+For example a common design evolution is when a single value needs to become a list of multiple values. We capture this in the \textsf{ListOf} operation, shown on a \DIFdelbegin \DIFdel{TODO table }\DIFdelend \DIFaddbegin \DIFadd{table of tasks for a TODO application }\DIFaddend in Figure~\ref{fig:TODO-refactor}. \DIFaddbegin \DIFadd{We want to change tasks from having a single assigned person to a list of people.
+}\DIFaddend The \textsf{ListOf} operation takes any type and wraps it inside a list, and wraps all corresponding values into single-element lists using the element ID $\mathbb{1}$. We will return to this example in the next section.
 
 
 % \subsection{Much Ado About Nothing}
 % Possibly merge with deletion
 % Conjecture: don’t need Null, Option, Result
-% Snobol and verse show we don't need Results
+%DIF <  Snobol and verse show we don't need Results
+%DIF >  SNOBOL and verse show we don't need Results
 % Conjecture: common-sense solution to the conundrum of nulls.
 % Mention along with sums?
 % Or just skip as irrelevant and argument-triggering
@@ -681,7 +686,9 @@ How do we know if the rules for projection and retraction are correct, that they
 
 The two timelines are called the \textit{branches} of the diff and we call their operations the \textit{differences}. Many version control systems use something like a diff by looking for the \textit{last common ancestor} in a tree of branching versions, which is then used for \textit{three-way diffing}~\cite{diff3}. We do not do that---we will discuss how to calculate a diff in \S\ref{diff-synth} but for the moment let us take them as given. The key operation on a diff is to
 \textit{transfer} an operation from one side to another, which we define diagrammatically in Figure~\ref{fig:transfer} (where we lift projection and retraction from operations to timelines in the obvious way).
-\vspace{-16pt}
+\DIFdelbegin %DIFDELCMD < \vspace{-16pt}
+%DIFDELCMD < %%%
+\DIFdelend %DIF > \vspace{-16pt}
 \begin{figure}[h]
 \[
 \textsf{Transfer}(a_{1\ldots n}, O, b_{1\ldots m}) = b' \textrm{ in }\quad
@@ -989,17 +996,21 @@ It seems managing identity in databases is usually left to the programmer.
 Indeed Baseline's solution is not entirely satisfactory either.
 We }\DIFaddend used a \textsf{move} operation to deduplicate the two coyotes \mathbox{e_1} and \mathbox{e_3}. We took that approach because it was the simplest thing that could possibly work, but arguably it doesn't. Say that \mathbox{e_1} changed its address in the old database and we transfer that change forward into the deduped table. Our current implementation drops the change, because \mathbox{e_3} overwrites \mathbox{e_1}. We believe a more intuitive result would be to ``de-deduplicate'' leaving two coyotes with the same name but different addresses.
 \DIFdelbegin \DIFdel{In \S\ref{discussion} we propose a set-like datatype to solve this problem.
-The moral of this story is that it is surprisingly hard to get the transfer semantics of operationsright.
+The moral of this story is that it is surprisingly hard to get the transfer semantics of operations right.
 }%DIFDELCMD < \end{note}
 %DIFDELCMD < %%%
 \DIFdelend \DIFaddbegin \DIFadd{We plan to do that by offering a proper }\textsf{\DIFadd{Set}} \DIFadd{datatype that collapses duplicates into equivalence classes of IDs, retaining ID provenance to make change transfers like the above meet intuitive expectations.
 %DIF >  This datatype should also simplify the primitive operations for schema evolution in nested relations.
-However that may require weakening the roundtrip law and requiring that the diffing algorithm impose a causal ordering on transferred operations.
+%DIF >  However that may require weakening the roundtrip law and requiring that the diffing algorithm impose a causal ordering on transferred operations.
 %DIF >  The moral of this story is that it is surprisingly hard to get the transfer semantics of operations right.
-}\end{casestudy}
-\DIFaddend 
+}\DIFaddend 
 
-\section{Operationalized Queries}
+\DIFaddbegin \caseplus
+\citet{herrmann17} \DIFadd{study the case of a task management system (similar to our }\textsf{\DIFadd{TODO}} \DIFadd{example), where they split an }\textsf{\DIFadd{author}} \DIFadd{column into a separate table while assigning unique IDs that are used as a foreign key. Their }\textsf{\DIFadd{Decompose}} \DIFadd{operation combines our }\textsf{\DIFadd{Split}} \DIFadd{operation with deduplication.
+Their system is not subject to the deduplication anomalies we discussed above, but at the cost of not supporting divergence of data: multiple schema are maintained as updatable views of a single materialized view.
+}\end{casestudy}
+
+\DIFaddend \section{Operationalized Queries}
 
 We saw in the last section that although the Fulfillment department preferred the unnormalized view of orders it would be forced to migrate to the normalized database to stay fully in sync with all changes. Relational databases offer a better solution: \textit{queries}. In this section we discuss how Operational Differencing can build queries and updatable views. But the simplest solution doesn't even require a query. We can just fork a copy of the database and denormalize it.
 
