@@ -871,6 +871,9 @@ The preceding discussion does not reflect the full complexity of our data model.
 
 \begin{casestudy}
 The preceding example of Acme's database evolution is taken verbatim from the challenge problem \textbf{Extract Entity}~\cite{challenge-problems}. Indeed more than being a case study, this problem was the primary motivating example in the design of Baseline.
+
+\caseplus
+\citet{sculpin} study restructuring JSON data. Their example of art exhibition data would be modelled relationally (unnormalized) as a table of exhibits containing nested tables of locations. They map the exhibit title into each location and then extract a single concatenated list of the enhanced locations. Baseline's data model supports nested structures like JSON. The \textsf{Split} operation on tables is actually composed from two more general operations on nested structures. The \textsf{Extract} operation replaces content in possibly nested lists with links to a concatenated list of the contents. The \textsf{Push} operation maps a column of a table through another column containing links. These more general operations can perform the JSON restructuring example.
 \end{casestudy}
 
 
@@ -1038,18 +1041,22 @@ For example if we were to transfer the prior backported query forward again thro
 This example of query rewriting is a partial solution to the challenge problem \textbf{Code Co-evolution for Extract Entity}~\cite{challenge-problems}. A complete solution would first require a fully general query language. In particular, selection was handled as a special case of testing for blank values; in general a language of predicates is needed.
 % We could embed a predicate as a Boolean-valued computed column and then use the \textsf{removePresent/removeAbsent} operations. That would be consistent with the philosophy of \textit{querying by sculpting} but we want to consider adding general predicates into the language of operations.
 We conjecture that just as queries can be seen as timelines of operations, so can pure functional expressions, as a series of imperative operations on a result value. By consistently using timelines as the mechanism of language abstraction, the semantics of operational transfer through these timelines provides refactoring and rewriting ``for free''.
+
+\caseplus
+\citet{curino08} first introduced \textit{Schema Modification Operations} using the example of a complex Wikipedia schema evolution. It used selection operations with predicates as discussed above. It also involved making a temporary copy of a table and unioning with another table. Baseline currently does not have either of those operations. They appear straightforward with the caveat that changes to a copy can't be retracted into the original without breaking the roundtrip law.
 \end{casestudy}
 
+---
 
-% Calling this section Evaluation makes the latexdiff better
-% If only there was a more accurate way to do diffing :(
-\section{Evaluation}\label{discussion}
+Align latexdiff.
 
-\textcolor{red}{Need to add variations to the 3 Extract Entity problems}
+If only there was a way to do operational diffs that respect provenance.
 
-\textcolor{red}{Summarize case study results here?}
+\section{Evaluation \& Discussion}\label{discussion}
 
-\textcolor{red}{Discuss 4 failed challenge problems as case studies here?}
+\textcolor{red}{Summarize case studies?}
+\textcolor{red}{Talk about failed challenge problems?}
+
 %   \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the state of an Elm application so that it needn't be restarted.
 %   The example given is to evolve a field of a TODO item from \textsf{completed: bool} to \textsf{completed: Maybe<DateTime>}. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
 

@@ -1,7 +1,7 @@
 % -*- coding: utf-8; -*-
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL originalsubmission.tex   Sat Feb  7 15:15:59 2026
-%DIF ADD paper.tex                Sun Feb 22 13:21:23 2026
+%DIF DEL originalsubmission.tex   Sun Feb 22 14:38:52 2026
+%DIF ADD paper.tex                Sun Feb 22 14:39:20 2026
 % vim: set fileencoding=utf-8 :
 \documentclass[english,submission]{programming}
 %% First parameter: the language is 'english'.
@@ -951,6 +951,10 @@ The preceding discussion does not reflect the full complexity of our data model.
 \DIFadd{The preceding example of Acme's database evolution is taken verbatim from the challenge problem }\textbf{\DIFadd{Extract Entity}}\DIFadd{~\mbox{%DIFAUXCMD
 \cite{challenge-problems}}\hskip0pt%DIFAUXCMD
 . Indeed more than being a case study, this problem was the primary motivating example in the design of Baseline.
+}
+
+\caseplus
+\citet{sculpin} \DIFadd{study restructuring JSON data. Their example of art exhibition data would be modelled relationally (unnormalized) as a table of exhibits containing nested tables of locations. They map the exhibit title into each location and then extract a single concatenated list of the enhanced locations. Baseline's data model supports nested structures like JSON. The }\textsf{\DIFadd{Split}} \DIFadd{operation on tables is actually composed from two more general operations on nested structures. The }\textsf{\DIFadd{Extract}} \DIFadd{operation replaces content in possibly nested lists with links to a concatenated list of the contents. The }\textsf{\DIFadd{Push}} \DIFadd{operation maps a column of a table through another column containing links. These more general operations can perform the JSON restructuring example.
 }\end{casestudy}
 
 
@@ -1137,96 +1141,103 @@ For example if we were to transfer the prior backported query forward again thro
 . A complete solution would first require a fully general query language. In particular, selection was handled as a special case of testing for blank values; in general a language of predicates is needed.
 %DIF >  We could embed a predicate as a Boolean-valued computed column and then use the \textsf{removePresent/removeAbsent} operations. That would be consistent with the philosophy of \textit{querying by sculpting} but we want to consider adding general predicates into the language of operations.
 We conjecture that just as queries can be seen as timelines of operations, so can pure functional expressions, as a series of imperative operations on a result value. By consistently using timelines as the mechanism of language abstraction, the semantics of operational transfer through these timelines provides refactoring and rewriting ``for free''.
+}\DIFaddend 
+
+\DIFaddbegin \caseplus
+\citet{curino08} \DIFadd{first introduced }\textit{\DIFadd{Schema Modification Operations}} \DIFadd{using the example of a complex Wikipedia schema evolution. It used selection operations with predicates as discussed above. It also involved making a temporary copy of a table and unioning with another table. Baseline currently does not have either of those operations. They appear straightforward with the caveat that changes to a copy can't be retracted into the original without breaking the roundtrip law.
 }\end{casestudy}
-\DIFaddend 
 
+\DIFaddend ---
 
-%DIF >  Calling this section Evaluation makes the latexdiff better
-%DIF >  If only there was a more accurate way to do diffing :(
-\section{Evaluation}\DIFaddbegin \label{discussion}
-\DIFaddend 
+Align latexdiff.
 
-\DIFdelbegin \DIFdel{We evaluate Baseline against the challenge problems proposed in
+\DIFdelbegin \DIFdel{If only there was a way to do operational diffs that respect provenance.
+}%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\section{\DIFdel{Evaluation}}
+%DIFAUXCMD
+\addtocounter{section}{-1}%DIFAUXCMD
+%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdel{We evaluate Baseline against the challenge problems proposed in
 }\textit{\DIFdel{Schema Evolution in Interactive Programming Systems}}%DIFAUXCMD
 \DIFdel{~\mbox{%DIFAUXCMD
 \cite{challenge-problems}}\hskip0pt%DIFAUXCMD
 .
-}\DIFdelend \DIFaddbegin \DIFadd{\textcolor{red}{Need to add variations to the 3 Extract Entity problems}
-}\DIFaddend 
+}%DIFDELCMD < 
 
-\DIFdelbegin %DIFDELCMD < \begin{enumerate}
-%DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \DIFadd{\textcolor{red}{Summarize case study results here?}
-}\DIFaddend 
+%DIFDELCMD < \begin{enumerate}
+%DIFDELCMD < 
 
-\DIFdelbegin %DIFDELCMD < \item %%%
+%DIFDELCMD <   \item %%%
 \textbf{\DIFdel{Live State Type Evolution}}%DIFAUXCMD
 %DIFDELCMD < \redCross %%%
 \DIFdel{The problem is to evolve the state of an Elm application so that it needn't be restarted.
   The example given is to evolve a field of a TODO item from }\textsf{\DIFdel{completed: bool}} %DIFAUXCMD
 \DIFdel{to }\textsf{\DIFdel{completed: Maybe<DateTime>}}%DIFAUXCMD
 \DIFdel{. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
-}\DIFdelend \DIFaddbegin \DIFadd{\textcolor{red}{Discuss 4 failed challenge problems as case studies here?}
-%DIF >    \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the state of an Elm application so that it needn't be restarted.
-%DIF >    The example given is to evolve a field of a TODO item from \textsf{completed: bool} to \textsf{completed: Maybe<DateTime>}. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
-}\DIFaddend 
+}%DIFDELCMD < 
 
-\DIFdelbegin %DIFDELCMD < \item %%%
+%DIFDELCMD <   \item %%%
 \textbf{\DIFdel{Extract Entity}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
 \DIFdel{We adopted this problem verbatim as the example shown in Figure~\ref{fig:tables} and solved in \S\ref{db-evolution} with the }\textsf{\DIFdel{Split}} %DIFAUXCMD
 \DIFdel{and }\textsf{\DIFdel{move}} %DIFAUXCMD
-\DIFdel{operations. }\DIFdelend %DIF >    \item \textbf{Structured Document Edits}\redCross The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
+\DIFdel{operations. }%DIFDELCMD < 
 
-\DIFdelbegin %DIFDELCMD < \item %%%
+%DIFDELCMD <   \item %%%
 \textbf{\DIFdel{Code Co-evolution for Extract Entity}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
-\DIFdel{This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We discussed this example and solved it in \S\ref{query-rewriting}, albeit in a fragmentary query language .
-}\DIFdelend %DIF >    \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
+\DIFdel{This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We discussed this example and solved it in \S\ref{query-rewriting}, albeit in a fragmentary query language }\DIFdelend \DIFaddbegin \DIFadd{If only there was a way to do operational diffs that respect provenance}\DIFaddend .
 
 \DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Structured Document Edits}}%DIFAUXCMD
 %DIFDELCMD < \redCross %%%
 \DIFdel{The problem is to take string data in a table column and parse it into multiple columns.
 Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a }\textsf{\DIFdel{parse}} %DIFAUXCMD
-\DIFdel{operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operationsare concrete direct manipulations, so we disclaim a solution.
-}\DIFdelend %DIF >    \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
-
-
+\DIFdel{operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operationsare concrete direct manipulations, so we disclaim a solution. }\DIFdelend \DIFaddbegin \section{\DIFadd{Evaluation \& Discussion}}\label{discussion}
+\DIFaddend 
 
 \DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Code Co-Evolution for Structured Document Edits}}%DIFAUXCMD
 %DIFDELCMD < \redCross %%%
 \DIFdel{This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
-}%DIFDELCMD < 
+}\DIFdelend \DIFaddbegin \DIFadd{\textcolor{red}{Summarize case studies?}
+\textcolor{red}{Talk about failed challenge problems?}
+}\DIFaddend 
 
-%DIFDELCMD <   \item %%%
+\DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Divergence Control for Extract Entity}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
-\DIFdel{This problem extends problem \#2, requiring that changes be bidirectionally transferable through the schema evolution. We solved it in \S\ref{db-vc}, albeit with the well-known limitations of view updates.
-}%DIFDELCMD < 
+\DIFdel{This problem extends problem \#2, requiring that changes be bidirectionally transferable through the schema evolution. We solved it in \S\ref{db-vc}, albeit with the well-known limitations of view updates. }\DIFdelend %DIF >    \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the state of an Elm application so that it needn't be restarted.
+%DIF >    The example given is to evolve a field of a TODO item from \textsf{completed: bool} to \textsf{completed: Maybe<DateTime>}. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
 
-%DIFDELCMD <   \item %%%
+\DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Multiplicity Change in Schema}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
-\DIFdel{This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar valueinto a list. We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by }%DIFDELCMD < \citeauthor*{Cambria}%%%
+\DIFdel{This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by }%DIFDELCMD < \citeauthor*{Cambria}%%%
 \DIFdel{~\mbox{%DIFAUXCMD
 \cite[Appendex III]{Cambria} }\hskip0pt%DIFAUXCMD
 involving null values that we can't handle yet.
-}%DIFDELCMD < 
+}\DIFdelend %DIF >    \item \textbf{Structured Document Edits}\redCross The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
 
-%DIFDELCMD <   \item %%%
+\DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Live Editing Domain-Specific Languages}}%DIFAUXCMD
 %DIFDELCMD < \redCross %%%
-\DIFdel{This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
-}%DIFDELCMD < 
+\DIFdel{This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it.
+This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible.
+Baseline lacks enough programming capability to handle this problem yet.
+}\DIFdelend %DIF >    \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
 
-%DIFDELCMD < \end{enumerate}
-%DIFDELCMD < 
-
+\DIFdelbegin %DIFDELCMD < \end{enumerate}
 %DIFDELCMD < %%%
-\DIFdel{We judge that we have solved four of the eight challenge problems. The remaining four are goals for future work.
-}\DIFdelend Appendix~\ref{tech-dims} contains an evaluation of Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+\DIFdelend %DIF >    \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
+
+
+
+\DIFdelbegin \DIFdel{We judge that we have solved four of the eight challenge problems. The remaining four are goals for future work. }\DIFdelend Appendix~\ref{tech-dims} contains an evaluation of Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
 \DIFaddbegin \DIFadd{\textcolor{red}{absorb the appendix inline here? Conclusions?}
 }\DIFaddend 
 
