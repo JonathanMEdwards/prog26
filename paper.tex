@@ -25,13 +25,6 @@
 \usepackage{circledsteps}
 \newcommand{\circledtext}[1]{{\sffamily\Circled{#1}}}
 
-% \usepackage{fontawesome5}
-% \newcommand{\caseplus}{\noindent {\scriptsize\faPlus} \ }
-% \newcommand{\caseplus}{\noindent \textbf{?} \ }
-
-% \newcommand{\redCross}{\textcolor{red}{\ \faTimes\ }}
-% \newcommand{\greenCheck}{\textcolor{ForestGreen}{\ \faCheck\ }}
-
 % define natbib \citet
 \newcommand{\citet}[1]{\citeauthor*{#1}~\cite{#1}}
 
@@ -145,7 +138,8 @@ he can be reached at \email{tomas@tomasp.net}.}
   % We discuss the design of Baseline's direct manipulation UI supporting interactive schema changes as well as diffing and merging between databases.
   % A playable demo is available.
 
-  We evaluate Baseline with case studies of schema evolution problems identified in a recent paper and a literature review.
+  We evaluate Baseline with case studies of schema evolution problems identified iin a literature review, including the set of challenge problems we identified in a prior paper.
+
 
 % Prog Journal rubric for abstract. This is annoying to readers. Remove in camera ready!
 
@@ -165,7 +159,7 @@ Knowledge: Operational Differencing is able to do fine-grained version control o
 % Miller columns cen be used to visualize rich data structures. Coordinated selection can be used to visualize differences across schema changes.
 
 % Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?
-Grounding: In prior work with others we identified challenge problems of schema evolution in interactive programming systems based on our own experiences and a literature review. We use these problems as case studies to evaluate the usefulness and limitations of Baseline.
+Grounding: We evaluate Baseline with case studies of schema evolution problems identified iin a literature review, including the set of challenge problems we identified in a prior paper.
 % The UI was iterated through three versions by feedback from demonstrations. We report initial experience with a \textit{Playable Demo} as a method of evaluation.
 
 % Importance: Why does this work matter?
@@ -871,7 +865,7 @@ The preceding discussion does not reflect the full complexity of our data model.
 \end{note}
 
 
-\begin{casestudy}
+\begin{casestudy}\label{case-extract}
 The preceding example of Acme's database evolution is taken verbatim from the challenge problem \textbf{Extract Entity}~\cite{challenge-problems}. Indeed this problem was a primary motivating example in the design of Baseline.
 \end{casestudy}
 
@@ -913,7 +907,7 @@ Even with the limitations on view updates, Operational Differencing brings many 
 % \end{note}
 
 
-\begin{casestudy}
+\begin{casestudy}\label{case-diverge}
 The preceding example is taken from the challenge problem \textbf{Divergence Control for Extract Entity}~\cite{challenge-problems}. Our literature review in that paper found surprisingly little prior work on the problems of deduplication and ID assignment despite that being a commonplace situation in database schema evolution.
 It seems managing identity in databases is usually left to the programmer.
 Indeed Baseline's solution is not entirely satisfactory either.
@@ -1046,7 +1040,7 @@ Forward rewriting is more complicated. It occurs when a formula definition is tr
 For example if we were to transfer the prior backported query forward again through the \textsf{Split} operation then the inverse operation \textsf{Join} would be prepended to the \textsf{deletePresent} operation, correctly reconstructing the original query.
 
 
-\begin{casestudy}
+\begin{casestudy}\label{case-query}
 This example of query rewriting is a partial solution to the challenge problem \textbf{Code Co-evolution for Extract Entity}~\cite{challenge-problems}. A complete solution would first require a fully general query language. In particular, selection was handled as a special case of testing for blank values; in general a language of predicates is needed.
 % We could embed a predicate as a Boolean-valued computed column and then use the \textsf{removePresent/removeAbsent} operations. That would be consistent with the philosophy of \textit{querying by sculpting} but we want to consider adding general predicates into the language of operations.
 We conjecture that just as queries can be seen as timelines of operations, so can pure functional expressions, as a series of imperative operations on a result value. The hope is that by consistently using timelines as the mechanism of language abstraction the semantics of operational transfer through these timelines would provide refactoring and rewriting ``for free''.
@@ -1059,26 +1053,34 @@ We conjecture that just as queries can be seen as timelines of operations, so ca
 
 ---
 
-Align latexdiff. Another example of the limitations of state-based diffing.
+Align latexdiff.
+
+A typical example of state-based diffing going wrong.
+
+blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah.
+
+---
+
 
 \section{Evaluation \& Discussion}\label{discussion}
 
-\textcolor{red}{Summarize case studies?}
-\textcolor{red}{Talk about failed challenge problems?}
+To evaluate the capabilities of Baseline we have examined case studies taken from the research literature. These include the challenge problems identified in our prior paper
+\textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}. We have already discussed four of these challenge problems in case studies \ref{case-multiplicity}, \ref{case-extract}, \ref{case-diverge}, and \ref{case-query}.
 
-%   \item \textbf{Live State Type Evolution}\redCross The problem is to evolve the state of an Elm application so that it needn't be restarted.
-%   The example given is to evolve a field of a TODO item from \textsf{completed: bool} to \textsf{completed: Maybe<DateTime>}. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
+\begin{casestudy}
+The challenge problem \textbf{Structured Document Edits}~\cite{challenge-problems} is to
+take comma-separated strings in a table column and split it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{Match} operation that takes a regular expression. This operation takes a string column and extracts the first match group of the regular expression into another column. While this solves the problem as stated, we are not satisfied, because the use of regular expressions violates Baseline's principle that operations are concrete direct manipulations. We hope that the language of predicates conjectured in case~\ref{case-query} generalizes into a parsing language.
+\end{casestudy}
 
-%   \item \textbf{Structured Document Edits}\redCross The problem is to take string data in a table column and parse it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{parse} operation taking a regular expression that splits a string column of a table. But we judge that regular expressions violate Baseline's principle that operations are concrete direct manipulations, so we disclaim a solution.
-
-%   \item \textbf{Code Co-Evolution for Structured Document Edits}\redCross This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
-
-%   \item \textbf{Live Editing Domain-Specific Languages}\redCross This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
-
+\begin{casestudy}
+The challenge problems \textbf{Live State Type Evolution}, \textbf{Code Co-Evolution for Structured Document Edits} and
+\textbf{Live Editing Domain-Specific Languages}~\cite{challenge-problems} all require programming language capabilities that are beyond the current scope of Baseline.
+\end{casestudy}
 
 
-Appendix~\ref{tech-dims} contains an evaluation of Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
-\textcolor{red}{absorb the appendix inline here? Conclusions?}
+Baseline is foremost an interactive programming system that must be evaluated in terms of usability. The playable demo discussed in Appendix~\ref{demo} is a first step in that direction. We evaluate and situate the design of Baseline in Appendix~\ref{tech-dims} using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+
+
 
 
 
@@ -1227,7 +1229,7 @@ Given the inverse operations we then project the subsequent timeline through the
 
 \section{Visualizing Structure and Change}\label{UI}
 
-A primary goal of Baseline is useability. We believe that people should have the same power as programs, entailing that all state is visualized in a UI and that all operations are manifested as direct manipulations in it. The same goes for our version control capabilities: differences are visualized and can be transferred. There is a playable demo (see Appendix~\ref{demo}) and a short video presentation at  \url{https://www.hytradboi.com/2025/3b6de0f0-c61c-4e70-9bae-cca5a0e5bb7b-db-usability-as-if}.
+Usability is a primary goal of Baseline. We believe that people should have the same power as programs, entailing that all state is visualized in a UI and that all operations are manifested as direct manipulations in it. The same goes for our version control capabilities: differences are visualized and can be transferred. There is a playable demo (see Appendix~\ref{demo}) and a short video presentation at  \url{https://www.hytradboi.com/2025/3b6de0f0-c61c-4e70-9bae-cca5a0e5bb7b-db-usability-as-if}.
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{GUInumbered.png}
