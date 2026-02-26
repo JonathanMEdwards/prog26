@@ -1065,11 +1065,11 @@ blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah 
 \section{Evaluation \& Discussion}\label{discussion}
 
 To evaluate the capabilities of Baseline we have examined case studies taken from the research literature. These include the challenge problems identified in our prior paper
-\textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}. We have already discussed four of these challenge problems in case studies \ref{case-multiplicity}, \ref{case-extract}, \ref{case-diverge}, and \ref{case-query}.
+\textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems}. We have already discussed four of these challenge problems in case studies \ref{case-multiplicity}, \ref{case-extract}, \ref{case-diverge}, and \ref{case-query}. The other four challenge problems present difficulties, as follows.
 
 \begin{casestudy}
 The challenge problem \textbf{Structured Document Edits}~\cite{challenge-problems} is to
-take comma-separated strings in a table column and split it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{Match} operation that takes a regular expression. This operation takes a string column and extracts the first match group of the regular expression into another column. While this solves the problem as stated, we are not satisfied, because the use of regular expressions violates Baseline's principle that operations are concrete direct manipulations. We hope that the language of predicates conjectured in case~\ref{case-query} generalizes into a parsing language.
+take comma-separated strings in a table column and split them into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{Match} operation that takes a regular expression. This operation takes a string column and extracts the first match group of the regular expression into another column. While this solves the problem as stated we are not satisfied because the use of regular expressions violates Baseline's principle that operations correspond to concrete direct manipulations in the UI. We hope that the language of predicates conjectured in case~\ref{case-query} generalizes into a parsing language while still allowing Programming by Demonstration.
 \end{casestudy}
 
 \begin{casestudy}
@@ -1079,6 +1079,18 @@ The challenge problems \textbf{Live State Type Evolution}, \textbf{Code Co-Evolu
 
 
 Baseline is foremost an interactive programming system that must be evaluated in terms of usability. The playable demo discussed in Appendix~\ref{demo} is a first step in that direction. We evaluate and situate the design of Baseline in Appendix~\ref{tech-dims} using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+
+There are two main conclusions from our evaluations. First, Baseline offers unique capabilities for version control on databases and documents, the need for which has been documented in field studies~\cite{Burnett14, Basman19}.
+Working in terms of operations rather than states provides higher-level semantics, as for example the \textsf{Rename} operation that does not conflict with other changes.
+Operational Differencing can ``cherry pick'' and merge changes without conflict across substantial schema changes.
+
+The second, unavoidable, conclusion is that Baseline's operations and transfer rules are worryingly complex and incomplete. We are frankly disappointed that an elegant algebra like that of relational databases has not emerged yet. Nevertheless we have a strong intuition that there is a simpler more elegant theory struggling to get out. We report on our interim results here in the hope of sparking discussions that reveal new angles of attack.
+
+On a more technical level, implementing transfer rules in procedural code has proven to be
+laborious. We want to define a logic programming DSL for specifying these rules more succinctly that exploits their inherent symmetries.
+
+% Ideally this DSL can be rendered as diagrams for publication.
+% This DSL should also support property-based testing of the roundtrip law.
 
 
 
@@ -1092,19 +1104,16 @@ Baseline is foremost an interactive programming system that must be evaluated in
 % These operations may require weakening the roundtrip law.
 %  and requiring that the diffing algorithm impose a causal ordering on transferred operations.
 
-Implementing projection and retraction rules with procedural if statements is laborious and would benefit from a more declarative approach. It should be possible to define a DSL for specifying rules more succinctly that exploits their inherent symmetries.
-% Ideally this DSL can be rendered as diagrams for publication.
-This DSL should also support property-based testing of the roundtrip law.
-
-An intriguing question is whether it is possible to define an operationalized query language as we conjecture. Could that be extended into a general purpose functional programming language?
+% An intriguing question is whether it is possible to define an operationalized query language as we conjecture. Could that be extended into a general purpose functional programming language?
 
 % The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
 
 \subsection{Conclusion}
 
 Baseline unifies data management across multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It leverages \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes.
-Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought, enabling solutions to four of the eight challenge problems identified in prior work.
-Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches, able to work across schema evolutions. It also offers a simplified conceptual model for ad hoc usage.
+Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought.
+% , enabling solutions to four of the eight challenge problems identified in prior work.
+Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches and is able to work across schema evolutions. It also offers a simplified conceptual model for ad hoc usage.
 
 Our preliminary exploration of an operationalized query language opens an intriguing avenue for further research.
 We believe that Baseline demonstrates, at the least, that operation-based approaches to data management have been under-explored and offer a broad range of new possibilities.
