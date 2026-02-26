@@ -1081,22 +1081,15 @@ The challenge problems \textbf{Live State Type Evolution}, \textbf{Code Co-Evolu
 Baseline is foremost an interactive programming system that must be evaluated in terms of usability. The playable demo discussed in Appendix~\ref{demo} is a first step in that direction. We evaluate and situate the design of Baseline in Appendix~\ref{tech-dims} using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
 
 There are two main conclusions from our evaluations. First, Baseline offers unique capabilities for version control on databases and documents, the need for which has been documented in field studies~\cite{Burnett14, Basman19}.
-Working in terms of operations rather than states provides higher-level semantics, as for example the \textsf{Rename} operation that does not conflict with other changes.
-Operational Differencing can ``cherry pick'' and merge changes without conflict across substantial schema changes.
+% Working in terms of operations rather than states provides higher-level semantics, as for example the \textsf{Rename} operation that does not conflict with other changes.
+Operational Differencing can ``cherry pick'' and merge changes without conflict across substantial schema changes. Doing so by direct manipulation without learning git and without laborious conflict resolution is a substantial benefit to non-technical users.
 
-The second, unavoidable, conclusion is that Baseline's operations and transfer rules are worryingly complex and incomplete. We are frankly disappointed that an elegant algebra like that of relational databases has not emerged yet. Nevertheless we have a strong intuition that there is a simpler more elegant theory struggling to get out. We report on our interim results here in the hope of sparking discussions that reveal new angles of attack.
+The second, unavoidable, conclusion is that Baseline's operations and transfer rules are worryingly complex and still incomplete. We are frankly disappointed that an elegant algebra like that of relational databases has not emerged yet. Nevertheless we have a strong intuition that there is a simpler more elegant theory struggling to get out. We report on our interim results here in the hope of motivating future research taking new angles of attack. One angle we want to explore is generalizing the data model into a graph to distill a smaller and complete algebra of primitive operations.
 
-On a more technical level, implementing transfer rules in procedural code has proven to be
-laborious. We want to define a logic programming DSL for specifying these rules more succinctly that exploits their inherent symmetries.
+Specific technical problems have been discussed where they arose in the case studies, perhaps most notably the need to support a proper set datatype. An overall problem is that implementing transfer rules in procedural code has proven to be unsustainable. We propose to define a logic programming DSL for specifying these rules more succinctly by exploiting their symmetries: \textsf{Project} and  \textsf{Retract} are often inverses of each other and their rules are often transposeable.
 
 % Ideally this DSL can be rendered as diagrams for publication.
 % This DSL should also support property-based testing of the roundtrip law.
-
-
-
-
-
-% Baseline demonstrates novel capabilities but also raises questions requiring further research.
 
 % Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result. The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
 
@@ -1116,7 +1109,7 @@ Integrating schema change operations into a rich data model makes schema evoluti
 Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches and is able to work across schema evolutions. It also offers a simplified conceptual model for ad hoc usage.
 
 Our preliminary exploration of an operationalized query language opens an intriguing avenue for further research.
-We believe that Baseline demonstrates, at the least, that operation-based approaches to data management have been under-explored and offer a broad range of new possibilities.
+We believe that Baseline demonstrates, at the least, that operation-based approaches to data management have been under-explored and offer valuable new capabilities.
 
 
 \section{Related Work}

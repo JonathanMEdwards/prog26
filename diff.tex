@@ -1,7 +1,7 @@
 % -*- coding: utf-8; -*-
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL originalsubmission.tex   Wed Feb 25 14:04:08 2026
-%DIF ADD paper.tex                Wed Feb 25 14:05:04 2026
+%DIF DEL originalsubmission.tex   Thu Feb 26 15:51:33 2026
+%DIF ADD paper.tex                Fri Feb 27 13:22:18 2026
 % vim: set fileencoding=utf-8 :
 \documentclass[english,submission]{programming}
 %% First parameter: the language is 'english'.
@@ -1170,9 +1170,13 @@ blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah 
 \DIFdel{~\mbox{%DIFAUXCMD
 \cite{challenge-problems}}\hskip0pt%DIFAUXCMD
 .
-}%DIFDELCMD < 
+}\DIFdelend \DIFaddbegin \DIFadd{To evaluate the capabilities of Baseline we have examined case studies taken from the research literature. These include the challenge problems identified in our prior paper
+}\textit{\DIFadd{Schema Evolution in Interactive Programming Systems}}\DIFadd{~\mbox{%DIFAUXCMD
+\cite{challenge-problems}}\hskip0pt%DIFAUXCMD
+. We have already discussed four of these challenge problems in case studies \ref{case-multiplicity}, \ref{case-extract}, \ref{case-diverge}, and \ref{case-query}. The other four challenge problems present difficulties, as follows.
+}\DIFaddend 
 
-%DIFDELCMD < \begin{enumerate}
+\DIFdelbegin %DIFDELCMD < \begin{enumerate}
 %DIFDELCMD < 
 
 %DIFDELCMD <   \item %%%
@@ -1193,25 +1197,23 @@ blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah 
 %DIFDELCMD <   \item %%%
 \textbf{\DIFdel{Code Co-evolution for Extract Entity}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
-\DIFdel{This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We discussed this example and solved it in \S\ref{query-rewriting}, albeit in a fragmentary query language}\DIFdelend \DIFaddbegin \DIFadd{To evaluate the capabilities of Baseline we have examined case studies taken from the research literature. These include the challenge problems identified in our prior paper
-}\textit{\DIFadd{Schema Evolution in Interactive Programming Systems}}\DIFadd{~\mbox{%DIFAUXCMD
-\cite{challenge-problems}}\hskip0pt%DIFAUXCMD
-. We have already discussed four of these challenge problems in case studies \ref{case-multiplicity}, \ref{case-extract}, \ref{case-diverge}, and \ref{case-query}}\DIFaddend .
+\DIFdel{This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We discussed this example and solved it in \S\ref{query-rewriting}, albeit in a fragmentary query language. }%DIFDELCMD < 
 
-\DIFdelbegin %DIFDELCMD < \item %%%
+%DIFDELCMD <   \item %%%
 \DIFdelend \DIFaddbegin \begin{casestudy}
 \DIFadd{The challenge problem }\DIFaddend \textbf{Structured Document Edits}\DIFdelbegin %DIFDELCMD < \redCross %%%
 \DIFdel{The problem }\DIFdelend \DIFaddbegin \DIFadd{~\mbox{%DIFAUXCMD
 \cite{challenge-problems} }\hskip0pt%DIFAUXCMD
 }\DIFaddend is to
-take \DIFdelbegin \DIFdel{string data }\DIFdelend \DIFaddbegin \DIFadd{comma-separated strings }\DIFaddend in a table column and \DIFdelbegin \DIFdel{parse }\DIFdelend \DIFaddbegin \DIFadd{split }\DIFaddend it into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{\DIFdelbegin \DIFdel{parse}\DIFdelend \DIFaddbegin \DIFadd{Match}\DIFaddend } operation \DIFdelbegin \DIFdel{taking }\DIFdelend \DIFaddbegin \DIFadd{that takes }\DIFaddend a regular expression\DIFdelbegin \DIFdel{that splits }\DIFdelend \DIFaddbegin \DIFadd{. This operation takes }\DIFaddend a string column \DIFdelbegin \DIFdel{of a table. But we judge that regular expressions violate }\DIFdelend \DIFaddbegin \DIFadd{and extracts the first match group of the regular expression into another column. While this solves the problem as stated, we are not satisfied, because the use of regular expressions violates }\DIFaddend Baseline's principle that operations are concrete direct manipulations\DIFdelbegin \DIFdel{, so we disclaim a solution. }\DIFdelend \DIFaddbegin \DIFadd{. We hope that the language of predicates conjectured in case~\ref{case-query} generalizes into a parsing language.
+take \DIFdelbegin \DIFdel{string data }\DIFdelend \DIFaddbegin \DIFadd{comma-separated strings }\DIFaddend in a table column and \DIFdelbegin \DIFdel{parse it }\DIFdelend \DIFaddbegin \DIFadd{split them }\DIFaddend into multiple columns. Changes should be transferable bidirectionally between the new document and a variant of the old. We have implemented a solution using a \textsf{\DIFdelbegin \DIFdel{parse}\DIFdelend \DIFaddbegin \DIFadd{Match}\DIFaddend } operation \DIFdelbegin \DIFdel{taking }\DIFdelend \DIFaddbegin \DIFadd{that takes }\DIFaddend a regular expression\DIFdelbegin \DIFdel{that splits }\DIFdelend \DIFaddbegin \DIFadd{. This operation takes }\DIFaddend a string column \DIFdelbegin \DIFdel{of a table. But we judge that regular expressions violate }\DIFdelend \DIFaddbegin \DIFadd{and extracts the first match group of the regular expression into another column. While this solves the problem as stated we are not satisfied because the use of regular expressions violates }\DIFaddend Baseline's principle that operations \DIFdelbegin \DIFdel{are }\DIFdelend \DIFaddbegin \DIFadd{correspond to }\DIFaddend concrete direct manipulations \DIFdelbegin \DIFdel{, so we disclaim a solution.
+}\DIFdelend \DIFaddbegin \DIFadd{in the UI. We hope that the language of predicates conjectured in case~\ref{case-query} generalizes into a parsing language while still allowing Programming by Demonstration.
 }\end{casestudy}
 \DIFaddend 
 
 \DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Code Co-Evolution for Structured Document Edits}}%DIFAUXCMD
 %DIFDELCMD < \redCross %%%
-\DIFdel{This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula languageto meet the requirements of this problem.
+\DIFdel{This problem builds upon the previous one, asking that formulas be rewritten during the schema evolution. Baseline does not yet have enough of a formula language to meet the requirements of this problem.
 }%DIFDELCMD < 
 
 %DIFDELCMD <   \item %%%
@@ -1245,44 +1247,60 @@ all require programming language capabilities that are beyond the current scope 
 %DIFDELCMD < %%%
 \DIFdel{We judge that we have solved four of the eight challenge problems. The remaining four are goals for future work. }\DIFdelend \DIFaddbegin \DIFadd{Baseline is foremost an interactive programming system that must be evaluated in terms of usability. The playable demo discussed in Appendix~\ref{demo} is a first step in that direction. We evaluate and situate the design of Baseline in }\DIFaddend Appendix~\ref{tech-dims} \DIFdelbegin \DIFdel{contains an evaluation of Baseline }\DIFdelend using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
 
-
-
-
-
 \DIFdelbegin \section{\DIFdel{Discussion}}%DIFAUXCMD
 \addtocounter{section}{-1}%DIFAUXCMD
 %DIFDELCMD < \label{discussion}
-%DIFDELCMD < %%%
-\DIFdelend %DIF >  Baseline demonstrates novel capabilities but also raises questions requiring further research.
-
-\DIFdelbegin \DIFdel{Baseline demonstrates novel capabilities but also raises questions requiring further research.
-}%DIFDELCMD < 
+%DIFDELCMD < 
 
 %DIFDELCMD < %%%
-\DIFdelend % Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result. The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
+\DIFdel{Baseline demonstrates novel capabilities but also raises questions requiring further research.
+}\DIFdelend \DIFaddbegin \DIFadd{There are two main conclusions from our evaluations. First, Baseline offers unique capabilities for version control on databases and documents, the need for which has been documented in field studies~\mbox{%DIFAUXCMD
+\cite{Burnett14, Basman19}}\hskip0pt%DIFAUXCMD
+.
+%DIF >  Working in terms of operations rather than states provides higher-level semantics, as for example the \textsf{Rename} operation that does not conflict with other changes.
+Operational Differencing can ``cherry pick'' and merge changes without conflict across substantial schema changes. Doing so by direct manipulation without learning git and without laborious conflict resolution is a substantial benefit to non-technical users.
+}\DIFaddend 
 
-\DIFdelbegin \DIFdel{The simple approach of deduplicating by collapsing with }\textsf{\DIFdel{move}} %DIFAUXCMD
+%DIF <  Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result. The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
+\DIFdelbegin %DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdel{The simple approach of deduplicating by collapsing with }\textsf{\DIFdel{move}} %DIFAUXCMD
 \DIFdel{operations leads to transfer anomalies. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
-}\DIFdelend %DIF >  The simple approach of deduplicating by collapsing with \textsf{move} operations leads to transfer anomalies. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
-% These operations may require weakening the roundtrip law.
-%  and requiring that the diffing algorithm impose a causal ordering on transferred operations.
+%DIF <  These operations may require weakening the roundtrip law.
+%DIF <   and requiring that the diffing algorithm impose a causal ordering on transferred operations.
+}\DIFdelend \DIFaddbegin \DIFadd{The second, unavoidable, conclusion is that Baseline's operations and transfer rules are worryingly complex and still incomplete. We are frankly disappointed that an elegant algebra like that of relational databases has not emerged yet. Nevertheless we have a strong intuition that there is a simpler more elegant theory struggling to get out. We report on our interim results here in the hope of motivating future research taking new angles of attack. One angle we want to explore is generalizing the data model into a graph to distill a smaller and complete algebra of primitive operations.
+}\DIFaddend 
 
-Implementing projection and retraction rules with procedural if statements is laborious and would benefit from a more declarative approach. It should be possible to define a DSL for specifying rules more succinctly that exploits their inherent symmetries.
-% Ideally this DSL can be rendered as diagrams for publication.
-This DSL should also support property-based testing of the roundtrip law.
+\DIFdelbegin \DIFdel{Implementing projection and retraction rules with procedural if statements is laborious and would benefit from a more declarative approach. It should be possible }\DIFdelend \DIFaddbegin \DIFadd{Specific technical problems have been discussed where they arose in the case studies, perhaps most notably the need to support a proper set datatype. An overall problem is that implementing transfer rules in procedural code has proven to be unsustainable. We propose }\DIFaddend to define a \DIFaddbegin \DIFadd{logic programming }\DIFaddend DSL for specifying \DIFaddbegin \DIFadd{these }\DIFaddend rules more succinctly \DIFdelbegin \DIFdel{that exploits their inherent symmetries}\DIFdelend \DIFaddbegin \DIFadd{by exploiting their symmetries: }\textsf{\DIFadd{Project}} \DIFadd{and  }\textsf{\DIFadd{Retract}} \DIFadd{are often inverses of each other and their rules are often transposeable}\DIFaddend .
+\DIFaddbegin 
 
-An intriguing question is whether it is possible to define an operationalized query language as we conjecture. Could that be extended into a general purpose functional programming language?
+\DIFaddend % Ideally this DSL can be rendered as diagrams for publication.
+\DIFdelbegin \DIFdel{This DSL should also support property-based testing of the roundtrip law.
+}\DIFdelend %DIF >  This DSL should also support property-based testing of the roundtrip law.
 
-% The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
+\DIFdelbegin \DIFdel{An intriguing question is whether it is possible to define an operationalized query language as we conjecture. Could that be extended into a general purpose functional programming language?
+}\DIFdelend %DIF >  Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result. The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
+
+%DIF >  The simple approach of deduplicating by collapsing with \textsf{move} operations leads to transfer anomalies. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
+%DIF >  These operations may require weakening the roundtrip law.
+%DIF >   and requiring that the diffing algorithm impose a causal ordering on transferred operations.
+\DIFaddbegin 
+
+%DIF >  An intriguing question is whether it is possible to define an operationalized query language as we conjecture. Could that be extended into a general purpose functional programming language?
+
+\DIFaddend % The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
 
 \subsection{Conclusion}
 
 Baseline unifies data management across multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It leverages \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes.
-Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought, enabling solutions to four of the eight challenge problems identified in prior work.
-Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches, able to work across schema evolutions. It also offers a simplified conceptual model for ad hoc usage.
+Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought\DIFdelbegin \DIFdel{, enabling solutions to four of the eight challenge problems identified in prior work.
+}\DIFdelend \DIFaddbegin \DIFadd{.
+%DIF >  , enabling solutions to four of the eight challenge problems identified in prior work.
+}\DIFaddend Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches \DIFdelbegin \DIFdel{, }\DIFdelend \DIFaddbegin \DIFadd{and is }\DIFaddend able to work across schema evolutions. It also offers a simplified conceptual model for ad hoc usage.
 
 Our preliminary exploration of an operationalized query language opens an intriguing avenue for further research.
-We believe that Baseline demonstrates, at the least, that operation-based approaches to data management have been under-explored and offer a broad range of new possibilities.
+We believe that Baseline demonstrates, at the least, that operation-based approaches to data management have been under-explored and offer \DIFdelbegin \DIFdel{a broad range of new possibilities}\DIFdelend \DIFaddbegin \DIFadd{valuable new capabilities}\DIFaddend .
 
 
 \section{Related Work}
