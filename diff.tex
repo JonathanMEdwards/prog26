@@ -1,7 +1,7 @@
 % -*- coding: utf-8; -*-
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL originalsubmission.tex   Thu Feb 26 15:51:33 2026
-%DIF ADD paper.tex                Fri Feb 27 13:22:18 2026
+%DIF DEL originalsubmission.tex   Fri Feb 27 14:07:51 2026
+%DIF ADD paper.tex                Fri Feb 27 14:07:32 2026
 % vim: set fileencoding=utf-8 :
 \documentclass[english,submission]{programming}
 %% First parameter: the language is 'english'.
@@ -1135,8 +1135,8 @@ Forward rewriting is more complicated. It occurs when a formula definition is tr
 \footnote{This naive algorithm would clutter up the formula with irrelevant schema changes. We simplify them out by retracting the original formula back through them as much as possible, retaining only those schema changes the formula is dependent upon.}.
 For example if we were to transfer the prior backported query forward again through the \textsf{Split} operation then the inverse operation \textsf{Join} would be prepended to the \textsf{deletePresent} operation, correctly reconstructing the original query.
 
-
 %DIF <  We offer this as a solution to \textit{Challenge Problem \#3: Code Co-evolution for Extract Entity}~\cite{challenge-problems}.
+%DIF > BEGIN DIFADD
 \DIFaddbegin \begin{casestudy}\label{case-query}
 \DIFadd{This example of query rewriting is a partial solution to the challenge problem }\textbf{\DIFadd{Code Co-evolution for Extract Entity}}\DIFadd{~\mbox{%DIFAUXCMD
 \cite{challenge-problems}}\hskip0pt%DIFAUXCMD
@@ -1151,6 +1151,10 @@ We conjecture that just as queries can be seen as timelines of operations, so ca
 \citet{curino08} \DIFadd{first introduced }\textit{\DIFadd{Schema Modification Operations}} \DIFadd{using the example of a complex Wikipedia schema evolution. It used selection operations with predicates as discussed above. It also involved making a temporary copy of a table and unioning with another table. Baseline currently does not have either of those operations. They appear straightforward with the caveat that changes to a copy can't be retracted into the original without breaking the roundtrip law.
 }\end{casestudy}
 
+
+%DIF > END DIFADD
+
+%DIF > BEGIN DIFNOMARKUP
 \DIFaddend ---
 
 Align latexdiff.
@@ -1160,26 +1164,32 @@ A typical example of state-based diffing going wrong.
 blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah.
 
 ---
+%DIF > END DIFNOMARKUP
 
 
-\section{Evaluation \DIFaddbegin \DIFadd{\& Discussion}\DIFaddend }\DIFaddbegin \label{discussion}
-\DIFaddend 
+%DIF < BEGIN DIFDEL
+\DIFdelbegin \section{\DIFdel{Evaluation}}
+%DIFAUXCMD
+\addtocounter{section}{-1}%DIFAUXCMD
+\DIFdelend %DIF > BEGIN DIFADD
 
 \DIFdelbegin \DIFdel{We evaluate Baseline against the challenge problems proposed in
 }\textit{\DIFdel{Schema Evolution in Interactive Programming Systems}}%DIFAUXCMD
 \DIFdel{~\mbox{%DIFAUXCMD
 \cite{challenge-problems}}\hskip0pt%DIFAUXCMD
 .
-}\DIFdelend \DIFaddbegin \DIFadd{To evaluate the capabilities of Baseline we have examined case studies taken from the research literature. These include the challenge problems identified in our prior paper
+}\DIFdelend \DIFaddbegin \section{\DIFadd{Evaluation \& Discussion}}\label{discussion}
+\DIFaddend 
+
+\DIFdelbegin %DIFDELCMD < \begin{enumerate}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \DIFadd{To evaluate the capabilities of Baseline we have examined case studies taken from the research literature. These include the challenge problems identified in our prior paper
 }\textit{\DIFadd{Schema Evolution in Interactive Programming Systems}}\DIFadd{~\mbox{%DIFAUXCMD
 \cite{challenge-problems}}\hskip0pt%DIFAUXCMD
 . We have already discussed four of these challenge problems in case studies \ref{case-multiplicity}, \ref{case-extract}, \ref{case-diverge}, and \ref{case-query}. The other four challenge problems present difficulties, as follows.
 }\DIFaddend 
 
-\DIFdelbegin %DIFDELCMD < \begin{enumerate}
-%DIFDELCMD < 
-
-%DIFDELCMD <   \item %%%
+\DIFdelbegin %DIFDELCMD < \item %%%
 \textbf{\DIFdel{Live State Type Evolution}}%DIFAUXCMD
 %DIFDELCMD < \redCross %%%
 \DIFdel{The problem is to evolve the state of an Elm application so that it needn't be restarted.
@@ -1290,6 +1300,10 @@ Operational Differencing can ``cherry pick'' and merge changes without conflict 
 %DIF >  An intriguing question is whether it is possible to define an operationalized query language as we conjecture. Could that be extended into a general purpose functional programming language?
 
 \DIFaddend % The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
+
+%DIF < END DIFDEL
+%DIF > END DIFADD
+
 
 \subsection{Conclusion}
 
