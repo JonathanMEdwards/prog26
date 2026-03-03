@@ -1,7 +1,7 @@
 % -*- coding: utf-8; -*-
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL originalsubmission.tex   Fri Feb 27 14:07:51 2026
-%DIF ADD paper.tex                Fri Feb 27 14:07:32 2026
+%DIF ADD paper.tex                Tue Mar  3 10:48:18 2026
 % vim: set fileencoding=utf-8 :
 \documentclass[english,submission]{programming}
 %% First parameter: the language is 'english'.
@@ -241,13 +241,25 @@ The benefit of operation-based approaches is that they can capture user intentio
 
 In this paper we introduce a new technique for operation-based change management: \textit{Operational Differencing}, which we define on a \textit{rich data} model curated from the features of programming languages and databases.
 
-\begin{figure}
-\includegraphics[width=\textwidth]{GUI.png}
-\caption{The Baseline UI}
-\label{fig:UI-plain}
-\end{figure}
+\DIFdelbegin %DIFDELCMD < \begin{figure}
+%DIFDELCMD < \includegraphics[width=\textwidth]{GUI.png}
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{The Baseline UI}}
+%DIFAUXCMD
+%DIFDELCMD < \label{fig:UI-plain}
+%DIFDELCMD < \end{figure}
+%DIFDELCMD < %%%
+\DIFdelend %DIF >  \begin{figure}
+%DIF >  \includegraphics[width=\textwidth]{GUI.png}
+%DIF >  \caption{The Baseline UI}
+%DIF >  \label{fig:UI-plain}
+%DIF >  \end{figure}
 
-Baseline manifests all operations in a direction manipulation UI (Figure~\ref{fig:UI-plain}) that gives users the same power as programs. It is difficult to convey the experience of an interactive interface in a written narrative, so we offer the reader a playable demo at \url{https://thebaseline.dev/Prog26submission/}. The UI and playable demo are discussed in Appendices \ref{UI} and \ref{demo}.
+Baseline manifests all operations in a direction manipulation UI \DIFdelbegin \DIFdel{(Figure~\ref{fig:UI-plain}) }\DIFdelend that gives users the same power as programs.
+It is difficult to convey the experience of an interactive interface in a written narrative, so we offer the reader a playable demo at \url{https://thebaseline.dev/Prog26submission/}.
+\DIFdelbegin \DIFdel{The UI and playable demo are discussed in }\DIFdelend \DIFaddbegin \DIFadd{Space limitations force us to move discussion of the UI and the demo into }\DIFaddend Appendices \ref{UI} and \ref{demo}.
 
 The contributions of this paper are:
 
@@ -1235,15 +1247,19 @@ take \DIFdelbegin \DIFdel{string data }\DIFdelend \DIFaddbegin \DIFadd{comma-sep
 %DIFDELCMD <   \item %%%
 \textbf{\DIFdel{Multiplicity Change in Schema}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
-\DIFdel{This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list. We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by }%DIFDELCMD < \citeauthor*{Cambria}%%%
+\DIFdel{This problem is about allowing different versions of code to interoperate bidirectionally even though they have different schema, specifically a schema evolution converting a scalar value into a list.
+We adopted this problem as the example shown in Figure~\ref{fig:TODO-refactor} and solved it in \S\ref{transfer}. An extended version of this problem is posed by }%DIFDELCMD < \citeauthor*{Cambria}%%%
 \DIFdel{~\mbox{%DIFAUXCMD
 \cite[Appendex III]{Cambria} }\hskip0pt%DIFAUXCMD
-involving null values that we can't handle yet. }%DIFDELCMD < 
+involving null values that we can't handle yet.
+}%DIFDELCMD < 
 
 %DIFDELCMD <   \item %%%
 \DIFdelend \DIFaddbegin \DIFadd{Live State Type Evolution}}\DIFadd{, }\textbf{\DIFadd{Code Co-Evolution for Structured Document Edits}} \DIFadd{and
 }\DIFaddend \textbf{Live Editing Domain-Specific Languages}\DIFdelbegin %DIFDELCMD < \redCross %%%
-\DIFdel{This problem is the most challenging. It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible. Baseline lacks enough programming capability to handle this problem yet.
+\DIFdel{This problem is the most challenging.
+It asks to evolve data and correspondingly adapt the internal execution state of code concurrently operating on it. This appears intractable in general, but the problem is framed in a state-machine DSL where it may be possible.
+Baseline lacks enough programming capability to handle this problem yet.
 }\DIFdelend \DIFaddbegin \DIFadd{~\mbox{%DIFAUXCMD
 \cite{challenge-problems} }\hskip0pt%DIFAUXCMD
 all require programming language capabilities that are beyond the current scope of Baseline.
@@ -1255,7 +1271,15 @@ all require programming language capabilities that are beyond the current scope 
 %DIFDELCMD < 
 
 %DIFDELCMD < %%%
-\DIFdel{We judge that we have solved four of the eight challenge problems. The remaining four are goals for future work. }\DIFdelend \DIFaddbegin \DIFadd{Baseline is foremost an interactive programming system that must be evaluated in terms of usability. The playable demo discussed in Appendix~\ref{demo} is a first step in that direction. We evaluate and situate the design of Baseline in }\DIFaddend Appendix~\ref{tech-dims} \DIFdelbegin \DIFdel{contains an evaluation of Baseline }\DIFdelend using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+\DIFdel{We judge that we have solved four of the eight challenge problems.
+The remaining four are goals for future work. Appendix~\ref{tech-dims} contains an evaluation of Baseline using the }\DIFdelend \DIFaddbegin \DIFadd{Baseline is foremost an interactive programming system.
+We evaluate and situate its design in Appendix~\ref{tech-dims} using the }\DIFaddend \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+\DIFaddbegin \DIFadd{Much of the work on Baseline has been on its user interface, and especially how to visualize structural differences. Unfortunately space limitations have prevented us from discussing this work, which is summarized in Appendix~\ref{UI}.
+Ultimately Baseline must be judged in terms of usability.
+The playable demo described in Appendix~\ref{demo} has provided some initial feedback and could become the basis of a controlled experiment.
+%DIF >  We also want to explore the use of the playable demo as a way to communicate UI design ideas.
+}\DIFaddend 
+
 
 \DIFdelbegin \section{\DIFdel{Discussion}}%DIFAUXCMD
 \addtocounter{section}{-1}%DIFAUXCMD
@@ -1319,22 +1343,30 @@ We believe that Baseline demonstrates, at the least, that operation-based approa
 
 \section{Related Work}
 
-% We only have room here to highlight some of the vast adjacent research literature.
+%DIF <  We only have room here to highlight some of the vast adjacent research literature.
+\DIFdelbegin %DIFDELCMD < 
 
-\paragraph{OT and CRDT}
+%DIFDELCMD < %%%
+\DIFdelend \paragraph{OT and CRDT}
 
 Operational Differencing is related to
 Operational Transformation (OT)~\cite{ceda-ot, Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
-% , and attempts to unify them~\cite{braid}.
-Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence. On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are centralized: we can synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers.
+%DIF <  , and attempts to unify them~\cite{braid}.
+Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence. On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are centralized: we can synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers\DIFaddbegin \DIFadd{, which determines who wins conflicts}\DIFaddend .
 
 While we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and indeed was inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
 
 There is work on adding branching and conflict resolution to CRDTs~\cite{patchwork, automerge-conflicts} and to DB replication~\cite{couchdb-conflicts}.
 CEDA~\cite{ceda} is an OT-based multi-paradigm distributed database.
-Synql~\cite{ignat-synql} is a CRDT-based approach to replicating relational databases respecting integrity constraints.
+Synql~\cite{ignat-synql} is a CRDT-based approach to replicating relational databases respecting integrity constraints. \DIFaddbegin \DIFadd{Braid~\mbox{%DIFAUXCMD
+\cite{braid} }\hskip0pt%DIFAUXCMD
+is an attempt to unify OT and CRDT.
+}\DIFaddend 
 
-\paragraph{Databases}
+\DIFaddbegin \DIFadd{The power of CRDTs is their monotonic semantics but that is also their weakness. They can't go backwards, as in OT's ET and our }\textsf{\DIFadd{Retract}}\DIFadd{. Cherry picking a change requires moving it backwards to the most recent ancestor. Going backwards is also essential for undo, especially selective undo (Appendix~\ref{undo}).
+}
+
+\DIFaddend \paragraph{Databases}
 
 There is a vast literature on schema evolution in databases, however we will limit the discussion here to the minority of operation-based approaches. A fuller survey can be found in \citet{challenge-problems}.
 
@@ -1377,7 +1409,8 @@ Coupled Transformations~\cite{Berdaguer07, alcino06, Cleve2006} express transfor
 % It is not clear how bidirectional transformations can handle generating the unique IDs required in some evolutions, nor information loss and duplication.
 
 Lenses~\cite{Foster2007,edit-lenses} are a linguistic approach to bidirectional transformations that have been the subject of much research.
- ~\citet{carvalho24} use lenses explicitly specified inside code to express its evolution.
+ ~\citet{carvalho24} use lenses explicitly specified inside code to express its evolution. \DIFaddbegin \DIFadd{Lenses are an elegant construct but they are essentially first-order: they can transform data changes bidirectionally through schema changes, but they cannot transform schema changes through other schema changes. That is required in order to merge branches whose schema have diverged. A key benefit of Baseline is treating schema and data changes uniformly.
+}\DIFaddend 
 
 \paragraph{Model Driven Engineering}
 % Model Driven Engineering must also handle evolution.

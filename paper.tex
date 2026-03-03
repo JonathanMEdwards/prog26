@@ -183,13 +183,15 @@ The benefit of operation-based approaches is that they can capture user intentio
 
 In this paper we introduce a new technique for operation-based change management: \textit{Operational Differencing}, which we define on a \textit{rich data} model curated from the features of programming languages and databases.
 
-\begin{figure}
-\includegraphics[width=\textwidth]{GUI.png}
-\caption{The Baseline UI}
-\label{fig:UI-plain}
-\end{figure}
+% \begin{figure}
+% \includegraphics[width=\textwidth]{GUI.png}
+% \caption{The Baseline UI}
+% \label{fig:UI-plain}
+% \end{figure}
 
-Baseline manifests all operations in a direction manipulation UI (Figure~\ref{fig:UI-plain}) that gives users the same power as programs. It is difficult to convey the experience of an interactive interface in a written narrative, so we offer the reader a playable demo at \url{https://thebaseline.dev/Prog26submission/}. The UI and playable demo are discussed in Appendices \ref{UI} and \ref{demo}.
+Baseline manifests all operations in a direction manipulation UI that gives users the same power as programs.
+It is difficult to convey the experience of an interactive interface in a written narrative, so we offer the reader a playable demo at \url{https://thebaseline.dev/Prog26submission/}.
+Space limitations force us to move discussion of the UI and the demo into Appendices \ref{UI} and \ref{demo}.
 
 The contributions of this paper are:
 
@@ -1085,7 +1087,13 @@ The challenge problems \textbf{Live State Type Evolution}, \textbf{Code Co-Evolu
 \end{casestudy}
 
 
-Baseline is foremost an interactive programming system that must be evaluated in terms of usability. The playable demo discussed in Appendix~\ref{demo} is a first step in that direction. We evaluate and situate the design of Baseline in Appendix~\ref{tech-dims} using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+Baseline is foremost an interactive programming system.
+We evaluate and situate its design in Appendix~\ref{tech-dims} using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
+Much of the work on Baseline has been on its user interface, and especially how to visualize structural differences. Unfortunately space limitations have prevented us from discussing this work, which is summarized in Appendix~\ref{UI}.
+Ultimately Baseline must be judged in terms of usability.
+The playable demo described in Appendix~\ref{demo} has provided some initial feedback and could become the basis of a controlled experiment.
+% We also want to explore the use of the playable demo as a way to communicate UI design ideas.
+
 
 There are two main conclusions from our evaluations. First, Baseline offers unique capabilities for version control on databases and documents, the need for which has been documented in field studies~\cite{Burnett14, Basman19}.
 % Working in terms of operations rather than states provides higher-level semantics, as for example the \textsf{Rename} operation that does not conflict with other changes.
@@ -1124,20 +1132,19 @@ We believe that Baseline demonstrates, at the least, that operation-based approa
 
 \section{Related Work}
 
-% We only have room here to highlight some of the vast adjacent research literature.
-
 \paragraph{OT and CRDT}
 
 Operational Differencing is related to
 Operational Transformation (OT)~\cite{ceda-ot, Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
-% , and attempts to unify them~\cite{braid}.
-Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence. On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are centralized: we can synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers.
+Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence. On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are centralized: we can synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers, which determines who wins conflicts.
 
 While we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and indeed was inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
 
 There is work on adding branching and conflict resolution to CRDTs~\cite{patchwork, automerge-conflicts} and to DB replication~\cite{couchdb-conflicts}.
 CEDA~\cite{ceda} is an OT-based multi-paradigm distributed database.
-Synql~\cite{ignat-synql} is a CRDT-based approach to replicating relational databases respecting integrity constraints.
+Synql~\cite{ignat-synql} is a CRDT-based approach to replicating relational databases respecting integrity constraints. Braid~\cite{braid} is an attempt to unify OT and CRDT.
+
+The power of CRDTs is their monotonic semantics but that is also their weakness. They can't go backwards, as in OT's ET and our \textsf{Retract}. Cherry picking a change requires moving it backwards to the most recent ancestor. Going backwards is also essential for undo, especially selective undo (Appendix~\ref{undo}).
 
 \paragraph{Databases}
 
@@ -1181,7 +1188,7 @@ Coupled Transformations~\cite{Berdaguer07, alcino06, Cleve2006} express transfor
 % It is not clear how bidirectional transformations can handle generating the unique IDs required in some evolutions, nor information loss and duplication.
 
 Lenses~\cite{Foster2007,edit-lenses} are a linguistic approach to bidirectional transformations that have been the subject of much research.
- ~\citet{carvalho24} use lenses explicitly specified inside code to express its evolution.
+ ~\citet{carvalho24} use lenses explicitly specified inside code to express its evolution. Lenses are an elegant construct but they are essentially first-order: they can transform data changes bidirectionally through schema changes, but they cannot transform schema changes through other schema changes. That is required in order to merge branches whose schema have diverged. A key benefit of Baseline is treating schema and data changes uniformly.
 
 \paragraph{Model Driven Engineering}
 % Model Driven Engineering must also handle evolution.
