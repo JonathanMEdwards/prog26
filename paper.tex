@@ -1044,7 +1044,7 @@ Henceforth the \textit{new-formula} field's value will be the result of a query 
 
 
 
-\subsection{Query Rewriting}\label{query-rewriting}
+\paragraph{Query Rewriting}
 
 There is another benefit to treating queries as timelines of operations: operation transfer gives us \textit{query rewriting}~\cite{curino08, herrmann17} for free. When a database schema changes, some of the queries written for it may need to change too. This scenario is called forward rewriting---backward rewriting is backporting a query on a new schema to an older one.
 In practice query rewriting is done manually by SQL programmers. The just-cited research adapts query optimization techniques to build specialized rewriting algorithms.
