@@ -52,6 +52,7 @@
 % \setlength{\belowdisplayskip}{4pt}
 \setlength{\belowcaptionskip}{-6pt}
 
+\newcommand{\myparagraph}[1]{\vspace{-8pt}\paragraph{#1}}
 
 %%%%%%%%%%%%%%%%%%
 %% These data MUST be filled for your submission. (see 5.3)
@@ -1157,7 +1158,7 @@ We believe that Baseline demonstrates, at the least, that operation-based approa
 
 \section{Related Work}
 
-\paragraph{OT and CRDT}
+\myparagraph{OT and CRDT}
 
 Operational Differencing is related to
 Operational Transformation (OT)~\cite{ceda-ot, Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
@@ -1171,7 +1172,7 @@ Synql~\cite{ignat-synql} is a CRDT-based approach to replicating relational data
 
 The power of CRDTs is their monotonic semantics but that is also their weakness. They can't go backwards, as in OT's ET and our \textsf{Retract}. Cherry picking a change requires moving it backwards to the most recent ancestor. Going backwards is also essential for undo, especially selective undo (Appendix~\ref{undo}).
 
-\paragraph{Databases}
+\myparagraph{Databases}
 
 There is a vast literature on schema evolution in databases, however we will limit the discussion here to the minority of operation-based approaches. A fuller survey can be found in \citet{challenge-problems}.
 
@@ -1197,7 +1198,7 @@ Schema evolution is also a problem for NoSQL~\cite{sadalage12} databases. While 
 
 Schema evolution has also been studied for Object Oriented Databases(OODB)~\cite{li99, banerjee87}. Smalltalk~\cite{Goldberg80} is itself an OODB, persisting all object instances in an \textit{image file} with some evolution capabilities incorporated in the programming environment~\cite[pp.252-272]{Goldberg80}. Gemstone turns the Smalltalk image into a production-quality database and accordingly provides a complex schema evolution API~\cite{Gemstone}. \citet{kamina25} extend a relational DEL for persistent objects.
 
-\paragraph{Data Science}
+\myparagraph{Data Science}
 % The evolution of data formats is a concern in Data Science.
 % Data~Diff~\cite{sutton18} compares two versions of tabular data and finds a shortest sequence of matching transformations.
 AI~assistants~\cite{AIassistants} provide a mechanism for interactively correcting
@@ -1206,7 +1207,7 @@ Wrangler~\cite{kandel11} observes interactive manipulation of sampled data to wr
 \citet{petersohn20} present an algebra of operations on Python dataframes that include shape transformations.
 
 
-\paragraph{Bidirectional Transformations}
+\myparagraph{Bidirectional Transformations}
 % Programming language theory undergirds research on type-driven transformations.
  Bidirectional Transformations~\cite{czarnecki2009bidirectional, hu2024bidirectional} have been a rich field of research.
 Coupled Transformations~\cite{Berdaguer07, alcino06, Cleve2006} express transformations coordinated between types and their instances by encoding them into functions on Haskell GADTs built with strategy combinators. \citet{JVisser08} extends the encoding to transform queries written in point-free style. \citet{lammel16} recapitulates coupled transformations within logic programming which extends it to transform logic programs.
@@ -1215,7 +1216,7 @@ Coupled Transformations~\cite{Berdaguer07, alcino06, Cleve2006} express transfor
 Lenses~\cite{Foster2007,edit-lenses} are a linguistic approach to bidirectional transformations that have been the subject of much research.
  ~\citet{carvalho24} use lenses explicitly specified inside code to express its evolution. Lenses are an elegant construct but they are essentially first-order: they can transform data changes bidirectionally through schema changes, but they cannot transform schema changes through other schema changes. That is required in order to merge branches whose schema have diverged. A key benefit of Baseline is treating schema and data changes uniformly.
 
-\paragraph{Model Driven Engineering}
+\myparagraph{Model Driven Engineering}
 % Model Driven Engineering must also handle evolution.
 Unlike the textual artifacts involved in other domains, models typically assign unique identifiers enabling more precise differencing and mergeing~\cite{alanen2003}.
 Models are often themselves modeled by a metamodel, which lifts the evolution problem to the metalevel: models must be migrated through the evolution of their metamodel, analogously to changing the grammar of a programming language.~\cite{Herrmannsdoerfer11}. \citet{Cicchetti11} study metamodel evolution in the context of divergent changes.
@@ -1326,19 +1327,19 @@ written narratives and recorded demos? Our early results are mixed.
 We can heuristically evaluate Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
 % but we designed the system with these goals in mind
 
-\paragraph{Interaction} Strictly speaking Baseline has two \textbf{modes of interaction}: user and developer, however user mode is a strict subset of developer mode (no type operations) so it is fair to say there is really only one mode of interaction.
+\myparagraph{Interaction} Strictly speaking Baseline has two \textbf{modes of interaction}: user and developer, however user mode is a strict subset of developer mode (no type operations) so it is fair to say there is really only one mode of interaction.
 Operationalized queries minimize \textbf{abstraction construction} since they correspond exactly to interactive actions in the UI, suporting Programming by Demonstration.
 % An intriguing question is how well we can hew to this principle as we add general programming language capabilities following the path previously explored in Subtext~\cite{reifying-programming, direct-programming}.
 Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evaluation is reduced because all operations are concrete direct manipulations; The Gulf of Interpretation is reduced by visualizing changes in terms of concrete difference operations. Version control of data enables collaborative feedback loops that are not practical with conventional techniques.
 
-\paragraph{Notation} Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably because Baseline involves a rich set of operations they do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}.
+\myparagraph{Notation} Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably because Baseline involves a rich set of operations they do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}.
 % In future work we want to investigate whether there is a normal form for sequences of operations.
 
-\paragraph{Conceptual structure} Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
+\myparagraph{Conceptual structure} Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
 
-\paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transferred later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not hold that as a goal. Our ID-annotated tree structures provide some level of \textbf{addressing and externalizability}.
+\myparagraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transferred later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not hold that as a goal. Our ID-annotated tree structures provide some level of \textbf{addressing and externalizability}.
 
-\paragraph{Complexity, Errors, and Adoptability} Baseline is still very immature in these dimensions.
+\myparagraph{Complexity, Errors, and Adoptability} Baseline is still very immature in these dimensions.
 
 
 
