@@ -1,7 +1,7 @@
 % -*- coding: utf-8; -*-
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL originalsubmission.tex   Fri Feb 27 14:07:51 2026
-%DIF ADD paper.tex                Tue Mar  3 10:48:18 2026
+%DIF DEL originalsubmission.tex   Thu Mar  5 10:46:38 2026
+%DIF ADD paper.tex                Thu Mar  5 10:46:05 2026
 % vim: set fileencoding=utf-8 :
 \documentclass[english,submission]{programming}
 %% First parameter: the language is 'english'.
@@ -49,6 +49,13 @@
 \newcommand{\mathbox}[1]{\colorbox{black!10}{$#1$\phantom{i\hspace{-3.5pt}}}}
 \usepackage{tcolorbox}
 \tcbset{colback=black!10, colframe=white, right=-20pt}
+%DIF 32a34-38
+\newcommand{\figbox}[1]{\tcbox{ %DIF > 
+  \begin{minipage}{\textwidth} %DIF > 
+  \vspace{-14pt} %DIF > 
+  #1 %DIF > 
+  \end{minipage}}} %DIF > 
+%DIF -------
 
 \DeclareMathOperator{\exec}{\ \fatsemi\ \ }
 \newcommand{\is}{{:}\ }
@@ -58,6 +65,16 @@
 \newcommand{\emptystring}{\textsf{\textquotedbl\ \!\textquotedbl}}
 %\DeclareMathOperator{\pipe}{|}
 %\DeclareMathOperator{\at}{\textsf{@}}
+%DIF 41a48-55
+ %DIF > 
+% Tighten up spacing %DIF > 
+% \setlength{\textfloatsep}{8pt} %DIF > 
+% \setlength{\abovedisplayskip}{4pt} %DIF > 
+% \setlength{\belowdisplayskip}{4pt} %DIF > 
+\setlength{\belowcaptionskip}{-6pt} %DIF > 
+ %DIF > 
+\newcommand{\myparagraph}[1]{\vspace{-8pt}\paragraph{#1}} %DIF > 
+%DIF -------
 
 %%%%%%%%%%%%%%%%%%
 %% These data MUST be filled for your submission. (see 5.3)
@@ -231,8 +248,10 @@ Importance: Our technique improves upon the known methods for schema evolution a
 
 Data changes in multiple dimensions. Data changes over time, indeed often that is the whole point. Data changes over space between replicas and variant copies. Data also changes in meaning: as needs and understanding evolve so must the shape and interpretation of the data. In practice we handle these different dimensions of change with different technologies embodying different abstractions. Programming languages, file systems, and databases all have distinct ways of managing data change over time. There are many different techniques for distributing, replicating, and collaborating on data, although surprisingly few for version control of data. There is a plethora of tools to assist in evolving the schema of databases, but in practice it often requires ad hoc programming.
 
-Baseline is a research project to develop a general purpose mechanism for data change in all these dimensions, and to provide it conveniently to both programs and humans.
-To ground this research we first surveyed one of the most problematic aspects of data change: schema evolution. In \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems} we and others formulated a suite of challenge problems across a range of contexts, including traditional database programming as well as live front-end programming, model-driven development, and collaboration in computational documents. These problems have guided our work and are used as examples in the rest of the paper.
+Baseline is a research project to develop a general purpose mechanism for data change in all these dimensions, and to provide it conveniently to both programs and \DIFdelbegin \DIFdel{humans}\DIFdelend \DIFaddbegin \DIFadd{users}\DIFaddend .
+To ground this research we first surveyed one of the most problematic aspects of data change: schema evolution. In \textit{Schema Evolution in Interactive Programming Systems}~\cite{challenge-problems} we and others formulated a suite of challenge problems across a range of contexts, including traditional database programming as well as live front-end programming, model-driven development, and collaboration in computational documents.
+\DIFdelbegin \DIFdel{These problems have guided our work and are used as examples in the rest of the paper.
+}\DIFdelend %DIF >  These problems have guided our work and are used as examples in the rest of the paper.
 
 Systems that manage change split into \textit{state-based} and \textit{operation-based} approaches~\cite{diff3, Shapiro11}. State-based approaches observe only the before and after of changes, while operation-based approaches record the execution of a set of possible operations.
 The benefit of state-based approaches is that since they observe from the outside they more easily interoperate with existing tools.
@@ -266,18 +285,25 @@ The contributions of this paper are:
 \begin{enumerate}
 
 \item We introduce \textit{Operational Differencing} by example in the familiar setting of typed nested lists and records supplied with a rich set of operations
-including refactorings. We define the primitive transformations \textit{projection} and \textit{retraction} and the rules governing them.
+including refactorings. We define the primitive transformations \textit{projection} and \textit{retraction} \DIFdelbegin \DIFdel{and the rules governing them}\DIFdelend \DIFaddbegin \DIFadd{with rules expressed as commutative diagrams}\DIFaddend .
 
-\item Using these primitives we reconstruct the key features of version control: \textit{diffing} and \textit{transfer} (a specialization of merging more like cherry-picking). Because our technique is operation-based we are able to do \DIFdelbegin \DIFdel{fine-grained }\DIFdelend \DIFaddbegin \DIFadd{high-fidelity }\DIFaddend diffing and merging \DIFdelbegin \DIFdel{despite intervening }\DIFdelend \DIFaddbegin \DIFadd{across refactorings and }\DIFaddend structural transformations. \DIFaddbegin \DIFadd{For example renaming does not conflict with other changes, and movement of a structure does not conflict with changes inside it.
+\item Using these primitives we \DIFdelbegin \DIFdel{reconstruct the key features }\DIFdelend \DIFaddbegin \DIFadd{construct the key capabilities }\DIFaddend of version control: \textit{diffing} and \textit{transfer} (a \DIFdelbegin \DIFdel{specialization of merging more like cherry-picking). Because our technique is }\DIFdelend \DIFaddbegin \DIFadd{merging primitive somewhat like git's cherry-pick). Being }\DIFaddend operation-based \DIFdelbegin \DIFdel{we are able to do fine-grained }\DIFdelend \DIFaddbegin \DIFadd{provides high-fidelity }\DIFaddend diffing and merging \DIFdelbegin \DIFdel{despite intervening }\DIFdelend \DIFaddbegin \DIFadd{across refactorings and }\DIFaddend structural transformations. \DIFaddbegin \DIFadd{For example renaming doesn't conflict with other changes, and movement of a structure doesn't conflict with changes within it.
 }\DIFaddend 
 
-\item We develop a simplified form of version control without a repo: artifacts under version control have an append-only history of operations attached to them. Branching is just making a copy of the artifact with its history, which can then diverge. There is no need for a repo to record a graph of branches and merges because that can be synthesized from the histories on need, and can be done so optimally in a well-defined sense. By liberating branches and versions of artifacts from the repo they can be shared freely and independently, much like the ubiquitous folk practice of file copying~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
+\item We \DIFdelbegin \DIFdel{develop a simplified form }\DIFdelend \DIFaddbegin \DIFadd{propose a simplified model }\DIFaddend of version control without a repo: \DIFdelbegin \DIFdel{artifacts under version control }\DIFdelend \DIFaddbegin \DIFadd{documents }\DIFaddend have an append-only history of operations\DIFdelbegin \DIFdel{attached to them. Branching }\DIFdelend \DIFaddbegin \DIFadd{; branching }\DIFaddend is just making a copy of the artifact with its history, which can then diverge. \DIFdelbegin \DIFdel{There is no need for a repo to record a }\DIFdelend \DIFaddbegin \DIFadd{The }\DIFaddend graph of branches and merges \DIFdelbegin \DIFdel{because that }\DIFdelend \DIFaddbegin \DIFadd{does not need to recorded in a repo because it }\DIFaddend can be synthesized from the histories on need, and can be done so optimally in a \DIFdelbegin \DIFdel{well-defined sense . By liberating branches and versions of artifacts }\DIFdelend \DIFaddbegin \DIFadd{sense we define. Liberating versions and branches }\DIFaddend from the repo \DIFdelbegin \DIFdel{they can be shared freely and independently, much like }\DIFdelend \DIFaddbegin \DIFadd{frees them to be shared independently, as in }\DIFaddend the ubiquitous folk practice of \DIFdelbegin \DIFdel{file copying }\DIFdelend \DIFaddbegin \DIFadd{copying spreadsheets}\DIFaddend ~\cite{Burnett14, Basman19}, but with the added benefit of being able to diff and merge.
 
-\item We enrich the data model to incorporate relational databases, including operations for schema change and normalization. We demonstrate version control on databases that works across schema changes, and which can also be used to manage schema migrations.
+\item We enrich the data model to incorporate relational databases, including operations for schema change and normalization\DIFdelbegin \DIFdel{. We demonstrate }\DIFdelend \DIFaddbegin \DIFadd{, providing }\DIFaddend version control on databases that works across schema changes \DIFdelbegin \DIFdel{, and which can also be used to manage schema migrations}\DIFdelend \DIFaddbegin \DIFadd{and automates schema migration}\DIFaddend .
 
-\item We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations, in a form of Programming by Demonstration~\cite{cypher93-pbd}. We develop this idea on a query language fragment containing selects and joins. Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. This conjecture could open up an unexplored space of query language designs.
+\item We conjecture that queries can be \textit{operationalized} into a sequence of schema and data operations, in a form of Programming by Demonstration~\cite{cypher93-pbd}. We develop this idea on a query language fragment \DIFdelbegin \DIFdel{containing }\DIFdelend \DIFaddbegin \DIFadd{with }\DIFaddend selects and joins.
+\DIFdelbegin \DIFdel{Operationalized queries are represented as a }\textit{\DIFdel{future timeline}} %DIFAUXCMD
+\DIFdel{that is speculatively executed as a branch off of the present state, returning a value from its }\textit{\DIFdel{hypothetical future}}%DIFAUXCMD
+\DIFdel{. This conjecture could open up an unexplored space of query language designs.
+}%DIFDELCMD < 
 
-\item Operationalized queries have a perhaps surprising benefit: query rewriting~\cite{curino08, herrmann17} during schema change falls out ``for free'' from the machinery of operational differencing.
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{Operationalized queries have a perhaps surprising benefit: query }\DIFdelend %DIF >  Operationalized queries are represented as a \textit{future timeline} that is speculatively executed as a branch off of the present state, returning a value from its \textit{hypothetical future}. This conjecture could open up an unexplored space of query language designs.
+\DIFaddbegin \DIFadd{Query }\DIFaddend rewriting~\cite{curino08, herrmann17} during schema change falls out ``for free''\DIFdelbegin \DIFdel{from the machinery of operational differencing}\DIFdelend .
 
 % \item We demonstrate Baseline's direct manipulation UI that supports interactive data and schema changes as well as diffing and merging between databases.
 % Miller columns~\cite{miller-columns} are used to drill into nested data and across relationhips, with each column containing an indented outline or a flat table. We discuss our design iteration on visualizing differences in the presence of rich transformations, leading to a split screen with coordinated selection. A \textit{Playable Demo} is available.
@@ -289,11 +315,7 @@ including refactorings. We define the primitive transformations \textit{projecti
 
 \end{enumerate}
 
-\DIFadd{We evaluate the usefulness of Baseline with case studies }\DIFaddend of schema evolution \DIFdelbegin \DIFdel{~\mbox{%DIFAUXCMD
-\cite{challenge-problems}}\hskip0pt%DIFAUXCMD
-}\DIFdelend \DIFaddbegin \DIFadd{scenarios taken from the research literature. These include challenge problems we identified in }\textit{\DIFadd{Schema Evolution in Interactive Programming Systems}}\DIFadd{~\mbox{%DIFAUXCMD
-\cite{challenge-problems} }\hskip0pt%DIFAUXCMD
-that originally motivated Baseline}\DIFaddend .
+\DIFadd{We evaluate the capabilities and usefulness of Baseline with case studies }\DIFaddend of schema evolution \DIFaddbegin \DIFadd{scenarios taken from the research literature. These include the challenge problems we identified earlier}\DIFaddend ~\cite{challenge-problems}.
 
 \DIFdelbegin %DIFDELCMD < \end{enumerate}
 %DIFDELCMD < 
@@ -321,8 +343,79 @@ Figure~\ref{rich-data} defines the syntax and operations of the model.
 
 % data syntax table
 \begin{figure}[h]
-\tcbox{
-  \begin{minipage}{\textwidth}
+  \DIFdelbeginFL %DIFDELCMD < \tcbox{
+%DIFDELCMD <   \begin{minipage}{\textwidth}
+%DIFDELCMD < \[ \begin{array}{r@{\ }l|r@{\ }l|r@{\ }l|l}
+%DIFDELCMD <   \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
+%DIFDELCMD <   \hline
+%DIFDELCMD <   T \Coloneqq & & v \Coloneqq & & T^\varnothing = & &\\
+%DIFDELCMD <   &  \textsf{String} & & S & & \emptystring & \textrm{string}\\
+%DIFDELCMD <   & \textsf{Number} & &  N & & \textsf{NaN} & \textrm{number}\\
+%DIFDELCMD <   & \textsf{List } T & & [ E \is v \  \dots ] & & [] & \textrm{list}\\
+%DIFDELCMD <   %& \{ F \  S \is T \  \dots \} & & \{ F \is v \  \dots \} & & \{ F \is T^\varnothing \  \dots \}& \textrm{record}\\
+%DIFDELCMD <   & \{ F \  S \is T \  \dots \} & & \{ F \is v \  \dots \} & & \{ F \is T^\varnothing \  \dots \}& \textrm{record}\\
+%DIFDELCMD < 
+
+%DIFDELCMD <   & \bot && \bigtimes & & \bigtimes & \textrm{tombstone}\\
+%DIFDELCMD < \end{array}\]
+%DIFDELCMD < 
+
+%DIFDELCMD < % data operations table
+%DIFDELCMD < \[
+%DIFDELCMD < \hspace{-22pt}
+%DIFDELCMD < \begin{array}{l|l}
+%DIFDELCMD <   \textrm{Value operations} & \\
+%DIFDELCMD <   \hline
+%DIFDELCMD <   p \textsf{ noop} & \textrm{Do nothing}\\
+%DIFDELCMD <   p \textsf{ write } v & \textrm{Write atomic value $v$ at $p$}\\
+%DIFDELCMD <   % p \textsf{ init } & \textrm{Set $p$ to initial value}\\
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ insert } E \textsf{ before } E' & \textrm{Insert element ID $E$ into list at $p$ in front of element $E'$}\\
+%DIFDELCMD <   p \textsf{ append } E & \textrm{Append element ID $E$ to end of list at $p$}\\
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ delete } E & \textrm{Delete element ID $E$ in list at $p$}\\
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ move } p' & \textrm{List element $p$ is copied to $p'$ in same list then $p$ is deleted}\\
+%DIFDELCMD <   \hline
+%DIFDELCMD < 
+
+%DIFDELCMD <   \textrm{Type operations} & \rule[0pt]{0pt}{16pt}\\
+%DIFDELCMD <   \hline
+%DIFDELCMD <   p \textsf{ Define } T & \textrm{Define $p$ to have type $T$, initializing values}\\
+%DIFDELCMD <   p \textsf{ Convert } T & \textrm{Convert atomically-typed $p$ to atomic type $T$}\\
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ Rename } S & \textrm{Rename record field $p$ to string $S$}\\
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ Insert } F \textsf{ before } F' & \textrm{Insert field ID $F$ into record at $p$ in front of field $F'$}\\
+%DIFDELCMD <   p \textsf{ Append } F & \textrm{Append field ID $F$ to end of record at $p$}\\
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ Delete } F & \textrm{Delete field ID $F$ in record at $p$}\\
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ Move } p' & \textrm{Record field at $p$ is copied to $p'$ in the same record}\\
+%DIFDELCMD <   & \textrm{or containing\slash contained record, and then $p$ is deleted}\\
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ ListOf } & \textrm{Convert value at $p$ into a list of one element with ID $\mathbb{1}$}\\
+%DIFDELCMD <   p \textsf{ IntoFirst } & \textrm{Convert list at $p$ into its first element, else the initial value} \\
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ RecordOf } F & \textrm{Convert value at $p$ into a record of one field with ID $F$} \\
+%DIFDELCMD <   p \textsf{ IntoField } F & \textrm{Convert record at $p$ into value of its field $F$} \\
+%DIFDELCMD < 
+
+%DIFDELCMD < \end{array}\]
+%DIFDELCMD < \end{minipage}
+%DIFDELCMD < }
+%DIFDELCMD < %%%
+\DIFdelendFL \DIFaddbeginFL \vspace{-8pt}
+\figbox{
 \[ \begin{array}{r@{\ }l|r@{\ }l|r@{\ }l|l}
   \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
   \hline
@@ -337,6 +430,7 @@ Figure~\ref{rich-data} defines the syntax and operations of the model.
 \end{array}\]
 
 % data operations table
+\vspace{-12pt}
 \[
 \hspace{-22pt}
 \begin{array}{l|l}
@@ -377,9 +471,9 @@ Figure~\ref{rich-data} defines the syntax and operations of the model.
   p \textsf{ IntoField } F & \textrm{Convert record at $p$ into value of its field $F$} \\
 
 \end{array}\]
-\end{minipage}
 }
-\caption{Rich data syntax and operations}
+\vspace{-4pt}
+\DIFaddendFL \caption{Rich data syntax and operations}
 \label{fig:rich-data}
 \end{figure}
 
@@ -420,8 +514,13 @@ In this presentation we adopt the standard approach of defining values and types
 \end{remark}
 
 Many of the type operations exist in order to do schema migration on values: they would not be needed just to define a type prior to populating it with data. We think of these operations as \textit{type refactorings}, capturing high-level design changes. They are manifested in the UI as direct manipulations so that schema evolution can be done interactively. \DIFdelbegin \DIFdel{Schema }\DIFdelend \DIFaddbegin \DIFadd{Interactive schema }\DIFaddend evolution is also needed in \textit{live programming}~\cite{challenge-problems}.
-\begin{figure}[h]
-\begin{align*}
+\DIFdelbegin %DIFDELCMD < \begin{figure}[h]
+%DIFDELCMD < %%%
+\DIFdelendFL \DIFaddbeginFL 
+
+\begin{figure}[]
+  \vspace{-20pt}
+\DIFaddendFL \begin{align*}
   S_1 &= [
     e \is \{ \mathit{what}\is \quotedstring{clean}\comma  \mathit{who}\is \quotedstring{Jack} \}
     ] \isa
@@ -476,7 +575,8 @@ Baseline records histories by observing the operations executed in the API and i
 
 % projection diagrams
 \begin{figure}[h]
-\begin{minipage}[b][][b]{1.75in}
+  \DIFaddbeginFL \vspace{-8pt}
+\DIFaddendFL \begin{minipage}[b][][b]{1.75in}
 \center
 \begin{tikzcd}[column sep=large]
 	0 & {[\mathbb{1}\is 0]} \\
@@ -588,9 +688,14 @@ Figure~\ref{fig:projection-rules}(b) is the rule for conflicting writes.
 % Figure~\ref{fig:projection-rules}(c) is a generic rule that identical operations cancel out in projection, which overrides all the other rules. HoW?
 
 
-\subsection{Retraction}
 
-% retraction diagrams
+\DIFdelbegin \subsection{\DIFdel{Retraction}}
+%DIFAUXCMD
+\addtocounter{subsection}{-1}%DIFAUXCMD
+%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdelend % retraction diagrams
 \begin{figure}[h]
 \begin{minipage}[b][][b]{1.2in}
 \center
@@ -640,7 +745,10 @@ Figure~\ref{fig:projection-rules}(b) is the rule for conflicting writes.
 \label{fig:retraction}
 \end{figure}
 
-The \textsf{Retract} function goes in the opposite direction of \textsf{Project}. Figure~\ref{fig:retraction}(a) shows that it starts with two timelines \textit{base} and \textit{post} and produces \textit{pre} and \textit{adjust}. We say that \textit{post} is retracted through \textit{base} into \textit{pre}. The goal as with projection is that \textit{pre} preserves the intention of \textit{post} before \textit{base} happened---it ``does the same thing''. Likewise \textit{adjust} preserves the intention of \textit{base} but defers to the first rule.
+
+\DIFaddbegin \subsection{\DIFadd{Retraction}}
+
+\DIFaddend The \textsf{Retract} function goes in the opposite direction of \textsf{Project}. Figure~\ref{fig:retraction}(a) shows that it starts with two timelines \textit{base} and \textit{post} and produces \textit{pre} and \textit{adjust}. We say that \textit{post} is retracted through \textit{base} into \textit{pre}. The goal as with projection is that \textit{pre} preserves the intention of \textit{post} before \textit{base} happened---it ``does the same thing''. Likewise \textit{adjust} preserves the intention of \textit{base} but defers to the first rule.
 
 Figure~\ref{fig:retraction}(b) shows the retraction reversing the projection in Figure~\ref{fig:projection}(a). Often retraction is the inverse of projection as in this case, but not always, and sometimes retraction is not possible at all. In Figure~\ref{fig:retraction}(c) the list has a new element appended to it. There is no way to do the same thing before the list was created. Projection failures indicates a \textit{dependency} between operations. The \textsf{append} operation depends on the prior \textsf{ListOf} operation having created the list and cannot be retracted through it.
 
@@ -676,7 +784,31 @@ How do we know if the rules for projection and retraction are correct, that they
 % We also need to prove that diffs are indeed optimal.
 \end{remark}
 
-\subsection{Across the Multiverse}\label{transfer}
+
+\DIFaddbegin \begin{figure}[]
+  \vspace{-20pt}
+\[
+\DIFaddFL{\textsf{Transfer}(a_{1\ldots n}, O, b_{1\ldots m}) = b' \textrm{ in }\quad
+}\begin{tikzcd}[column sep = huge]
+	\DIFaddFL{A_{n-1} }& \DIFaddFL{O }& \DIFaddFL{B }\\
+	\DIFaddFL{A_n }& {\DIFaddFL{O'}} & {\DIFaddFL{B'}}
+	\DIFaddFL{\arrow["{a_n}"', from=1-1, to=2-1]
+	\arrow["{\textsf{R}\Rightarrow}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
+	\arrow["{a_{n-1}\,\ldots\  a_1}"', from=1-2, to=1-1]
+	\arrow["{b_1\,\ldots \  b_m}", from=1-2, to=1-3]
+	\arrow["o", dashed, from=1-2, to=2-2]
+	\arrow["{\textsf{P}\Rightarrow}"{description, pos=0.2}, draw=none, from=1-2, to=2-3]
+	\arrow["{b'}", dashed, from=1-3, to=2-3]
+	\arrow["{\mathit{adjust}_a}"', dashed, from=2-2, to=2-1]
+	\arrow["{\mathit{adjust}_b}", dashed, from=2-2, to=2-3]
+}\end{tikzcd}\DIFaddFL{}\]
+\vspace{-16pt}
+\caption{\DIFaddFL{Transfer}}
+\label{fig:transfer}
+\end{figure}
+
+
+\DIFaddend \subsection{Across the Multiverse}\label{transfer}
 
   A \textit{diff} between two states \mathbox{A} and \mathbox{B} is a pair of timelines that branch off some shared state \mathbox{O} resulting in \mathbox{A} and \mathbox{B}, diagrammed like this:
 \[\begin{tikzcd}
@@ -692,15 +824,14 @@ How do we know if the rules for projection and retraction are correct, that they
 The two timelines are called the \textit{branches} of the diff and we call their operations the \textit{differences}. Many version control systems use something like a diff by looking for the \textit{last common ancestor} in a tree of branching versions, which is then used for \textit{three-way diffing}~\cite{diff3}. We do not do that---we will discuss how to calculate a diff in \S\ref{diff-synth} but for the moment let us take them as given. The key operation on a diff is to
 \textit{transfer} an operation from one side to another, which we define diagrammatically in Figure~\ref{fig:transfer} (where we lift projection and retraction from operations to timelines in the obvious way).
 \DIFdelbegin %DIFDELCMD < \vspace{-16pt}
+%DIFDELCMD < \begin{figure}[h]
 %DIFDELCMD < %%%
-\DIFdelend %DIF > \vspace{-16pt}
-\begin{figure}[h]
 \[
-\textsf{Transfer}(a_{1\ldots n}, O, b_{1\ldots m}) = b' \textrm{ in }\quad
-\begin{tikzcd}[column sep = huge]
-	A_{n-1} & O & B \\
-	A_n & {O'} & {B'}
-	\arrow["{a_n}"', from=1-1, to=2-1]
+\DIFdelFL{\textsf{Transfer}(a_{1\ldots n}, O, b_{1\ldots m}) = b' \textrm{ in }\quad
+}\begin{tikzcd}[column sep = huge]
+	\DIFdelFL{A_{n-1} }& \DIFdelFL{O }& \DIFdelFL{B }\\
+	\DIFdelFL{A_n }& {\DIFdelFL{O'}} & {\DIFdelFL{B'}}
+	\DIFdelFL{\arrow["{a_n}"', from=1-1, to=2-1]
 	\arrow["{\textsf{R}\Rightarrow}"{description, pos=0.1}, draw=none, from=1-1, to=2-2]
 	\arrow["{a_{n-1}\,\ldots\  a_1}"', from=1-2, to=1-1]
 	\arrow["{b_1\,\ldots \  b_m}", from=1-2, to=1-3]
@@ -709,11 +840,17 @@ The two timelines are called the \textit{branches} of the diff and we call their
 	\arrow["{b'}", dashed, from=1-3, to=2-3]
 	\arrow["{\mathit{adjust}_a}"', dashed, from=2-2, to=2-1]
 	\arrow["{\mathit{adjust}_b}", dashed, from=2-2, to=2-3]
-\end{tikzcd}\]
-\vspace{-16pt}
-\caption{Transfer}
-\label{fig:transfer}
-\end{figure}
+}\end{tikzcd}\DIFdelFL{}\]%DIFAUXCMD
+%DIFDELCMD < \vspace{-16pt}
+%DIFDELCMD < %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{Transfer}}
+%DIFAUXCMD
+%DIFDELCMD < \label{fig:transfer}
+%DIFDELCMD < \end{figure}
+%DIFDELCMD < %%%
+\DIFdelend 
 
 Transfer\footnote{Transfer was called migrate in earlier publications~\cite{edwards21, edwards22}.} retracts \mathbox{a_n} backwards through all earlier operations on the \mathbox{A} timeline onto the original state \mathbox{O} and then projects that operation forwards through all the operations of the \mathbox{B} timeline. The final result is the operation \mathbox{b'} that yields a new version \mathbox{B'}. The effect of the transfer is that the final operation \mathbox{b'} preserves the intention of the original operation \mathbox{a_n} given all the operations traversed while traveling backward in time to \mathbox{O} and then forward to \mathbox{B}. Transfer also computes a new diff between \mathbox{A_n} and \mathbox{B'}: the transferred operation is now shared between them in \mathbox{O'} with branching timelines \mathbox{\mathit{adjust}_a} and \mathbox{\mathit{adjust}_b}. This updated diff is used later for diff optimization (\S\ref{diff-synth}).
 
@@ -799,12 +936,18 @@ This approach is more flexible: since versions and branches no longer belong to 
 
 
 
-\section{Database Evolution}\label{db-evolution}
-% \section{Relationships}
-% \section{Relational Databases}
+\DIFdelbegin \section{\DIFdel{Database Evolution}}%DIFAUXCMD
+\addtocounter{section}{-1}%DIFAUXCMD
+%DIFDELCMD < \label{db-evolution}
+%DIFDELCMD < %%%
+%DIF <  \section{Relationships}
+%DIF <  \section{Relational Databases}
+%DIFDELCMD < 
 
-\begin{figure}
-\begin{subfigure}[b]{35em}\vspace{0pt}
+%DIFDELCMD < %%%
+\DIFdelend \begin{figure}
+  \DIFaddbeginFL \vspace{-8pt}
+\DIFaddendFL \begin{subfigure}[b]{35em}\vspace{0pt}
   \sffamily
   \small
   \begin{tabular}{ r|l|r|r|l|l|}
@@ -863,14 +1006,87 @@ This approach is more flexible: since versions and branches no longer belong to 
   \caption{Deduped customers}
   \label{fig:tables-dedup}
 \end{subfigure}
-\caption{Table schema change}
+\DIFaddbeginFL \vspace{-8pt}
+\DIFaddendFL \caption{Table schema change}
 \label{fig:tables}
 \end{figure}
 
-% database syntax and operations
-\begin{figure}
-\tcbox{
-  \begin{minipage}{\textwidth}
+
+%DIF <  database syntax and operations
+\DIFdelbegin %DIFDELCMD < \begin{figure}
+%DIFDELCMD < \tcbox{
+%DIFDELCMD <   \begin{minipage}{\textwidth}
+%DIFDELCMD < \[\begin{array}{r@{\ }l|r@{\ }l|r@{\ }l|l}
+%DIFDELCMD <   \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
+%DIFDELCMD <   \hline
+%DIFDELCMD < 
+
+%DIFDELCMD <   & \rightarrow\! p & & \rightarrow\! E & & \rightarrow\! *
+%DIFDELCMD <   & \textrm{link to element $E$ of list $p$ ($*$ is null link)}  \\
+%DIFDELCMD < 
+
+%DIFDELCMD <   % multi-link
+%DIFDELCMD <   % & \rightarrow\! p & & \rightarrow\! [ E \  \dots ] & & \rightarrow\! []
+%DIFDELCMD <   % & \textrm{link into list } p \\
+%DIFDELCMD < \end{array}\]
+%DIFDELCMD < \vspace{.5em}
+%DIFDELCMD < \[\begin{array}{l|l}
+%DIFDELCMD <   \textrm{Value operations} & \\
+%DIFDELCMD <   \hline
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ link } E & \textrm{Link to element } E \textsf{ (unlink if $*$)} \\
+%DIFDELCMD < 
+
+%DIFDELCMD <   % multi-link
+%DIFDELCMD <   % p \textsf{ link } E & \textrm{Link to element } E \\
+%DIFDELCMD <   % p \textsf{ unlink } E & \textrm{Unlink from element } E \\
+%DIFDELCMD <   \hline
+%DIFDELCMD < 
+
+%DIFDELCMD <   \textrm{Type operations} & \rule[0pt]{0pt}{16pt}\\
+%DIFDELCMD <   \hline
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ Link } p' & \textrm{Define $p$ as link to list $p'$} \\
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ Split } p' & \textrm{Split at column $p$ creating linked table $p'$}\\
+%DIFDELCMD <   p \textsf{ Join } & \textrm{Join link column $p$ deleteing linked table}\\
+%DIFDELCMD < 
+
+%DIFDELCMD < \end{array}\]
+%DIFDELCMD < \end{minipage}
+%DIFDELCMD < }
+%DIFDELCMD <   %%%
+%DIFDELCMD < \caption{%
+{%DIFAUXCMD
+\DIFdelFL{Additional database syntax and operations}}
+  %DIFAUXCMD
+%DIFDELCMD < \label{fig:db-addons}
+%DIFDELCMD < \end{figure}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \section{\DIFadd{Database Evolution}}\label{db-evolution}
+\DIFaddend 
+
+In this section we apply Operational Differencing to the problem of \textit{schema evolution} in relational databases. We do this by adding relational database features into our data types and operations.
+% We use as a running example \textit{Extract Entity} from~\citet{challenge-problems}.
+For example Figure~\ref{fig:tables-single} shows a table of orders for the Acme Corporation. A database professional will immediately see a problem: the customer name and address is duplicated across all orders by the same customer, so any changes to that information would need to be duplicated.
+Database textbooks teach to avoid this sort of problem by properly \textit{normalizing} the schema before adding any data. However in practice the need for schema changes often arises after there is data, which must then be \textit{migrated} into the changed schema, typically with ad hoc SQL programs.
+
+One approach a SQL migration program could take is to populate a new \textsf{customers} table from a query projecting out the \textsf{name} and \textsf{address} columns and excluding duplicates. Then it would need to generate primary keys for the deduped customers (the name cannot be the primary key because it is mutable). A new column \textsf{customer} would be added to \textsf{orders} declared as a foreign key containing the customer's primary key. Finally the \textsf{name} and \textsf{address} columns in the \textsf{orders} table would be dropped.
+
+To perform the migration in Baseline we first need to add support for relational data into our types and operations.
+We already support tables: they are lists of records, where the elements of the list are the rows and the fields of the record are the columns, which are homogeneously typed as in a relational database.
+Throughout the rest of the paper we will refer to any Baseline document containing tables as a \textit{database}.
+What is missing so far is \textit{relationships} between tables, which relational databases model through primary and foreign keys. We take a more PL-oriented approach.
+Instead of primary keys exposed as user data fields we annotate list elements with IDs that are unique, permanent, and opaque. Instead of foreign keys we add the \textit{link} data type in Figure~\ref{fig:db-addons}: the type of a link defines the table (or list) it ranges over; the value of a link is an element ID in that range, or \mathbox{*} for a null link. We also add the operations defined in Figure~\ref{fig:db-addons}. All operations that move a list must also adjust the path in the type of all links into that list.
+
+
+%DIF >  database syntax and operations
+\DIFaddbegin \begin{figure}
+  \vspace{-8pt}
+\figbox{
 \[\begin{array}{r@{\ }l|r@{\ }l|r@{\ }l|l}
   \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
   \hline
@@ -882,7 +1098,7 @@ This approach is more flexible: since versions and branches no longer belong to 
   % & \rightarrow\! p & & \rightarrow\! [ E \  \dots ] & & \rightarrow\! []
   % & \textrm{link into list } p \\
 \end{array}\]
-\vspace{.5em}
+\vspace{-4pt}
 \[\begin{array}{l|l}
   \textrm{Value operations} & \\
   \hline
@@ -903,26 +1119,15 @@ This approach is more flexible: since versions and branches no longer belong to 
   p \textsf{ Join } & \textrm{Join link column $p$ deleteing linked table}\\
 
 \end{array}\]
-\end{minipage}
 }
-  \caption{Additional database syntax and operations}
+\vspace{-4pt}
+  \caption{\DIFaddFL{Additional database syntax and operations}}
   \label{fig:db-addons}
 \end{figure}
 
-In this section we apply Operational Differencing to the problem of \textit{schema evolution} in relational databases. We do this by adding relational database features into our data types and operations.
-% We use as a running example \textit{Extract Entity} from~\citet{challenge-problems}.
-For example Figure~\ref{fig:tables-single} shows a table of orders for the Acme Corporation. A database professional will immediately see a problem: the customer name and address is duplicated across all orders by the same customer, so any changes to that information would need to be duplicated.
-Database textbooks teach to avoid this sort of problem by properly \textit{normalizing} the schema before adding any data. However in practice the need for schema changes often arises after there is data, which must then be \textit{migrated} into the changed schema, typically with ad hoc SQL programs.
 
-One approach a SQL migration program could take is to populate a new \textsf{customers} table from a query projecting out the \textsf{name} and \textsf{address} columns and excluding duplicates. Then it would need to generate primary keys for the deduped customers (the name cannot be the primary key because it is mutable). A new column \textsf{customer} would be added to \textsf{orders} declared as a foreign key containing the customer's primary key. Finally the \textsf{name} and \textsf{address} columns in the \textsf{orders} table would be dropped.
 
-To perform the migration in Baseline we first need to add support for relational data into our types and operations.
-We already support tables: they are lists of records, where the elements of the list are the rows and the fields of the record are the columns, which are homogeneously typed as in a relational database.
-Throughout the rest of the paper we will refer to any Baseline document containing tables as a \textit{database}.
-What is missing so far is \textit{relationships} between tables, which relational databases model through primary and foreign keys. We take a more PL-oriented approach.
-Instead of primary keys exposed as user data fields we annotate list elements with IDs that are unique, permanent, and opaque. Instead of foreign keys we add the \textit{link} data type in Figure~\ref{fig:db-addons}: the type of a link defines the table (or list) it ranges over; the value of a link is an element ID in that range, or \mathbox{*} for a null link. We also add the operations defined in Figure~\ref{fig:db-addons}. All operations that move a list must also adjust the path in the type of all links into that list.
-
-The first step in evolving the Acme database is to \textsf{Split} out a \textsf{Customers} table with the following operations:
+\DIFaddend The first step in evolving the Acme database is to \textsf{Split} out a \textsf{Customers} table with the following operations:
 \[
 \begin{array}{ll}
 \{ \textsf{orders}\is [ \ldots ]\} \exec & \textrm{(1)}\\
@@ -1047,9 +1252,48 @@ doing: computing a query by mutating a copy of the database.
 
 \begin{figure}
 % query syntax
-% \vspace{-4em}
-\tcbox{
-\begin{minipage}{\textwidth}
+%DIF <  \vspace{-4em}
+\DIFdelbeginFL %DIFDELCMD < \tcbox{
+%DIFDELCMD < \begin{minipage}{\textwidth}
+%DIFDELCMD <   \[ \begin{array}{r@{\ }l|r@{\ }l|r@{\ }l|l}
+%DIFDELCMD <   \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
+%DIFDELCMD <   \hline
+%DIFDELCMD < 
+
+%DIFDELCMD <   & \langle \mathit{op}\fatsemi \ldots \ \uparrow\! p \rangle &&
+%DIFDELCMD <   % \textrm{return value} && \textrm{return value} &
+%DIFDELCMD <   && &
+%DIFDELCMD <   \textrm{Formula returning value at $p$.} \\
+%DIFDELCMD < 
+
+%DIFDELCMD < \end{array}\]
+%DIFDELCMD < \vspace{.5em}
+%DIFDELCMD < \[
+%DIFDELCMD < \begin{array}{l|l}
+%DIFDELCMD <   \textrm{Value operations} & \\
+%DIFDELCMD <   \hline
+%DIFDELCMD < 
+
+%DIFDELCMD <   p \textsf{ deletePresent } E & \textrm{Delete rows where column $p$ has non-initial value.} \\
+%DIFDELCMD <   p \textsf{ deleteAbsent } E & \textrm{Delete rows where column $p$ has initial value.} \\
+%DIFDELCMD < 
+
+%DIFDELCMD <   % p \textsf{ return} & \textrm{Return value at $p$ as result of query.}\\
+%DIFDELCMD < 
+
+%DIFDELCMD <   \hline
+%DIFDELCMD < 
+
+%DIFDELCMD <   \textrm{Type operations} & \rule[0pt]{0pt}{16pt}\\
+%DIFDELCMD <   \hline
+%DIFDELCMD < 
+
+%DIFDELCMD < \end{array}\]
+%DIFDELCMD < \end{minipage}
+%DIFDELCMD < }
+%DIFDELCMD <   %%%
+\DIFdelendFL \DIFaddbeginFL \vspace{-8pt}
+\figbox{
   \[ \begin{array}{r@{\ }l|r@{\ }l|r@{\ }l|l}
   \multicolumn{2}{l|}{\textrm{type}} & \multicolumn{2}{l|}{\textrm{value}} & \multicolumn{2}{l|}{\textrm{initial value}}&\\
   \hline
@@ -1060,7 +1304,7 @@ doing: computing a query by mutating a copy of the database.
   \textrm{Formula returning value at $p$.} \\
 
 \end{array}\]
-\vspace{.5em}
+\vspace{-4pt}
 \[
 \begin{array}{l|l}
   \textrm{Value operations} & \\
@@ -1077,9 +1321,9 @@ doing: computing a query by mutating a copy of the database.
   \hline
 
 \end{array}\]
-\end{minipage}
 }
-  \caption{Additional query syntax and operations}
+\vspace{-4pt}
+  \DIFaddendFL \caption{Additional query syntax and operations}
   \label{fig:query-addons}
 \end{figure}
 
@@ -1124,7 +1368,12 @@ Henceforth the \textit{new-formula} field's value will be the result of a query 
 
 
 
-\subsection{Query Rewriting}\label{query-rewriting}
+\DIFdelbegin \subsection{\DIFdel{Query Rewriting}}%DIFAUXCMD
+\addtocounter{subsection}{-1}%DIFAUXCMD
+%DIFDELCMD < \label{query-rewriting}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \paragraph{\DIFadd{Query Rewriting}}
+\DIFaddend 
 
 There is another benefit to treating queries as timelines of operations: operation transfer gives us \textit{query rewriting}~\cite{curino08, herrmann17} for free. When a database schema changes, some of the queries written for it may need to change too. This scenario is called forward rewriting---backward rewriting is backporting a query on a new schema to an older one.
 In practice query rewriting is done manually by SQL programmers. The just-cited research adapts query optimization techniques to build specialized rewriting algorithms.
@@ -1147,76 +1396,58 @@ Forward rewriting is more complicated. It occurs when a formula definition is tr
 \footnote{This naive algorithm would clutter up the formula with irrelevant schema changes. We simplify them out by retracting the original formula back through them as much as possible, retaining only those schema changes the formula is dependent upon.}.
 For example if we were to transfer the prior backported query forward again through the \textsf{Split} operation then the inverse operation \textsf{Join} would be prepended to the \textsf{deletePresent} operation, correctly reconstructing the original query.
 
+
 %DIF <  We offer this as a solution to \textit{Challenge Problem \#3: Code Co-evolution for Extract Entity}~\cite{challenge-problems}.
-%DIF > BEGIN DIFADD
-\DIFaddbegin \begin{casestudy}\label{case-query}
-\DIFadd{This example of query rewriting is a partial solution to the challenge problem }\textbf{\DIFadd{Code Co-evolution for Extract Entity}}\DIFadd{~\mbox{%DIFAUXCMD
-\cite{challenge-problems}}\hskip0pt%DIFAUXCMD
-. A complete solution would first require a fully general query language. In particular, selection was handled as a special case of testing for blank values; in general a language of predicates is needed.
+\DIFdelbegin %DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\section{\DIFdel{Evaluation}}
+%DIFAUXCMD
+\addtocounter{section}{-1}%DIFAUXCMD
+%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdel{We evaluate Baseline against the challenge problems proposed in
+}\textit{\DIFdel{Schema Evolution in Interactive Programming Systems}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \begin{casestudy}\label{case-query}
+\DIFadd{This example of query rewriting is a partial solution to the challenge problem }\textbf{\DIFadd{Code Co-evolution for Extract Entity}}\DIFaddend ~\cite{challenge-problems}. \DIFaddbegin \DIFadd{A complete solution would first require a fully general query language. In particular, selection was handled as a special case of testing for blank values; in general a language of predicates is needed.
 %DIF >  We could embed a predicate as a Boolean-valued computed column and then use the \textsf{removePresent/removeAbsent} operations. That would be consistent with the philosophy of \textit{querying by sculpting} but we want to consider adding general predicates into the language of operations.
 We conjecture that just as queries can be seen as timelines of operations, so can pure functional expressions, as a series of imperative operations on a result value. The hope is that by consistently using timelines as the mechanism of language abstraction the semantics of operational transfer through these timelines would provide refactoring and rewriting ``for free''.
 }\end{casestudy}
 \DIFaddend 
 
 
-\DIFaddbegin \begin{casestudy}
+\DIFdelbegin %DIFDELCMD < \begin{enumerate}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \begin{casestudy}
 \citet{curino08} \DIFadd{first introduced }\textit{\DIFadd{Schema Modification Operations}} \DIFadd{using the example of a complex Wikipedia schema evolution. It used selection operations with predicates as discussed above. It also involved making a temporary copy of a table and unioning with another table. Baseline currently does not have either of those operations. They appear straightforward with the caveat that changes to a copy can't be retracted into the original without breaking the roundtrip law.
 }\end{casestudy}
+\DIFaddend 
 
 
-%DIF > END DIFADD
 
-%DIF > BEGIN DIFNOMARKUP
-\DIFaddend ---
-
-Align latexdiff.
-
-A typical example of state-based diffing going wrong.
-
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah.
-
----
-%DIF > END DIFNOMARKUP
-
-
-%DIF < BEGIN DIFDEL
-\DIFdelbegin \section{\DIFdel{Evaluation}}
-%DIFAUXCMD
-\addtocounter{section}{-1}%DIFAUXCMD
-\DIFdelend %DIF > BEGIN DIFADD
-
-\DIFdelbegin \DIFdel{We evaluate Baseline against the challenge problems proposed in
-}\textit{\DIFdel{Schema Evolution in Interactive Programming Systems}}%DIFAUXCMD
-\DIFdel{~\mbox{%DIFAUXCMD
-\cite{challenge-problems}}\hskip0pt%DIFAUXCMD
-.
+\DIFdelbegin %DIFDELCMD < \item %%%
+\textbf{\DIFdel{Live State Type Evolution}}%DIFAUXCMD
+%DIFDELCMD < \redCross %%%
+\DIFdel{The problem is to evolve the state of an Elm application so that it needn't be restarted. The example given is to evolve a field of a TODO item from }\textsf{\DIFdel{completed: bool}} %DIFAUXCMD
+\DIFdel{to }\textsf{\DIFdel{completed: Maybe<DateTime>}}%DIFAUXCMD
+\DIFdel{.
+This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application.
 }\DIFdelend \DIFaddbegin \section{\DIFadd{Evaluation \& Discussion}}\label{discussion}
 \DIFaddend 
 
-\DIFdelbegin %DIFDELCMD < \begin{enumerate}
-%DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \DIFadd{To evaluate the capabilities of Baseline we have examined case studies taken from the research literature. These include the challenge problems identified in our prior paper
+\DIFdelbegin %DIFDELCMD < \item %%%
+\textbf{\DIFdel{Extract Entity}}%DIFAUXCMD
+%DIFDELCMD < \greenCheck %%%
+\DIFdel{We adopted this problem verbatim as the example shown in Figure~\ref{fig:tables} and solved in \S\ref{db-evolution} with the }\textsf{\DIFdel{Split}} %DIFAUXCMD
+\DIFdel{and }\textsf{\DIFdel{move}} %DIFAUXCMD
+\DIFdel{operations. }\DIFdelend \DIFaddbegin \DIFadd{To evaluate the capabilities of Baseline we have examined case studies taken from the research literature. These include the challenge problems identified in our prior paper
 }\textit{\DIFadd{Schema Evolution in Interactive Programming Systems}}\DIFadd{~\mbox{%DIFAUXCMD
 \cite{challenge-problems}}\hskip0pt%DIFAUXCMD
 . We have already discussed four of these challenge problems in case studies \ref{case-multiplicity}, \ref{case-extract}, \ref{case-diverge}, and \ref{case-query}. The other four challenge problems present difficulties, as follows.
 }\DIFaddend 
 
 \DIFdelbegin %DIFDELCMD < \item %%%
-\textbf{\DIFdel{Live State Type Evolution}}%DIFAUXCMD
-%DIFDELCMD < \redCross %%%
-\DIFdel{The problem is to evolve the state of an Elm application so that it needn't be restarted.
-  The example given is to evolve a field of a TODO item from }\textsf{\DIFdel{completed: bool}} %DIFAUXCMD
-\DIFdel{to }\textsf{\DIFdel{completed: Maybe<DateTime>}}%DIFAUXCMD
-\DIFdel{. This example raises the question of how Baseline handles optional types and nulls. But it is moot here because Baseline does not yet have enough programming capabilities to implement the TODO application. }%DIFDELCMD < 
-
-%DIFDELCMD <   \item %%%
-\textbf{\DIFdel{Extract Entity}}%DIFAUXCMD
-%DIFDELCMD < \greenCheck %%%
-\DIFdel{We adopted this problem verbatim as the example shown in Figure~\ref{fig:tables} and solved in \S\ref{db-evolution} with the }\textsf{\DIFdel{Split}} %DIFAUXCMD
-\DIFdel{and }\textsf{\DIFdel{move}} %DIFAUXCMD
-\DIFdel{operations. }%DIFDELCMD < 
-
-%DIFDELCMD <   \item %%%
 \textbf{\DIFdel{Code Co-evolution for Extract Entity}}%DIFAUXCMD
 %DIFDELCMD < \greenCheck %%%
 \DIFdel{This problem builds upon the previous one, asking that a query for pending orders be rewritten during the schema evolution. We discussed this example and solved it in \S\ref{query-rewriting}, albeit in a fragmentary query language. }%DIFDELCMD < 
@@ -1295,64 +1526,66 @@ The playable demo described in Appendix~\ref{demo} has provided some initial fee
 Operational Differencing can ``cherry pick'' and merge changes without conflict across substantial schema changes. Doing so by direct manipulation without learning git and without laborious conflict resolution is a substantial benefit to non-technical users.
 }\DIFaddend 
 
-%DIF <  Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result. The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
-\DIFdelbegin %DIFDELCMD < 
+\DIFaddbegin \DIFadd{The second, unavoidable, conclusion is that Baseline's operations and transfer rules are worryingly complex and still incomplete. We are frankly disappointed that an elegant algebra like that of relational databases has not emerged yet. Nevertheless we have a strong intuition that there is a simpler more elegant theory struggling to get out. We report on our interim results here in the hope of motivating future research taking new angles of attack. One angle we want to explore is generalizing the data model into a graph to distill a smaller and complete algebra of primitive operations.
+}
 
-%DIFDELCMD < %%%
-\DIFdel{The simple approach of deduplicating by collapsing with }\textsf{\DIFdel{move}} %DIFAUXCMD
-\DIFdel{operations leads to transfer anomalies. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
-%DIF <  These operations may require weakening the roundtrip law.
-%DIF <   and requiring that the diffing algorithm impose a causal ordering on transferred operations.
-}\DIFdelend \DIFaddbegin \DIFadd{The second, unavoidable, conclusion is that Baseline's operations and transfer rules are worryingly complex and still incomplete. We are frankly disappointed that an elegant algebra like that of relational databases has not emerged yet. Nevertheless we have a strong intuition that there is a simpler more elegant theory struggling to get out. We report on our interim results here in the hope of motivating future research taking new angles of attack. One angle we want to explore is generalizing the data model into a graph to distill a smaller and complete algebra of primitive operations.
-}\DIFaddend 
+\DIFadd{Specific technical problems have been discussed where they arose in the case studies, perhaps most notably the need to support a proper set datatype. An overall problem is that implementing transfer rules in procedural code has proven to be unsustainable. We propose to define a logic programming DSL for specifying these rules more succinctly by exploiting their symmetries: }\textsf{\DIFadd{Project}} \DIFadd{and  }\textsf{\DIFadd{Retract}} \DIFadd{are often inverses of each other and their rules are often transposeable.
+}
 
-\DIFdelbegin \DIFdel{Implementing projection and retraction rules with procedural if statements is laborious and would benefit from a more declarative approach. It should be possible }\DIFdelend \DIFaddbegin \DIFadd{Specific technical problems have been discussed where they arose in the case studies, perhaps most notably the need to support a proper set datatype. An overall problem is that implementing transfer rules in procedural code has proven to be unsustainable. We propose }\DIFaddend to define a \DIFaddbegin \DIFadd{logic programming }\DIFaddend DSL for specifying \DIFaddbegin \DIFadd{these }\DIFaddend rules more succinctly \DIFdelbegin \DIFdel{that exploits their inherent symmetries}\DIFdelend \DIFaddbegin \DIFadd{by exploiting their symmetries: }\textsf{\DIFadd{Project}} \DIFadd{and  }\textsf{\DIFadd{Retract}} \DIFadd{are often inverses of each other and their rules are often transposeable}\DIFaddend .
-\DIFaddbegin 
+%DIF >  Ideally this DSL can be rendered as diagrams for publication.
+%DIF >  This DSL should also support property-based testing of the roundtrip law.
 
-\DIFaddend % Ideally this DSL can be rendered as diagrams for publication.
-\DIFdelbegin \DIFdel{This DSL should also support property-based testing of the roundtrip law.
-}\DIFdelend %DIF >  This DSL should also support property-based testing of the roundtrip law.
+\DIFaddend % Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result. The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
+
+\DIFdelbegin \DIFdel{The simple approach of deduplicating by collapsing with }\textsf{\DIFdel{move}} %DIFAUXCMD
+\DIFdel{operations leads to transfer anomalies.
+We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
+}\DIFdelend %DIF >  The simple approach of deduplicating by collapsing with \textsf{move} operations leads to transfer anomalies. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
+% These operations may require weakening the roundtrip law.
+%  and requiring that the diffing algorithm impose a causal ordering on transferred operations.
+
+\DIFdelbegin \DIFdel{Implementing projection and retraction rules with procedural if statements is laborious and would benefit from a more declarative approach. It should be possible to define a DSL for specifying rules more succinctly that exploits their inherent symmetries.
+%DIF <  Ideally this DSL can be rendered as diagrams for publication.
+This DSL should also support property-based testing of the roundtrip law. }\DIFdelend %DIF >  An intriguing question is whether it is possible to define an operationalized query language as we conjecture. Could that be extended into a general purpose functional programming language?
 
 \DIFdelbegin \DIFdel{An intriguing question is whether it is possible to define an operationalized query language as we conjecture. Could that be extended into a general purpose functional programming language?
-}\DIFdelend %DIF >  Baseline assigns a unique ID to every insertion operation. Sometimes that might be undesirable, as when people working in different branches coincidentally make the same changes. Diffing will treat their insertions as different. This is one case where state-based version control has a more intuitive result. The diffing UI should detect such cases of adjacent similar insertions and offer to coalesce them (with \textsf{move} operations).
-
-%DIF >  The simple approach of deduplicating by collapsing with \textsf{move} operations leads to transfer anomalies. We plan to implement a proper set datatype that retains provenance by collapsing duplicates into equivalence classes. This datatype should also simplify the primitive operations for schema evolution in nested relations.
-%DIF >  These operations may require weakening the roundtrip law.
-%DIF >   and requiring that the diffing algorithm impose a causal ordering on transferred operations.
-\DIFaddbegin 
-
-%DIF >  An intriguing question is whether it is possible to define an operationalized query language as we conjecture. Could that be extended into a general purpose functional programming language?
-
-\DIFaddend % The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
-
-%DIF < END DIFDEL
-%DIF > END DIFADD
-
-
-\subsection{Conclusion}
-
-Baseline unifies data management across multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It leverages \textit{Operational Differencing}, a new technique for managing data in terms of high-level operations that include refactorings and schema changes.
-Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought\DIFdelbegin \DIFdel{, enabling solutions to four of the eight challenge problems identified in prior work.
-}\DIFdelend \DIFaddbegin \DIFadd{.
-%DIF >  , enabling solutions to four of the eight challenge problems identified in prior work.
-}\DIFaddend Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches \DIFdelbegin \DIFdel{, }\DIFdelend \DIFaddbegin \DIFadd{and is }\DIFaddend able to work across schema evolutions. It also offers a simplified conceptual model for ad hoc usage.
-
-Our preliminary exploration of an operationalized query language opens an intriguing avenue for further research.
-We believe that Baseline demonstrates, at the least, that operation-based approaches to data management have been under-explored and offer \DIFdelbegin \DIFdel{a broad range of new possibilities}\DIFdelend \DIFaddbegin \DIFadd{valuable new capabilities}\DIFaddend .
-
-
-\section{Related Work}
-
-%DIF <  We only have room here to highlight some of the vast adjacent research literature.
-\DIFdelbegin %DIFDELCMD < 
+}%DIFDELCMD < 
 
 %DIFDELCMD < %%%
-\DIFdelend \paragraph{OT and CRDT}
+\DIFdelend % The data model presented here is a subset of our implementation which is in turn a subset of our goal to integrate the data models of PLs and DBs. Notably missing are sum types, type references (aliases), and set-valued deep links with multiplicity/integrity constraints.
 
-Operational Differencing is related to
+
+\DIFdelbegin \subsection{\DIFdel{Conclusion}}
+%DIFAUXCMD
+\addtocounter{subsection}{-1}%DIFAUXCMD
+%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdel{Baseline unifies data management across multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It leverages }\textit{\DIFdel{Operational Differencing}}%DIFAUXCMD
+\DIFdel{, a new technique for managing data in terms of high-level operations that include refactorings and schema changes. Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought, enabling solutions to four of the eight challenge problems identified in prior work.
+Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches, able to work across schema evolutions. It also offers a simplified conceptual model for ad hoc usage. }%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdel{Our preliminary exploration of an operationalized query language opens an intriguing avenue for further research. We believe that Baseline demonstrates, at the least, that operation-based approaches to data management have been under-explored and offer a broad range of new possibilities.
+}%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdelend \section{Related Work}
+
+%DIF <  We only have room here to highlight some of the vast adjacent research literature.
+\DIFaddbegin \myparagraph{OT and CRDT}
+\DIFaddend 
+
+\DIFdelbegin \paragraph{\DIFdel{OT and CRDT}}
+%DIFAUXCMD
+\addtocounter{paragraph}{-1}%DIFAUXCMD
+%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdelend Operational Differencing is related to
 Operational Transformation (OT)~\cite{ceda-ot, Ellis89, Ressel96, Oster06} and Convergent Replicated DataTypes (CRDTs)~\cite{Shapiro11}.
 %DIF <  , and attempts to unify them~\cite{braid}.
-Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence. On the other hand, most OT and all CRDT algorithms are decentralized, whereas we are centralized: we can synchronize replicas, but only if one of them is designated as a \textit{primary} serializing all transfers\DIFaddbegin \DIFadd{, which determines who wins conflicts}\DIFaddend .
+Those techniques ensure that multiple replicas distributed across a network will converge to the same state regardless of the order in which operations propagate across the network. To ensure convergence they predetermine how conflicts will be resolved when the operations are first executed. However in version control we need to let humans decide how conflicts will be resolved long after the fact. Version control is about managing divergence not just convergence. On the other hand, most OT and all CRDT algorithms are decentralized, whereas \DIFdelbegin \DIFdel{we are centralized: we can synchronize replicas, but only if one of them is designated as a }\DIFdelend \DIFaddbegin \DIFadd{extending our approach to do replication would require a centralized }\DIFaddend \textit{primary} \DIFdelbegin \DIFdel{serializing all transfers}\DIFdelend \DIFaddbegin \DIFadd{whose order of operations decides conflict resolution for everyone consistently}\DIFaddend .
 
 While we have different requirements it would be fair to say that Operational Differencing is a generalization of OT, and indeed was inspired by it. Our Project and Retract functions can be seen as generalizing OT's Inclusion Transformation (IT) and Exclusion Transformation (ET). The difference is that our functions return a pair of operations not just one, retraction may fail, and they do not satisfy the correctness properties TP1 and TP2. In a sense we generalize (weaken) OT by removing predetermination of conflict resolution and insertion ordering (making projection non-commutative) and allowing retraction to fail because of dependencies (making it partial). This weakening makes our projection and retraction rules significantly more complex.
 
@@ -1363,12 +1596,15 @@ Synql~\cite{ignat-synql} is a CRDT-based approach to replicating relational data
 is an attempt to unify OT and CRDT.
 }\DIFaddend 
 
-\DIFaddbegin \DIFadd{The power of CRDTs is their monotonic semantics but that is also their weakness. They can't go backwards, as in OT's ET and our }\textsf{\DIFadd{Retract}}\DIFadd{. Cherry picking a change requires moving it backwards to the most recent ancestor. Going backwards is also essential for undo, especially selective undo (Appendix~\ref{undo}).
-}
+\DIFdelbegin \paragraph{\DIFdel{Databases}}
+%DIFAUXCMD
+\addtocounter{paragraph}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{The power of CRDTs is their monotonic semantics but that is also their weakness. They can't go backwards, as in OT's ET and our }\textsf{\DIFadd{Retract}}\DIFadd{. Cherry picking a change requires moving it backwards to the most recent ancestor. Going backwards is also essential for undo, especially selective undo (Appendix~\ref{undo}).
+}\DIFaddend 
 
-\DIFaddend \paragraph{Databases}
+\DIFaddbegin \myparagraph{Databases}
 
-There is a vast literature on schema evolution in databases, however we will limit the discussion here to the minority of operation-based approaches. A fuller survey can be found in \citet{challenge-problems}.
+\DIFaddend There is a vast literature on schema evolution in databases, however we will limit the discussion here to the minority of operation-based approaches. A fuller survey can be found in \citet{challenge-problems}.
 
 % Schema evolution has long been a major problem for SQL databases because
 % the SQL Data Definition Language (DDL) has limited capabilities to redefine existing data. It can rename tables and columns. SQLite \cite{sqliteDatatypes} uses dynamically typed values allowing them to be implicitly converted if the datatype of the column changes.
@@ -1392,8 +1628,11 @@ Schema evolution is also a problem for NoSQL~\cite{sadalage12} databases. While 
 
 Schema evolution has also been studied for Object Oriented Databases(OODB)~\cite{li99, banerjee87}. Smalltalk~\cite{Goldberg80} is itself an OODB, persisting all object instances in an \textit{image file} with some evolution capabilities incorporated in the programming environment~\cite[pp.252-272]{Goldberg80}. Gemstone turns the Smalltalk image into a production-quality database and accordingly provides a complex schema evolution API~\cite{Gemstone}. \citet{kamina25} extend a relational DEL for persistent objects.
 
-\paragraph{Data Science}
-% The evolution of data formats is a concern in Data Science.
+\DIFdelbegin \paragraph{\DIFdel{Data Science}}
+%DIFAUXCMD
+\addtocounter{paragraph}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \myparagraph{Data Science}
+\DIFaddend % The evolution of data formats is a concern in Data Science.
 %DIF <  Data~Diff~\cite{sutton18} compares two versions of tabular data and finds a shortest seqeuence of matching transformations.
 %DIF >  Data~Diff~\cite{sutton18} compares two versions of tabular data and finds a shortest sequence of matching transformations.
 AI~assistants~\cite{AIassistants} provide a mechanism for interactively correcting
@@ -1402,8 +1641,11 @@ Wrangler~\cite{kandel11} observes interactive manipulation of sampled data to wr
 \citet{petersohn20} present an algebra of operations on Python dataframes that include shape transformations.
 
 
-\paragraph{Bidirectional Transformations}
-% Programming language theory undergirds research on type-driven transformations.
+\DIFdelbegin \paragraph{\DIFdel{Bidirectional Transformations}}
+%DIFAUXCMD
+\addtocounter{paragraph}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \myparagraph{Bidirectional Transformations}
+\DIFaddend % Programming language theory undergirds research on type-driven transformations.
  Bidirectional Transformations~\cite{czarnecki2009bidirectional, hu2024bidirectional} have been a rich field of research.
 Coupled Transformations~\cite{Berdaguer07, alcino06, Cleve2006} express transformations coordinated between types and their instances by encoding them into functions on Haskell GADTs built with strategy combinators. \citet{JVisser08} extends the encoding to transform queries written in point-free style. \citet{lammel16} recapitulates coupled transformations within logic programming which extends it to transform logic programs.
 % It is not clear how bidirectional transformations can handle generating the unique IDs required in some evolutions, nor information loss and duplication.
@@ -1412,8 +1654,11 @@ Lenses~\cite{Foster2007,edit-lenses} are a linguistic approach to bidirectional 
  ~\citet{carvalho24} use lenses explicitly specified inside code to express its evolution. \DIFaddbegin \DIFadd{Lenses are an elegant construct but they are essentially first-order: they can transform data changes bidirectionally through schema changes, but they cannot transform schema changes through other schema changes. That is required in order to merge branches whose schema have diverged. A key benefit of Baseline is treating schema and data changes uniformly.
 }\DIFaddend 
 
-\paragraph{Model Driven Engineering}
-% Model Driven Engineering must also handle evolution.
+\DIFdelbegin \paragraph{\DIFdel{Model Driven Engineering}}
+%DIFAUXCMD
+\addtocounter{paragraph}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \myparagraph{Model Driven Engineering}
+\DIFaddend % Model Driven Engineering must also handle evolution.
 Unlike the textual artifacts involved in other domains, models typically assign unique identifiers enabling more precise differencing and mergeing~\cite{alanen2003}.
 Models are often themselves modeled by a metamodel, which lifts the evolution problem to the metalevel: models must be migrated through the evolution of their metamodel, analogously to changing the grammar of a programming language.~\cite{Herrmannsdoerfer11}. \citet{Cicchetti11} study metamodel evolution in the context of divergent changes.
 \citet{vermolen11} define a DSL for evolving a data model by generating SQL migrations on the backing database. They develop comparable capabilities to Baseline, although non-interactive. They consider the evolution of OO-style subclass hierarchies which goes beyond our and most other work.
@@ -1422,7 +1667,21 @@ Models are often themselves modeled by a metamodel, which lifts the evolution pr
 
 
 
-\acks
+\DIFaddbegin \section{\DIFadd{Conclusion}}
+
+\DIFadd{Baseline unifies data management across multiple dimensions: mutation over time, collaboration across space, and evolution through design changes. It leverages }\textit{\DIFadd{Operational Differencing}}\DIFadd{, a new technique for managing data in terms of high-level operations that include refactorings and schema changes.
+Integrating schema change operations into a rich data model makes schema evolution a first-class concern instead of an afterthought.
+%DIF >  , enabling solutions to four of the eight challenge problems identified in prior work.
+Operational Differencing offers a new kind of version control on data that is finer-grained and higher-fidelity than conventional state-based approaches and is able to work across schema evolutions. It also offers a simplified conceptual model for ad hoc usage.
+}
+
+\DIFadd{Our preliminary exploration of an operationalized query language opens an intriguing avenue for further research.
+We believe that Baseline demonstrates, at the least, that operation-based approaches to data management have been under-explored and offer valuable new capabilities.
+}
+
+
+
+\DIFaddend \acks
 %DIF <  We thank Joshua Horowitz, Devamardeep Hayatpur, and the anonymous reviewers for their helpful comments.
 \DIFaddbegin \DIFadd{We thank Joshua Horowitz, Devamardeep Hayatpur, and the anonymous reviewers for their helpful comments.
 }\DIFaddend 
@@ -1479,13 +1738,12 @@ Given the inverse operations we then project the subsequent timeline through the
 \caption{A selection is a path through Miller columns containing indented outlines and flat tables.}
 \label{fig:UI}
 \end{figure}
-\DIFdelbegin %DIFDELCMD < 
 
-%DIFDELCMD < \circledtextset{resize=real, charf=\LARGE\sffamily}
+\DIFdelbegin %DIFDELCMD < \circledtextset{resize=real, charf=\LARGE\sffamily}
+%DIFDELCMD < 
+
 %DIFDELCMD < %%%
-\DIFdelend 
-
-The following discussion concentrates on the rationale behind the key UI design decisions.
+\DIFdelend The following discussion concentrates on the rationale behind the key UI design decisions.
 Figure~\ref{fig:UI} displays a screen shot. \circledtext{1} The left hand column shows the history of operations on this database. History sidebars are a common technique but we were particularly inspired by Wrangler~\cite{kandel11}.
 
 The three columns to the right are Miller columns~\cite{miller-columns} that display a path drilling into and across nested data structures. Usually Miller columns display a simple list, as in the MacOS Finder column view of directories. We elaborate that convention to show in each column either an indented outline or a flat table. Nested structures are indicated with summaries that when clicked open a new column to the right. Cyan outlines show the selected path through the columns. \circledtext{2} is the top-level structure of this document. \circledtext{3} is the \textsf{orders} table within it. The user has selected a link to the \textsf{customers} table, which is opened in the column \circledtext{4}. Selection not only drills into nested structures but also follows links crossing the hierarchy, as if the target table of the link was nested inside it. This design was inspired as a reaction to Ultorg~\cite{bakke:phdthesis, ultorg} which uses nested tables to represent queries crossing a flat relational database. Ultorg provides a single view of a nested structure whereas our use of Miller columns provides only a view of the context of a path within the structure. The compensation for that restriction is that each column contains a visually simpler and context-independent layout, keeping neighbors at each level adjacent to each other rather than being splayed across lower layers.
@@ -1530,19 +1788,29 @@ written narratives and recorded demos? Our early results are mixed.
 We can heuristically evaluate Baseline using the \textit{Technical Dimensions of Programming Systems}~\cite{techdims} framework.
 % but we designed the system with these goals in mind
 
-\paragraph{Interaction} Strictly speaking Baseline has two \textbf{modes of interaction}: user and developer, however user mode is a strict subset of developer mode (no type operations) so it is fair to say there is really only one mode of interaction.
+\DIFdelbegin \paragraph{\DIFdel{Interaction}} %DIFAUXCMD
+\addtocounter{paragraph}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \myparagraph{Interaction} \DIFaddend Strictly speaking Baseline has two \textbf{modes of interaction}: user and developer, however user mode is a strict subset of developer mode (no type operations) so it is fair to say there is really only one mode of interaction.
 Operationalized queries minimize \textbf{abstraction construction} since they correspond exactly to interactive actions in the UI, suporting Programming by Demonstration.
 % An intriguing question is how well we can hew to this principle as we add general programming language capabilities following the path previously explored in Subtext~\cite{reifying-programming, direct-programming}.
 Operationalizing all change shortens \textbf{feedback loops}: The Gulf of Evaluation is reduced because all operations are concrete direct manipulations; The Gulf of Interpretation is reduced by visualizing changes in terms of concrete difference operations. Version control of data enables collaborative feedback loops that are not practical with conventional techniques.
 
-\paragraph{Notation} Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably because Baseline involves a rich set of operations they do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}.
+\DIFdelbegin \paragraph{\DIFdel{Notation}} %DIFAUXCMD
+\addtocounter{paragraph}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \myparagraph{Notation} \DIFaddend Baseline currently has a \textbf{primary notation} that is both a \textbf{surface and internal notation}: sequences of operations. However we expect general programming language features will use a superset \textbf{overlapping notation} that evaluates into the base one. Arguably because Baseline involves a rich set of operations they do not form a \textbf{uniform notation} and generate a complex \textbf{expression geography}.
 % In future work we want to investigate whether there is a normal form for sequences of operations.
 
-\paragraph{Conceptual structure} Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
+\DIFdelbegin \paragraph{\DIFdel{Conceptual structure}} %DIFAUXCMD
+\addtocounter{paragraph}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \myparagraph{Conceptual structure} \DIFaddend Baseline is attempting to build a common mechanism for all dimensions of change management, in order to maximize \textbf{conceptual integrity} even at the cost of \textbf{openness}. Our approach to \textbf{commonality} rejects the  dichotomy between static/explicit and dynamic/implicit structure: all structure is explicit but can be dynamically refactored as needed. \textbf{Composability} is uniformly through operation sequencing.
 
-\paragraph{Customizability} Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transferred later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not hold that as a goal. Our ID-annotated tree structures provide some level of \textbf{addressing and externalizability}.
+\DIFdelbegin \paragraph{\DIFdel{Customizability}} %DIFAUXCMD
+\addtocounter{paragraph}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \myparagraph{Customizability} \DIFaddend Operations are executed interactively without \textbf{staging}, but operations cen be staged in branches and transferred later when desired. Baseline is not \textbf{self-sustaining} because it is not implemented in itself and we do not hold that as a goal. Our ID-annotated tree structures provide some level of \textbf{addressing and externalizability}.
 
-\paragraph{Complexity, Errors, and Adoptability} Baseline is still very immature in these dimensions.
+\DIFdelbegin \paragraph{\DIFdel{Complexity, Errors, and Adoptability}} %DIFAUXCMD
+\addtocounter{paragraph}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \myparagraph{Complexity, Errors, and Adoptability} \DIFaddend Baseline is still very immature in these dimensions.
 
 
 

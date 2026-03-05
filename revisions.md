@@ -9,7 +9,9 @@ In response to points 1, 3, & 4 we have substantially restructured and expanded 
 
 The new discussion section also addresses the "elephant in the room" identified in point 2 above: the worrying complexity and incompleteness of the set of operations. We are forced to admit that this fact indicates our work is still preliminary and we propose future work generalizing the data model in order to distill fewer primitive operations. We hope that we have already demonstrated sufficiently valuable and novel benefits to warrant sharing them with the research community.
 
-In response to Reviewer C we have added to the Related Work section discussion of the benefits of our approach over CRDTs and lenses, which are the most popular competitive approaches.
+In response to reviewer B we have moved the Related Work section to the conventional location before the Conclusion. In response to Reviewer A we have added discussions of the benefits of our approach over CRDTs and lenses, which are the most popular competitive approaches. We also respond to Reviewer A's question about replication by clarifying that our approach would require a centralized primary whose order of operations decides conflict resolution for everyone consistently.
+
+We have submitted a latexdiff showing all our changes, but it may be hard to read due to the extent of the changes and the inherent limitations of state-based diffing (ahem).
 
 We believe these changes have made the paper more accessible and useful to the research community.
 
